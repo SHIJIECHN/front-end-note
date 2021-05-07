@@ -8,14 +8,14 @@ module.exports = {
   locales: {
     '/': {
       lang: 'zh-CN',
-      title: 'Anran',
+      title: 'ShiJie',
       description: 'Web 开发笔记与解决方案'
     }
   },
   dest: './dist',   // 设置输出目录
   port: 2233, //端口
   themeConfig: {
-    repo: 'https://github.com/anran758/front-end-note',
+    repo: 'https://github.com/SHIJIECHN/front-end-note',
     editLinks: true,
     docsDir: 'docs',
     smoothScroll: true,

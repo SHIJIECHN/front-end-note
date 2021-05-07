@@ -1,7 +1,7 @@
 ---
 home: true
 tagline: 
-footer: GPL Licensed | Copyright © 2021-present Asha
+footer: GPL Licensed | Copyright © 2021-present ShiJ
 ---
 
 <!-- <hide-outbound>
