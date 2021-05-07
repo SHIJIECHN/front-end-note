@@ -111,7 +111,7 @@ none，内容近期不会有太大的结构性改变
 
 </details>
 
-<details open>
+<!-- <details open>
 <summary><strong>其他</strong></summary>
 
 - [Topic :art:](./topic/2020.md)
@@ -129,4 +129,4 @@ none，内容近期不会有太大的结构性改变
 
 - [Introducing npx: an npm package runner | npx 简介](https://medium.com/@maybekatz/introducing-npx-an-npm-package-runner-55f7d4bd282b)
 - [usehooks | React Hooks 封装示例](https://usehooks.com/)
-- [The Missing Semester of Your CS Education (中译版) | 计算机教育中缺失的一课 | MIT](https://missing-semester-cn.github.io/)
+- [The Missing Semester of Your CS Education (中译版) | 计算机教育中缺失的一课 | MIT](https://missing-semester-cn.github.io/) -->
