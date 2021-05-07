@@ -10,7 +10,7 @@ npm run docs:build
 # echo 'www.example.com' > CNAME
 
 # 进入生成的文件夹
-cd /dist
+cd dist
 
 git init
 git add -A
