@@ -9,6 +9,9 @@ npm run docs:build
 # 如果是发布到自定义域名
 # echo 'www.example.com' > CNAME
 
+# 进入生成的文件夹
+cd /dist
+
 git init
 git add -A
 git commit -m 'deploy'
