@@ -4,17 +4,20 @@
 set -e
 
 # 生成静态文件
-yarn build
+npm run docs:build
 
-# 提交到历史区，$1 为运行 sh 时的第一个参数
+# 进入生成的文件夹
+
+git init
 git add -A
-git commit -m $1
-
+git commit -m 'deploy'
 # 提交到 master 分支
-git push origin master
+# git push origin master
 
 # 将 dist 文件提交到 gh-pages 分支
-git subtree push --prefix dist origin gh-pages
+# git subtree push --prefix dist origin gh-pages
 
-# 退出命令
-exit 0
+# 如果发布到 https://<USERNAME>.github.io/<REPO>
+git push -f git@github.com:SHIJIECHN/front-end-note.git master:gh-pages
+
+cd -
