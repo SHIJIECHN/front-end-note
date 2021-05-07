@@ -10,7 +10,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vuepress dev docs --temp .temp",
     "build": "vuepress build docs",
-    "docs:nav": "vuepress nav docs"
+    "docs:nav": "vuepress nav docs",
+    "deploy": "bash deploy.sh"
   },
   "keywords": [],
   "author": "",
