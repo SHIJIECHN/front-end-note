@@ -1,3 +1,10 @@
+/*
+ * @Author: shijie
+ * @Date: 2021-05-10 09:48:24
+ * @LastEditors: shijie
+ * @LastEditTime: 2021-05-10 10:12:44
+ * @Description: 
+ */
 const pluginConf = require('./config/pluginConf.js');
 const navConf = require('./config/navConf.js');
 const nav = require("./nav.js")
@@ -32,5 +39,5 @@ module.exports = {
     }
   },
   plugins: pluginConf,
-  extraWatchFiles: ['.vuepress/nav/zh.js']
+  extraWatchFiles: ['.vuepress/nav.js']
   }
