@@ -1,6 +1,6 @@
 ---
 home: true
-tagline: 笔记
+tagline: 
 footer: GPL Licensed | Copyright © 2021-present ShiJ
 ---
 
