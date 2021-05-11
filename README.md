@@ -1,7 +1,7 @@
 <h1 align="center">Web Note</h1>
 
 <p align="center">
-  <a href="https://github.com/SHIJIECHN/front-end-note">Website</a> ·
+  <a href="https://shijiechn.github.io/front-end-note/">Website</a> ·
   <a href="https://github.com/SHIJIECHN/front-end-note/tree/master/docs">目录概览</a>
 </p>
 
