@@ -2,4 +2,4 @@
 sidebarDepth: 3
 sidebar: auto
 ---
-# 设计模式
+# 编程训练题

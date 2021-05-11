@@ -1,13 +1,6 @@
-/*
- * @Author: shijie
- * @Date: 2021-05-10 09:48:24
- * @LastEditors: shijie
- * @LastEditTime: 2021-05-10 10:12:44
- * @Description: 
- */
 const pluginConf = require('./config/pluginConf.js');
 const navConf = require('./config/navConf.js');
-const nav = require("./nav.js")
+// const nav = require("./config/nav.js")
 
 module.exports = {
   base: '/front-end-note/',
@@ -15,7 +8,7 @@ module.exports = {
   locales: {
     '/': {
       lang: 'zh-CN',
-      title: 'ShiJie',
+      title: 'front-end-note',
       description: 'Web 开发笔记与解决方案'
     }
   },
@@ -33,7 +26,7 @@ module.exports = {
         ariaLabel: '选择语言',
         editLinkText: '在 GitHub 上编辑此页',
         lastUpdated: '上次更新',
-        nav: nav,
+        nav: navConf,
         displayAllHeaders: true,
       }
     }

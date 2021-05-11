@@ -1,74 +1,42 @@
 module.exports = [
-    {
-      text: '前端基础',
-      ariaLabel: '前端基础',
-      items: [
-        {
-          text: 'JavaScript知识库',
-          link: '/basicFrontEnd/JavaScript/'
-        },
-        {
-          text: 'CSS知识库',
-          link: '/basicFrontEnd/CSS/'
-        }
-      ],
-    },
-    {
-      text: '测试',
-      link: '/operations/'
-    },
-    {
-      text: '了解更多',
-      ariaLabel: '了解更多',
-      items: [
-        {
-          text: '开发',
-          items: [
-            {
-              text: 'HTML',
-              link: '/html/'
-            },
-            {
-              text: 'TypeScript',
-              link: '/typescript/'
-            }
-          ]
-        },
-        {
-          text: '笔记',
-          items: [
-            {
-              text: 'topic',
-              link: '/topic/2020'
-            },
-            {
-              text: '运维笔记',
-              link: '/operations/'
-            },
-            {
-              text: '移动端开发解决方案',
-              link: '/mobile/'
-            }
-          ]
-        },
-        {
-          text: '其他',
-          items: [
-            {
-              text: '扩展阅读',
-              link: '/further/'
-            },
-            {
-              text: 'Blog',
-              link: 'https://anran758.github.io/blog/'
-            },
-            {
-              text: 'Web 展示页',
-              link: 'https://anran758.github.io/'
-            },
-          ]
-        }
-      ]
-    }
-  ];
-  
+  {
+    text: "前端基础",
+    items: [
+      { text: "HTML", link: "/basicFrontEnd/HTML/", },
+      { text: "CSS", link: "/basicFrontEnd/CSS/", },
+      { text: "JavaScript", link: "/basicFrontEnd/JavaScript/", },
+      { text: "前端性能", link: "/basicFrontEnd/Performance/", },
+      { text: "前端工程化", link: "/basicFrontEnd/Engineering/", },
+    ],
+  },
+  {
+    text: "框架",
+    items: [
+      { text: "Vue", link: "/framework/Vue/", },
+      { text: "React", link: "/framework/React/", },
+      { text: "TypeScript", link: "/framework/TypeScript/", },
+    ],
+  },
+  {
+    text: "数据结构与算法",
+    items: [
+      { text: "数据结构与算法", link: "/algorithms/Theory/", },
+      { text: "编程训练题", link: "/algorithms/Training/", },
+    ],
+  },
+  {
+    text: "计算机基础",
+    items: [
+      { text: "操作系统", link: "/basicComputer/OperatingSystems/", },
+      { text: "网络", link: "/basicComputer/Network/", },
+      { text: "设计模式", link: "/basicComputer/Design/", },
+    ],
+  },
+  {
+    text: "运行环境",
+    items: [
+      { text: "浏览器", link: "/operationEnv/Browser/", },
+      { text: "Node", link: "/operationEnv/Node/", },
+    ],
+  }
+];

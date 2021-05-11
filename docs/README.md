@@ -1,18 +1,18 @@
 ---
 home: true
-tagline: 
+tagline: 笔记
 footer: GPL Licensed | Copyright © 2021-present ShiJ
 ---
 
 <!-- <hide-outbound>
   <p align="center">
-    <a href="https://github.com/anran758/Front-End-Lab/stargazers">
+    <a href="https://github.com/SHIJIECHN/front-end-note/stargazers">
       <img alt="GitHub stars" src="https://img.shields.io/github/stars/anran758/Front-End-Lab.svg?style=flat-square"></a>
-    <a href="https://github.com/anran758/Front-End-Lab/network"><img alt="GitHub forks"
+    <a href="https://github.com/SHIJIECHN/front-end-note/network"><img alt="GitHub forks"
         src="https://img.shields.io/github/forks/anran758/Front-End-Lab.svg?style=flat-square"></a>
-    <a href="https://github.com/anran758/Front-End-Lab/watchers"><img alt="GitHub watchers"
+    <a href="https://img.shields.io/cran/l/devtools.svg?style=flat-square/watchers"><img alt="GitHub watchers"
         src="https://img.shields.io/github/watchers/anran758/Front-End-Lab.svg?style=flat-square"></a>
-    <a href="https://github.com/anran758/Front-End-Lab"><img alt="CRAN/METACRAN"
+    <a href="https://img.shields.io/cran/l/devtools.svg?style=flat-square"><img alt="CRAN/METACRAN"
         src="https://img.shields.io/cran/l/devtools.svg?style=flat-square"></a>
   </p>
 </hide-outbound> -->
@@ -39,77 +39,56 @@ none，内容近期不会有太大的结构性改变
 <details open>
 <summary><strong>前端基础</strong></summary>
 
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
+- [HTML :memo:](/basicFrontEnd/HTML/)
+- [CSS :construction:](/basicFrontEnd/CSS/)
+- [JavaScrip ](/basicFrontEnd/JavaScript/)
+- [前端性能](/basicFrontEnd/Performance/)
+- [前端工程化](/basicFrontEnd/Engineering/)
 
 </details>
 
 <details open>
 <summary><strong>框架</strong></summary>
 
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
+- [Vue :memo:](/framework/Vue/)
+- [React :construction:](/framework/React/)
+- [TypeScript :truck:](/framework/TypeScript/)
 
 </details>
 
 <details open>
 <summary><strong>数据结构与算法</strong></summary>
 
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
+- [数据结构与算法 :memo:](/algorithms/Theory/)
+- [编程训练题 :construction:](/algorithms/Training/)
 
 </details>
 
 <details open>
 <summary><strong>计算机基础</strong></summary>
 
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
+- [操作系统 :memo:](/basicComputer/OperatingSystems/)
+- [网络 :construction:](/basicComputer/Network/)
+- [设计模式 :truck:](/basicComputer/Design/)
 
 </details>
-
-<summary><strong>运行环境</strong></summary>
-
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
-
-</details>
-
-<summary><strong>架构设计</strong></summary>
-
-- [HTML :memo:](./html)
-- [CSS 理论笔记 :construction:](./css/theory.md)
-- [CSS 实践笔记 :truck:](./css/README.md)
-- [JavaScrip / TypeScript](./javascript)
-- [RegExp](./REGEXP)
-
-</details>
-
-
 
 <details open>
+<summary><strong>运行环境</strong></summary>
+
+- [浏览器 :memo:](/operationEnv/Browser/)
+- [Node :construction:](/operationEnv/Node/)
+
+</details>
+
+<!-- <details open>
 <summary><strong>解决方案</strong></summary>
 
 - [Git 速查](./git)
 - [Mobile 开发 :memo:](./mobile)
 - [运维与开发环境相关笔记 :memo:](./operations/README.md)
 
-</details>
+</details> -->
 
 <!-- <details open>
 <summary><strong>其他</strong></summary>
