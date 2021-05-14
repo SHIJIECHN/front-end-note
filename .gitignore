@@ -114,3 +114,4 @@ dist
 
 # self
 .temp
+secretKeyConf.js
