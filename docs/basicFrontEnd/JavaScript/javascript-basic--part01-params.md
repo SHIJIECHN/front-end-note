@@ -1,5 +1,5 @@
 ---
-autoGroup-3: JavaScript基础(小野森森)
+autoGroup-3: JavaScript基础
 title: JavaScript变量与值
 ---
 
@@ -32,7 +32,7 @@ ES6新增Symbol和ES10新增BigInt类型。
  a = 1 // 将原来声明是变量a清掉，还原为1008，再声明变量a，在空间存一个值1。1008对应空间中的值是不会清除的，再次使用只会覆盖
  console.log(b) // 3
  ```
- <img :src="$withBase('/basicFrontEnd/origin-type-storage.png')" alt="origin-type-storage"> 
+ <img :src="$withBase('/basicFrontEnd/JavaScript/origin-type-storage.png')" alt="origin-type-storage"> 
 
 
 
@@ -44,7 +44,7 @@ arr1.push(5) // arr2也会发生改变
 arr1 = [1,2] // 1、在堆内存中开辟一个空间存储1,2；2、将原来声明是变量arr1清掉，还原为1008并断开堆内存的指向，再声明变量arr1；3、arr1栈内存空间存储堆内存地址
 console.log(arr2)
 ```
- <img :src="$withBase('/basicFrontEnd/quote-type-storage.png')" alt="quote-type-storage"> 
+ <img :src="$withBase('/basicFrontEnd/JavaScript/quote-type-storage.png')" alt="quote-type-storage"> 
 
 ## 操作符
 

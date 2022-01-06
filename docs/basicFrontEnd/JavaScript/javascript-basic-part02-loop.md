@@ -1,12 +1,11 @@
 ---
-autoGroup-3: JavaScript基础(小野森森)
+autoGroup-3: JavaScript基础
 title: 循环、引用值与类型转换
 ---
 
-## 循环
+## for、while循环
 在JavaScript中有两种常用的循环：for循环与while循环。下文分别讨论这两个循环
 
-### for、while循环
 ```js
 for(var i = 0; i < 100; i++){
     console.log(i)
