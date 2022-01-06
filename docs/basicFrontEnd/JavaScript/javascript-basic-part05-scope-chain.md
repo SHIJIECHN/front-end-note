@@ -32,7 +32,7 @@ a();
 ```
 
 分步分析上面函数作用域链之间的关系：
-1. 当函数`a`被定义时
+1. 全局执行
 ```js
 function a(){}
 var c = 3
@@ -40,21 +40,22 @@ var c = 3
 **当函数`a`被定义时**，系统生成`[[scope]]`属性，`[[scope]]`保存该函数的作用域链，该作用域链的第`0`位存储当前环境下的全局执行期上下文`GO`，`GO`里存储全局下的所有对象，其中包含函数`a`和全局变量`c`。
 <img :src="$withBase('/basicFrontEnd/JavaScript/scope-chain01.png')" alt="scope-chain01"> 
 
-2. 当`a`函数被执行时（前一刻）
+2. `a`函数执行
 ```js
 function a(){
     function b(){}
     var a = 1;
 }
 var c = 3;
-a();
+a(); // 执行
 ```
-**当`a`函数被执行时（前一刻）**，作用域链的顶端（第`0`位）存储a函数生成的函数执行期上下文`AO`，同时第`1`位存储`GO`。查找变量是到`a`函数存储的作用域链中从顶端开始依次向下查找。
+**当`a`函数被执行时（前一刻）**，作用域链的顶端（第`0`位）存储`a`函数生成的函数执行期上下文`AO`，同时第`1`位存储`GO`。查找变量是到`a`函数存储的作用域链中从顶端开始依次向下查找。
 <img :src="$withBase('/basicFrontEnd/JavaScript/scope-chain02.png')" alt="scope-chain02"> 
-
+在`a`函数执行时，`b`函数被定义。  
 **当`b`函数被定义时**，是在`a`函数环境下，所以`b`函数这时的作用域链就是`a`函数被执行期的作用域链。
+<img :src="$withBase('/basicFrontEnd/JavaScript/scope-chain03.png')" alt="scope-chain03"> 
 
-3. 当`b`函数被执行时（前一刻）
+3. `b`函数执行
 ```js
 function a(){
     function b(){
@@ -68,13 +69,19 @@ a();
 ```
 
 **当`b`函数被执行时（前一刻）**，生成函数`b`的`[[scope]]`，存储函数`b`的作用域链，顶端第`0`位存储`b`函数的`AO`，`a`函数的`AO`和全局的`GO`依次向下排列。
+<img :src="$withBase('/basicFrontEnd/JavaScript/scope-chain04.png')" alt="scope-chain04"> 
 
-**当`b`函数被执行结束后**，`b`函数的`AO`被销毁，回归被定义时的状态。
+4. `b`函数执行结束   
+   
+**当`b`函数被执行结束后**，`b`函数的`AO`被销毁，回归被定义时的状态。下图展示`b`函数的`AO`被销毁。
+<img :src="$withBase('/basicFrontEnd/JavaScript/scope-chain05.png')" alt="scope-chain05"> 
 
+1. `a`函数执行结束  
 **当`a`函数被执行结束时**，`a`函数的`AO`被销毁的同时，`b`函数的`[[scope]]`也将不存在。`a`函数回归到被定义时的状态。
 
+总结：
 1. 全局执行的前一刻，就生成GO，函数声明已经定义，当函数被定义的时候已经形成作用域链[[scope] -> scope chain -> GO， 在函数执行的时候才会生成AO。
-2. 全局执行
+2. 外层函数执行时，里层函数被定义。
 
 
 ## 练习
