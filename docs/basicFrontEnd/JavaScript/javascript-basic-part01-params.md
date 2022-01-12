@@ -1,5 +1,6 @@
 ---
 autoGroup-3: JavaScript基础
+sidebarDepth: 3
 title: JavaScript变量与值
 ---
 
