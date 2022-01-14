@@ -1,7 +1,7 @@
 ---
 autoGroup-3: JavaScript基础
 sidebarDepth: 3
-title: day09
+title: day05
 ---
 
 ## 目标
@@ -179,3 +179,97 @@ var Tom = new User({
 
 console.log(Tom.car)
 ```
+
+## 构造函数
+```js
+function Car(opt){
+    this.color = opt.color;
+    this.brand = opt.brand;
+    this.drive = function(){
+        console.log("I am running");
+    }
+}
+```
+当执行
+```js
+Car(); 
+```
+函数执行，可以在作用域链中找到函数AO，AO里面保存了this对象，this指向window。  
+this什么时候存在？  
+如果不实例化构造函数，this指向window。当实例化构造函数后，this的指向发生改变，指向实例化的对象。
+```js
+var car = new Car() // this = car
+```
+
+### `new`一个对象发生了什么？  
+
+当构造函数被实例化时，相当于`Car()`执行了，一旦要执行就会有AO，AO产生后自动默认保存this
+```js
+Ao = {
+    this：{}
+}
+```
+this保存为空对象，当`new`对象时，相当于把`Car()`中的内容都跑完了
+```js
+Ao = {
+    this：{
+        color: color,
+        brand: brand
+    }
+}
+```
+
+总结：new 相当于系统帮你把this指向实例化对象
+```js
+/**
+GO = {
+    Car: (function),
+    car: {
+        color: 'red',
+        brand: 'Benz'
+    }
+}
+
+AO = {
+    this: {
+        color: color,
+        brand: brand
+    }
+}
+*/
+function Car(){
+    /**
+    this: {
+        color: color,
+        brand: brand
+    }
+    */
+    this.color = color;
+    this.brand = brand;
+    // return this;
+}
+
+var car1 = new Car('red', 'Benz');
+```
+模拟`new`操作：
+```js
+function Car(color, brand){
+    var me = {};
+    me.color = color;
+    me.brand = brand;
+    return me;
+}
+var car = Car('red', 'Mazda');
+```
+
+### return问题
+```js
+function Car(color, brand){
+    this.color = color;
+    this.brand = brand;
+
+    return {}
+}
+var car = new Car('red', 'Benz');
+```
+构造函数里面，原本是隐式return this。如果故意return引用值，car就就是引用值，如果return原始值，car不会改变。
