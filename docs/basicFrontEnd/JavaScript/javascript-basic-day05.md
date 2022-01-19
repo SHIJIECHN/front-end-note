@@ -1,7 +1,7 @@
 ---
 autoGroup-3: JavaScript基础
 sidebarDepth: 3
-title: day09
+title: day05
 ---
 
 ## 目标
@@ -147,6 +147,43 @@ var compute = new Compute({
 });
 compute.add()
 compute.aMutiply()
+
+// 老师写
+function Compute(){
+    var args = arguments,
+        res;
+    this.plus = function(){
+        res = 0
+         loop('add', res);
+        // for(var i = 0; i < args.length; i++){
+        //     var item = args[i];
+        //     res += item;
+        // }
+        // console.log(res);
+    }
+    this.times = function(){
+        res = 1;
+        loop('mul', res);
+        // for(var i = 0; i < args.length; i++){
+        //     var item = args[i];
+        //     res *= item;
+        // }
+        // console.log(res)
+    }
+
+    function loop(method, res){
+        for(var i = 0; i < args.length; i++){
+            var item = args[i];
+
+            if(method === 'add'){
+                res += item;
+            }else if(method == 'mul'){
+                res *= item;
+            }
+        }
+        console.log(res);
+    }
+}
 ```
 
 2. 写一个构造车的函数，可设置车的品牌，颜色，排量。再写一个构造消费者的函数，设置用户的名字，年龄，收入，通过选车的方法实例化该用户喜欢的车，在设置车的属性。
@@ -154,7 +191,7 @@ compute.aMutiply()
 function Car(opt){
     this.brand = opt.brand;
     this.color = opt.color;
-    this.displacement = this.displacement;
+    this.displacement = opt.displacement;
 }
 
 function User(opt){
@@ -163,6 +200,7 @@ function User(opt){
     this.income = opt.income;
     this.choose = function(){
         var car = new Car(opt.car)
+        console.log(this.name + '挑选了一辆排量为' + car.displacement + '的' + car.color + car.brand);
     }
 }
 
@@ -170,12 +208,12 @@ var Tom = new User({
     name: 'Tom',
     age: 19,
     avenu: 10000,
-    car: new Car({
+    car:{
         brand: 'BYD',
         color: 'white',
         displacement: 5
-    })
+    }
 })
 
-console.log(Tom.car)
+Tom.choose()
 ```
