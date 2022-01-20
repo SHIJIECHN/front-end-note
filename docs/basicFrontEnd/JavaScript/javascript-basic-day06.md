@@ -218,4 +218,18 @@ function calculateByte(str){
   return totalByte;
 }
 console.log(calculateByte('123456是'))
+
+// 老师写
+function getBytes(str){
+  var bytes = str.length;
+  for(var i = 0; i < str.length; i++){
+    var pos = str.charCodeAt(i);
+    if(pos > 255){
+      bytes++
+    }
+  }
+  return bytes;
+}
+
+console.log(getBytes("你好，世界！Hello world!"))
 ```
