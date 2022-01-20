@@ -45,3 +45,12 @@ function removeElement(nums, val){
 }
 console.log(removeElement([0,1,2,2,3,0,4,2], 2));
 ```
+- 时间复杂度：$O(n)$
+- 空间复杂度：$O(1)$
+
+## 练习
+### 删除有序数组中的重复项
+[力扣题目链接](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
+```js
+
+```
