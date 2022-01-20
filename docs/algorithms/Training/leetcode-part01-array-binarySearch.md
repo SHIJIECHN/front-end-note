@@ -1,6 +1,7 @@
 ---
 autoGroup-1: Leetcode
-title: 数组
+sidebarDepth: 3
+title: 二分查找
 ---
 
 ## 二分查找
@@ -74,12 +75,12 @@ console.log(binarySearch([-1, 0, 3, 5, 9, 12], 5)); // 3
 
 > let middle = Math.floor((right - left) >> 1) + left;
 
-::: danger
+::: tip
 middle 的取值前面需要加 Math.floor，返回大于或等于指定数字的最大整数的数字
 :::
 
 ## 练习
-1. 搜索插值位置  
+### 搜索插值位置  
 [力扣题目链接](https://leetcode-cn.com/problems/search-insert-position/)
 
 数组插入目标值四种情况：
@@ -136,7 +137,8 @@ function searchInsert(nums, target){
 - 时间复杂度：$O(logn)$
 - 空间复杂度：$O(1)$
 
-2. 在排序数组中查找元素的第一个和最后一个位置  
+### 查找元素位置 
+在排序数组中查找元素的第一个和最后一个位置  
 
 寻找target在数组里的左右边界，有如下三种情况：
 - 情况一：target在数组范围的右边或者左右
