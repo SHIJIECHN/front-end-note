@@ -241,4 +241,86 @@ Number.prototype.toString.call(1); // '1'
 ```
 
 ## call、apply
+更改this的指向。
+```js
+function test(){
+  console.log('a');
+}
+
+test(); // test.call() 隐式添加了call
+
+/******************************/
+
+function Car(brand, color){
+  this.brand = brand;
+  this.color = color;
+}
+
+var newCar = {};
+
+Car.call(newCar, 'Benz', 'red');
+Car.apply(newCar, ['Benz', 'red']);
+console.log(newCar);
+```
+使用call和apply以后，newCar可以使用Car中的属性和方法。
+案例分析
+```js
+function Compute(){
+  this.plus = function(a, b){
+    console.log(a + b);
+  },
+  this.minus = function(a, b){
+    console.log(a - b);
+  }
+}
+
+function FullCompute(){
+  Compute.apply(this);
+
+  this.mul = function(a, b){
+    console.log(a * b);
+  },
+
+  this.div = function(a, b){
+    console.log(a / b);
+  }
+}
+
+var compute = new FullCompute();
+compute.plus(1, 2);
+compute.minus(1, 2);
+compute.mul(1, 2);
+compute.div(1, 2);
+```
+
+### 练习
+1. 年龄为多少岁，姓名为xx，买了一辆排量为xx的xx颜色的xx牌子的车(使用call/apply)
+```js
+function Car(opt){
+  console.log(opt)
+  this.color = opt.color;
+  this.brand = opt.brand;
+  this.displacement = opt.displacement;
+}
+function Person(opt){
+  // Car.apply(this, opt);
+  Cars.call(this,opt);
+  this.name = opt.name;
+  this.age = opt.age;
+
+  this.buy = function(){
+    console.log(`年龄为${this.age}岁，姓名为${this.name}，买了一辆排量为${this.displacement}的${this.color}的${this.brand}的车`);
+  }
+}
+
+var p1 = new Person({
+  name: 'Tom',
+  age: '20',
+  color: 'red',
+  brand: 'Benz',
+  displacement: '3.0'
+});
+console.log(p1)
+p1.buy();
+```
 
