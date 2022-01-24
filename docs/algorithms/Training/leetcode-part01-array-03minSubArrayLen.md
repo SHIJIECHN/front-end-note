@@ -61,5 +61,51 @@ var totalFruit = function(fruits) {
 2. 最小覆盖子串
 [力扣题目链接](https://leetcode-cn.com/problems/minimum-window-substring/)
 ```js
+var minWindow = function(s, t){
+  if(s.length < t.length){
+    return '';
+  }
 
+  let map = new Map();
+  let len = s.length;
+  let res = '';
+  let k = 0;
+  for(let i = 0; i < t.length; i++){
+    if(map.has(t[i])){
+      let value = map.get(t[i]);
+      map.set(t[i], ++value);
+    }else {
+      map.set(t[i], 1); // 初始化
+    }
+    
+  }
+  let needType = map.size;
+
+  for(let j = 0; j < s.length; j++){
+    if(map.has(s[j])){
+      map.set(s[j], map.get(s[j]) - 1);
+      if(map.get(s[j]) === 0){
+        needType -= 1;
+      }
+    }
+    while(needType === 0){
+      let subStr = s.slice(k, j + 1); // 截取子串 
+      // 
+      if(!res || subStr.length < len){
+        res = subStr
+      }
+      let c2 = s[k];
+      if(map.has(c2)){
+        map.set(c2, map.get(c2) + 1);
+        if(map.get(c2) === 1){
+          needType += 1;
+        }
+      }
+      k += 1;
+    }
+  }
+  return res;
+}
+
+console.log(minWindow('ADOBECODEBANC', 'ABC'))
 ```
