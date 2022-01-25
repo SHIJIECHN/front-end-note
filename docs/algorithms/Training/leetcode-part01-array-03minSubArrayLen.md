@@ -62,50 +62,56 @@ var totalFruit = function(fruits) {
 [力扣题目链接](https://leetcode-cn.com/problems/minimum-window-substring/)
 ```js
 var minWindow = function(s, t){
-  if(s.length < t.length){
-    return '';
+  if(t.length === 0 || s.length === 0){ // t放在前面，无论如何都会判断其长度是否为0
+    return ''
   }
 
-  let map = new Map();
+  let map = new Map(); // 用来存储t中字符，以及缺失度
   let len = s.length;
-  let res = '';
-  let k = 0;
+  let minLength = len + 1; // 长度最小是，初始值为s长度加1，尽量打，然后有符合的就会变更
+  let start = len + 1; // 最符合的子串的七点，开始大于s的长度，如果没有符合的，就截取到空字符串
+  let missType = 0; // 缺失的种类
+
   for(let i = 0; i < t.length; i++){
     if(map.has(t[i])){
-      let value = map.get(t[i]);
-      map.set(t[i], ++value);
+      map.set(t[i], map.get(t[i]) + 1);
     }else {
-      map.set(t[i], 1); // 初始化
+      map.set(t[i], 1);
     }
-    
   }
-  let needType = map.size;
+  missType = map.size;
 
-  for(let j = 0; j < s.length; j++){
-    if(map.has(s[j])){
-      map.set(s[j], map.get(s[j]) - 1);
-      if(map.get(s[j]) === 0){
-        needType -= 1;
-      }
+  let left = 0, right = 0;
+  for(; right < len; right++){
+    if(map.has(s[right])){ // //right对应的字符在t中出现过
+      map.set(s[right], map.get(s[right]) - 1);
     }
-    while(needType === 0){
-      let subStr = s.slice(k, j + 1); // 截取子串 
-      // 
-      if(!res || subStr.length < len){
-        res = subStr
+    if(map.get(s[right]) === 0){ //只有等于0时，缺失种类减1
+      missType--;
+    }
+    // 找到所有类型 ,取得符合的left和right，然后滑动窗口
+    while(missType === 0){ 
+      let subLength = right - left + 1; //获得符合子串的长度
+      if(subLength < minLength){ //有较优子串，更新子串起点start
+        minLength = subLength;
+        start = left;
       }
-      let c2 = s[k];
-      if(map.has(c2)){
-        map.set(c2, map.get(c2) + 1);
-        if(map.get(c2) === 1){
-          needType += 1;
-        }
+      // 左指针右移 处理左指针，比较左指针当前的字符，
+      // 如果在map中出现，则说明移动left会使map发生改变
+      if(map.has(s[left])){
+        map.set(s[left], map.get(s[left]) + 1);
       }
-      k += 1;
+
+      if(map.get(s[left]) > 0){ // 大于0说明如果移动left，会造成字符缺失
+        missType ++; 
+      }
+      left++; //左指针右移一位
     }
   }
-  return res;
+  console.log(start, minLength);
+  return s.substr(start, minLength);
 }
 
+console.log(minWindow("cabwefgewcwaefgcf", 'cae'))
 console.log(minWindow('ADOBECODEBANC', 'ABC'))
 ```
