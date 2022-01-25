@@ -124,7 +124,7 @@ compute.add();
 ```
 构造函数在new的时候隐式return this。
 
-## 闭包实现inherit
+## 闭包实现继承
 ```js
 function test(){
     var Buffer = function(){}
@@ -152,7 +152,7 @@ var inherit = (function(){
     return inherit;
 })();
 ```
-当浏览器加载后，函数会立即执行，return一个函数给inherit。   
+当浏览器加载后，函数会立即执行，`return`一个函数给`inherit`。   
 再次优化，直接返回匿名函数
 ```js
 var inherit = (function(){
@@ -168,6 +168,7 @@ var inherit = (function(){
 立即执行函数给自己创建了一个作用域，里面定义的变量与外面没有关系，拥有了自己的命名空间。防止了全局污染，利于协同开发。是一种模块化开发的形式。
 
 ### 练习
+模块化开发
 ```js
 var inherit = (function(){
     var Buffer = function(){};
