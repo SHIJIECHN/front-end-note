@@ -247,3 +247,11 @@ initCompute();
 1. 打印一个参数能被3或5或7整除的数
 2. 打印斐波那契数列的第N位
 3. 打印从0到一个数的累加值
+```js
+;(function(){
+    var MyTest = function(){
+        
+    }
+    return MyTest;
+})();
+```
