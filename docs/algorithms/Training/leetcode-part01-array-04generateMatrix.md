@@ -62,6 +62,71 @@ console.log(generateMatrix(4))
 ## 练习
 1. 螺旋矩阵
 [力扣题目链接](https://leetcode-cn.com/problems/spiral-matrix/)
+- 解法一
+```js
+var spiralOrder = function(matrix: number[][]) {
+  let res: number[] = [];
+  let rows: number = matrix.length,
+      cols: number = matrix[0].length;
+  let startX = 0, startY = 0;
+  let loop = Math.floor(Math.min(rows, cols) / 2);
+  let offset = 1;
+  let mid = Math.floor(Math.min(rows, cols) / 2);
+  
+  let i : number = 0, j: number = 0;
+
+  while (loop--) {
+    i = startX, j = startY;
+
+    // 上行
+    for (; j < startY + cols - offset; j++){
+      res.push(matrix[i][j]);
+    }
+
+    // 右行
+    for (; i < startX + rows - offset; i++){
+      res.push(matrix[i][j]);
+    }
+
+    // 下行
+    for (; j > startX; j--){
+      res.push(matrix[i][j]);
+    }
+
+    // 左行
+    for (; i > startY; i--){
+      res.push(matrix[i][j]);
+    }
+
+    startX++;
+    startY++;
+
+    offset += 2;
+  }
+
+  if (Math.min(rows, cols) % 2 !== 0) {
+    if (rows > cols) {
+      // rows - cols 求得rows和cols相差多少，+1是因为为开区间
+      for (let k = mid; k < mid + (rows - cols) + 1; k++){
+        res.push(matrix[k][mid]);
+      }
+    } else {
+      for (let k = mid; k < mid + (cols - rows) + 1; k++){
+        res.push(matrix[mid][k]);
+      }
+    }
+  }
+
+  return res;
+};
+
+console.log(spiralOrder([[1, 2, 3, 4],[5, 6, 7, 8]]))
+```
+分析：   
+  + `loop`的计算，因为`rows`和`cols`两个维度，所以`loop`只能去`min(rows, cols) / 2`
+  + `mid`的计算和填充，`min(rows, cols)`为偶数时，则不需要在最后单独考虑矩阵的最中间位置的赋值；如果`min(rows, cols)`为奇数时，则矩阵最中间位置不只是`[mid][mid]`, 而是会留下一个特殊的中间行或者中间列，具体是中间行还是中间列，要看`rows`和`cols`的大小，如果`rows > cols`，则是中间列，相反，则是中间行。
+
+- 解法二：
 ```js
 var spiralOrder = function(matrix) {
     let left = 0,
