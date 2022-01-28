@@ -404,7 +404,55 @@ removeAt(index){
 ```
 
 ## 有序链表
+实现有序链表类SortedLinkedList
+```js
+const Compare = {
+  LESS_THAN: -1,
+  BIGGER_THAN: 1
+}
 
+function defaultCompare(a, b) {
+  if (a === b) {
+    return 0
+  }
+  return a < b ? Compare.LESS_THAN : Compare.BIGGER_THAN;
+}
+
+export class SortedLinkedList extends LinkedList {
+  constructor(equalsFn = defaultEquals, compareFn = defaultCompare){
+    super(equalsFn);
+    this.compareFn = compareFn;
+  }
+}
+```
+### 1. 有序插入元素
+insert方法中传入了index参数，但是会被忽略，因为插入元素的位置是内部控制的，这么做的原因是不想重写整个LinkedList类的方法，只需要覆盖insert方法。
+```js
+insert(element, index = 0) {
+  if (this.isEmpty()) { // list no node
+    return super.insert(element, 0);
+  }
+  const pos = this.getIndexNextSortedElement(element);
+  return super.insert(element, pos);
+
+}
+
+// 获得插入元素的正确位置
+getIndexNextSortedElement(element) {
+  let current = this.head;
+  let i = 0;
+  for (; i < this.size() && current; i++) {
+    const comp = this.compareFn(element, current.element);
+    if (comp === Compare.LESS_THAN) {
+      return i;
+    }
+
+    current = current.next;
+  }
+  return i;
+}
+
+```
 
 
 
