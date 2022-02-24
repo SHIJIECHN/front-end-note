@@ -44,6 +44,9 @@ console.log(obj[2]); // 3
 ```
 数组底层的机制就是继承对象而来的
 
+数组特性：
+- 可以有空项
+- 访问空项，返回undefined
 ```js
 var arr = [,,]; 
 console.log(arr); // [empty x 2];
@@ -64,7 +67,7 @@ console.log(arr4[10]); // undefined
 2. `new Array(5)`中传入一个数字参数，表示设置数组的长度。
 3. 访问超出数组长度的下标值，返回`undefined`
 
-## 数组方法
+## 数组方法(修改原数组)
 **数组的方法都是继承自`Array.prototype`来的**
 ### 1. `push/unshift`
 返回值，都是**执行了方法以后**数组的长度.
@@ -237,10 +240,415 @@ arr.sort(function(a, b) {
 console.log(arr)
 ```
 
-## 总结
-修改原数组：`push/unshift`, `pop/shift`, `reverse`, `splice`, `sort`
+## 数组方法(新数组)
+### 1. concat
+拼接数组
+```js
+var arr1 = ['a', 'b', 'c'];
+var arr2 = ['d'];
+var arr3 = arr1.concat(arr2);
+console.log(arr3); // ['a', 'b', 'c', 'd']
+```
+
+### 2. toString
+数组转换成字符串
+```js
+var arr = ['a', 'b', 'c', 'd'];
+console.log(arr.toString()); // a,b,c,d
+```
+
+### 3. slice
+截取数组：[start, end)
+```js
+var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
+var arr1 = arr.slice(1); // 从下标为1的位置截取，并包含
+console.log(arr1); //['b', 'c', 'd', 'e', 'f']
+
+var arr2 = arr.slice(1, 3);
+console.log(arr2); // ['b', 'c']
+
+var arr3 = arr.slice(-3, 5);
+console.log(arr3); // ['d', 'e']
+```
+
+### 4. join和split
+```js
+var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
+var str1 = arr.join(); // 不传参数等同于toString()方法
+console.log(str1); // a,b,c,d,e,f
+
+var str2 = arr.join('-');
+console.log(str2); //a-b-c-d-e-f
+
+var arr1 = str2.split('-');
+console.log(arr1); // ['a', 'b', 'c', 'd', 'e', 'f']
+
+var arr2 = str2.split('-', 3);
+console.log(arr2); // ['a', 'b', 'c']
+```
+
+## 类数组
+```js
+function test() {
+    console.log(arguments);
+}
+test(1, 2, 3, 4, 5, 6)
+
+var arr = [1,2,3,4,5,6];
+console.log(arr); 
+```
+- 类数组没有数组方法，没有继承`Array.prototype`，但是有length属性。   
+- 类数组其实是对象，只是有length属性。
+- 类数组的__proto__是Object.prototype，数组的__proto__是Array.prototype。
+
+模拟类数组
+```js
+var obj = {
+    '0': 1,
+    '1': 2,
+    '2': 3,
+    '3': 4,
+    '4': 5,
+    '5': 6,
+    'length': 6
+}
+console.log(obj); // {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, length: 6}
+```
+此时obj最外层是{}，而想变成[]，只需要给对象添加splice属性。
+```js
+var obj = {
+    '0': 1,
+    '1': 2,
+    '2': 3,
+    '3': 4,
+    '4': 5,
+    '5': 6,
+    'length': 6,
+    'splice': Array.prototype.splice
+}
+console.log(obj); // [1, 2, 3, 4, 5, 6, splice: ƒ]
+```
+现在可以通过继承数组的方法，使用数组方法。
+```js
+Object.prototype.push = Array.prototype.push;
+```
+push方法的实现
+```js
+Array.prototype.push = function(elem){
+    this[this.length] = elem;
+    this.length++
+}
+```
+例一
+```js
+var obj = {
+    '2': 3,
+    '3': 4,
+    'length': 2,
+    'splice': Array.prototype.splice,
+    'push': Array.prototype.push
+}
+
+obj.push(1);
+obj.push(2);
+console.log(obj);
+/**
+ * obj = {
+ *  2: 1,
+ *  3: 2,
+ *  length: 4
+ * }
+ */
+```
+分析：
+执行`push`后，即
+```js
+obj[2] = 1;
+obj[3] = 2;
+```
+此时的index 2和3分别变成了1、2，length变成4，而index 0和1 还是空的。   
+例二
+```js
+var person = {
+    '0': '张小一',
+    '1': '张小二',
+    '2': '张小三',
+    'name': '张三',
+    'age': 32,
+    'weight': 140,
+    'height': 180,
+    'length': 3
+}
+
+Object.prototype.splice = Array.prototype.splice;
+Object.prototype.push = Array.prototype.push;
+
+console.log(person[1]);
+console.log(person.weight);
+console.log(person.length);
+
+for (var key in person) {
+    if (person.hasOwnProperty(key)) {
+        console.log(key);
+    }
+}
+```
+类数组一定是有数组形式下标对应的属性值，而且必须有length属性。   
+类数组转换成数组：
+```js
+Array.prototype.slice.call(arguments)
+```
 
 ## 练习
 1. 用`splice`方法重写数组原型上的`unshift`方法`myUnshift`
+```js
+// 方法一
+var arr = ['d', 'e', 'f'];
+Array.prototype.myUnshift = function() {
+    var pos = 0;
+    for (var i = 0; i < arguments.length; i++) {
+        this.splice(pos, 0, arguments[i]);
+        pos++;
+    }
+    return this.length;
+}
+arr.myUnshift('a', 'b', 'c');
+console.log(arr); // ['a', 'b', 'c', 'd', 'e', 'f']
+
+// 方法二
+var arr = ['d', 'e', 'f'];
+Array.prototype.myUnshift = function() {
+    var argArr = Array.prototype.slice.call(arguments);
+    var newArr = argArr.concat(this);
+    return newArr;
+}
+var newArr = arr.myUnshift('a', 'b', 'c');
+console.log(newArr); // ['a', 'b', 'c', 'd', 'e', 'f']
+```
+
 2. 请按照字节数排序下列数组。  
    arr = ['我爱你', 'OK', 'Hello', '你说WHAT', '可以']。
+```js
+/**
+ * unicode 0-255 1个字节 256 -  2个字节
+ */
+var arr = ['我爱你', 'OK', 'Hello', '你说WHAT', '可以'];
+
+function getBytes(str) {
+    var btyes = str.length;
+    for (var i = 0; i < str.length; i++) {
+        if (str.charCodeAt(i) > 255) {
+            btyes++;
+        }
+    }
+    return btyes
+}
+
+arr.sort(function(a, b) {
+    return getBytes(a) - getBytes(b);
+})
+console.log(arr)
+```
+
+3. 在数组原型上写去重方法unique
+```js
+var arr = [0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 'a', 'a'];
+Array.prototype.unique = function() {
+    var temp = {},
+        newArr = [];
+
+    for (var i = 0; i < this.length; i++) {
+        // 无法过滤0
+        // if (!temp[this[i]]) {
+        //     temp[this[i]] = this[i];
+        //     newArr.push(this[i]);
+        // }
+
+        if (!temp.hasOwnProperty(this[i])) {
+            temp[this[i]] = this[i];
+            newArr.push(this[i]);
+        }
+    }
+    return newArr;
+}
+console.log(arr.unique());
+```
+字符串去重
+```js
+var str = '111222000aabb';
+
+String.prototype.unique = function() {
+    var temp = {},
+        newStr = '';
+
+    for (var i = 0; i < this.length; i++) {
+        if (!temp.hasOwnProperty(this[i])) {
+            temp[this[i]] = this[i];
+            newStr += this[i];
+        }
+    }
+    return newStr
+}
+
+console.log(str.unique())
+```
+
+4. 封装typeof方法
+   返回值：undefined, boolean, number, string, null, function, array, object, object-number, object-boolean, object-string
+```js
+/**
+ * typeof 返回 number string boolean object function undefined -> String
+ * Object.prototype.toString.call(val);
+ */
+function myTypeof(val) {
+    var type = typeof(val);
+    var toStr = Object.prototype.toString;
+    var res = {
+        '[object Array]': 'array',
+        '[object Object]': 'object',
+        '[object Number]': 'number',
+        '[object String]': 'string',
+        '[object Boolean]': 'boolean'
+    };
+
+    if (val === null) {
+        return 'null';
+    } else if (type === 'object') {
+        var ret = toStr.call(val);
+        return res[ret];
+    } else {
+        return type;
+    }
+}
+console.log(myTypeof([]))
+```
+5. 返回字符串中，出现第一次的字符
+```js
+var str = 'trueadjljdodjajbdasdskcdkkvjvkjk';
+
+function test(str) {
+    var temp = {};
+    for (var i = 0; i < str.length; i++) {
+        if (temp.hasOwnProperty(str[i])) {
+            temp[str[i]]++;
+        } else {
+            temp[str[i]] = 1;
+        }
+    }
+
+    for (var key in temp) {
+        if (temp[key] === 1) {
+            return key;
+        }
+    }
+    return temp;
+}
+
+console.log(test(str));
+```
+
+## 题目
+1. 闭包
+```js
+function Test(a, b, c){
+    var d = 0;
+    this.a = a;
+    this.b = b;
+    this.c = c;
+
+    function e(){
+        d++;
+        console.log(d);
+    }
+
+    this.f = e;
+}
+
+var test1 = new Test();
+test1.f(); // 1
+test1.f(); // 2
+
+var test2 = new Test();
+test2.f(); // 1
+
+/**
+ * 1. 当函数Test被定义的时候产生AO
+ * AO = {
+ *  d: undefined
+ * }
+ * 2. 当函数被new Test()执行后
+ * AO = {
+ *  d: 0
+ * }
+ * 并且隐式创建
+ * var this = {
+ *  f: function(){}
+ * }
+ * return this
+ */
+```
+
+2. 数据类型
+```js
+function test() {
+    console.log(typeof(arguments)); //类数组
+}
+test(); //  object
+
+/*************************/
+var test = function a() {
+    return 'a';
+}
+
+console.log(typeof(a)); // undefined typeof没有声明的变量就是string类型的undefined
+console.log(a); //Uncaught ReferenceError: a is not defined
+/**
+ * 函数表达式忽略函数名，即外界打印是不存在的，在外界调用a()，会报错，在函数里面可以执行
+ */
+
+```
+
+3. 简化代码
+```js
+function test(day) {
+    switch (day) {
+        case 1:
+            console.log('Mon');
+            break;
+        case 2:
+            console.log('Tue');
+            break;
+        case 3:
+            console.log('Wed');
+            break;
+        case 4:
+            console.log('Thu');
+            break;
+        case 5:
+            console.log('Fir');
+            break;
+        case 6:
+            console.log('Sat');
+            break;
+        case 7:
+            console.log('Sun');
+            break;
+        default:
+            console.log('I don\'t kown');
+    }
+}
+// 简化
+function test(day) {
+    var weekday = ['Mon', 'Tue', 'Wed', 'Tue', 'Fri', 'Sat', 'Sun'];
+    weekday[day - 1] !== undefined ?
+        console.log(weekday[day - 1]) :
+        console.log('I don\'t kown');
+}
+// 去掉day - 1  优化
+function test(day) {
+    var weekday = [, 'Mon', 'Tue', 'Wed', 'Tue', 'Fri', 'Sat', 'Sun'];
+    weekday[day] !== undefined ?
+        console.log(weekday[day]) :
+        console.log('I don\'t kown');
+}
+```

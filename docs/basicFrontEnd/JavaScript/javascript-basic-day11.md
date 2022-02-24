@@ -239,7 +239,7 @@ test()();
 ```
 
 ### 作业
-
+1. 写出下列输出结果
 ```js
 function Foo(){
     getName = function(){
@@ -259,14 +259,36 @@ var getName = function(){
 function getName(){
     console.log(5);
 }
-Foo.getName();
-getName();
-Foo().getName();
-new Foo.getName();
-new Foo().getName();
-new new Foo().getName();
+Foo.getName(); // 2
+getName(); // 4
+Foo().getName(); // 1
+getName();// 1
+new Foo.getName();// new (Foo.getName())  2
+new Foo().getName();// (new Foo()).getName()  3
+new new Foo().getName();// 3
 ```
+
 2. 请用`window.prompt`接受用户输入的年份，判断是否是闰年？请用三目运算来做
 ```js
 
+var year = window.prompt('请输入年份');
+/**
+ * 1. 整除4 并且不能整除100
+ * 2. 整除400
+ */
+console.log(isLeapYear(year));
+
+function isLeapYear(year) {
+    // if ((year % 4 === 0 && year % 100 !== 0) ||
+    //     year % 400 === 0) {
+    //     return '是闰年';
+    // } else {
+    //     return '不是闰年';
+    // }
+
+    return (year % 4 === 0 && year % 100 !== 0) ||
+    (year % 400 === 0) ?
+    '闰年' :
+    '不是闰年';
+}
 ```
