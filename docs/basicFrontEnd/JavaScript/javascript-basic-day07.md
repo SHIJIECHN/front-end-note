@@ -1,5 +1,5 @@
 ---
-autoGroup-3: JavaScript基础
+autoGroup-1: ECMAScript
 sidebarDepth: 3
 title: day07 
 ---

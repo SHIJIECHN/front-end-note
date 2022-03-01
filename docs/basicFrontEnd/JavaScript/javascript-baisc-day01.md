@@ -1,5 +1,5 @@
 ---
-autoGroup-3: JavaScript基础
+autoGroup-1: ECMAScript
 sidebarDepth: 3
 title: day01 
 ---
@@ -25,7 +25,7 @@ title: day01
 
 优缺点：
 - 解释型语言：不需要根据不同的系统平台进行移植。
-- 编译型语言: 需要移植。
+- 编译型语言：需要移植。
 
 ## JavaScript
 三大部分：

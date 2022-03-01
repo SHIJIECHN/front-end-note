@@ -1,8 +1,10 @@
 ---
-autoGroup-3: JavaScript基础
+autoGroup-1: ECMAScript
 sidebarDepth: 3
 title: day03
 ---
+## 函数
+
 
 ## 预编译
 

@@ -1,5 +1,5 @@
 ---
-autoGroup-3: JavaScript基础
+autoGroup-1: ECMAScript
 sidebarDepth: 3
 title: day02
 ---
@@ -226,8 +226,25 @@ console.log(isNaN(undefined)); // true
 ```
  Number(值) -> NaN -> bool
 
-
-## 函数
-
 ## 练习
 1. 斐波那契数列
+```js
+var n = parseInt(window.prompt('请输入第几位'));
+    if(n <=0){
+        console.log('输入错误');
+    }else{
+        var n1 = 1, 
+        n2 = 2,
+        n3;
+        if(n <= 2){
+            console.log(1)
+        }else{
+            for(var i = 2; i < n; i++){
+                n3 = n1 + n2;
+                n1 = n2;
+                n2 = n3;
+            }
+            console.log(n3);
+        }
+    }
+```
