@@ -137,13 +137,9 @@ for(var i = 2; i < 100; i++){
     c = 0;
 }
 ```
-## 引用值
-object、array、function、date、RegExp
-### array数组
-
 ## typeof
 number string boolean function undefined    
-object = 引用类型 object/array/null/
+object = 引用类型
 ```js
 console.log(a);// 报错
 console.log(typeof(a)); // undefined
