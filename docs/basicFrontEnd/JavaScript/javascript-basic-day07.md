@@ -5,333 +5,309 @@ title: day07
 ---
 
 ## 目标
+- 创建对象的两种方式
+- 构造函数与实例化过程和原理
 
-## 原型对象`prototype`
-- 原型`prototype`是`function`对象的一个属性，打印出来看一下，结果它也是一个对象
-- `prototype`对象定义构造函数构造出的每个对象的**公共祖先**
-- 所有被构造函数构造出的对象都可以继承原型上的属性和方法
+## 对象的创建
+对象创建有两种方式：
+1. 对象字面量
+2. new Object 构造函数
+
+对象属性和方法的增删
 ```js
-function Handphone(color, brand){
-  this.color = color;
-  this.brand = brand;
-  // this.screen  = '18:9';
-  // this.system = 'Android'
+var teacher = {
+    name: 'Tom',
+    weight: 130,
+    height: 180,
+    teach: function(){
+        console.log('I am teaching JavaScript.')
+    },
+    smoke: function(){
+        // teacher.weight--;
+        // console.log(teacher.weight);
+        this.weight--;
+        console.log(this.weight);
+    },
+    eat: function(){
+        // teacher.weight++;
+        // console.log(teacher.weight);
+        this.weight++;
+        console.log(this.weight);
+    }
 }
-
-// Handphone.prototype.rom = '64G';
-// Handphone.prototype.ram = '6G';
-// Handphone.prototype.screen = '16:9'
-// Handphone.prototype.system = 'Android';
-// Handphone.prototype.call = fuinction(){
-//   console.log('I am calling somebody.');
-// }
-
-// 优化
-Handphone.prototype = {
-  rom: '64G',
-  ram: '6G',
-  screen: '18:9',
-  system: 'Android',
-  call: function(){
-    console.log('I am calling somebody.');
-  }
-}
-
-var hp1 = new Handphone('red', '小米');
-var hp2 = new Handphone('black', '华为');
-console.log(hp1.rom);
-console.log(hp1.ram);
-
-console.log(hp1.screen); // 18:9 自己有的属性就不会到原型上去找属性了
-
-hp1.call()
-```
-原型的作用：我们在实例化对象的时候总有一些写死的值，这些写死的值，在每次`new`的时候我们都需要去走一遍这个流程，这种代码对于实例化来说是一种代码冗余，也是一种耦合（重复了）。在这种情况下，我们得想一个办法能不能让它继承谁，在这种时候，我们把要写死的内容挂到原型上去，当我们需要参数去传值的这些，我们就写到`this`里面去，当我们需要写死的这些，我们就写到原型上去直接继承就可以了。
-
-经验：一个插件，方法往往被写到原型上去，部分属性写到构造函数内部。因为属性往往都是配置项，需要传参去配置的，而方法是一样的。
-
-构造出来的对象对原型的增删改查问题。
-```js
-function Test(){ }
-Test.prototype.name = 'prototype';
-
-var test = new Test();
-
-console.log(test.name); // 查
-
-test.num = 1;
-console.log(Test.prototype); // 不能增
-
-delete test.name
-console.log(Test.prototype); // 不能删
-
-test.name = 'proto'
-cosnole.log(Test.prototype); // 不能改
-```
-通过实例化对象来更改`prototype`，更改祖先上面的东西更改不了。
-
-## constructor构造器
-```js
-function Telephone(){}
-function Handphone(color, brand, system){
-  this.color = color;
-  this.brand = brand;
-  this.system = system;
-}
-
-Handphone.prototype = {
-  constructor: Telephone
-}
-
-var hp1 = new Handphone('red', 'iPhone', 'iOS');
-console.log(hp1.constructor); // 是一个函数 
-console.log(Handphone.prototype); // 是一个对象
-```
-- 原型上的`constructor`指向构造函数本身
-- 可以通过`Handphone.prototype.constructor`修改构造器指向别的
-
-## \_\_proto__
-```js
-function Car(){
-  // new实例化以后，隐式的var了一个this的一个空对象
-  var this = {
-    __proto__: Car.prorotype
-  }
-}
-Car.prototype.name = 'Banz';
-
-var car = new Car();
-console.log(car); // Banz
-```
-
-实例化对象中有`__proto__`，指向构造函数的`prototype`原型对象，实例对象可以使用构造函数`prototype`原型对象的属性和方法，是因为对象有`__proto__`的存在。
-
-::: tip
-`__proto__`属于每个实例化对象。每个实例对象原型的容器，它就是装`prototype`的。
-:::
-
-总结：当构造函数被`new`的时候，就产生了`this`，`this`并不是空对象，但你就把它当成空对象，`this`中有一个`__proto__`，这个`__proto__`默认就装的是实例化对象以后的原型。当`this`中没有自己的`name`属性，就会到`__proto__`里面去找`name`属性。
-
-- `__proto__`可以修改。
-```js
-function Person(){ }
-Person.prototype.name = '张三'
-var p1 = {
-  name: '李四'
+// 增
+teacher.address = '上海';
+teacher.drink = function(){
+    console.log('I am drinking beer.')
 };
+// 删
+delete teacher.address;
+delete teacher.teach(); //能成功删除吗？ 不能，后边有个执行 (笔试题)
 
-var person = new Person();
-console.log(person.__proto__); // {name: '张三', constructor: ƒ}
-console.log(person.name); // 张三
-/***********************************/
-person.__proto__ = p1
-console.log(person.name); // 李四
+delete teacher.teach; 
+
+// this的引入 在对象中this代表对象本身
+teacher.smoke();
+teacher.smoke();
+teacher.eat();
 ```
 
-
-原型一定是属于实例化对象的而不是构造函数的。
+## 构造函数
+用系统内自带的构造函数，对象是通过实例化构造函数而创建的对象实例。
 ```js
-function Car(){}
-Car.prototype.name = 'Mazda';
-var car = new Car();
-
-Car.prototype.name = 'Banz';
-console.log(car.name); // Benz
-
-/****************************/
-Car.prototype.name = 'Mazda';
-function Car(){}
-var car = new Car();
-
-Car.prototype.name = 'Banz';
-console.log(car.name); // Benz
-
-/***************************/
-Car.prototype.name = 'Mazda';
-function Car(){}
-Car.prototype.name = 'Banz';
-var car = new Car();
-
-console.log(car.name); // Benz
-
+var obj = new Object();
 ```
-以上都是对属性的重写。
 
+## 自定义构造函数
 ```js
-Car.prototype.name = 'Benz';
-function Car(){}
-var car = new Car();
-
-Car.prototype = {
-  name: 'Mazda'
-}
-
-var car1 = new Car()
-
-console.log(car.name); // Benz
-console.log(car1.name); // Mazda
-```
-分析：  
-重新写了prototype
-```js
-Car.prototype = {
-  name: 'Mazda'
-}
-```
-它是在实例化之后写的，实例化之后写的，跟我创建这个实例的`__proto__`对应的`prototype`已经没有关系了
-```js
-function Car(){
-  var this = {
-    __proto__: Car.prototype = {
-      name: 'Benz'
+function Teacher(){
+    this.name = 'Tom';
+    this.sex = 'male';
+    this.weight = 130;
+    this.smoke = function(){
+        this.weight--;
+        console.log(this.weight);
+    },
+    this.eat = function(){
+        this.weight++;
+        console.log(this.weight)
     }
-  }
 }
+
+var teacher1 = new Teacher()
+var teacher2 = new Teacher()
+
+teacher1.name = 'Alle';
+console.log(teacher1, teacher2); // name属性
+/*************************************/
+
+teacher1.smoke();
+teacher1.smoke();
+
+console.log(teacher1, teacher2); // weight值
 ```
-分析下面的例子：
+1. 在构造函数中`this`指向谁？    
+在构造函数还没有执行之前`this`根本就不存在。在`GO`中，不执行不看函数中内容。要让this存在必须要实例化它，谁用就是谁。`this`指向的是实例化对象本身。
 ```js
-Car.prototype.name = 'Banz';
-function Car(){}
-
-var car = new Car()
-
-Car.prototype = {
-  name: 'Mazda'
-}
-var ca1 = new Car();
-console.log(car.name); // Banz
-console.log(car1.name); // Mazda
+ var t = new Teacher(); // t = this
 ```
+2. 当实例出来的多个对象，它们之间是不同的对象，当改变其中一个对象的属性时，其他对象不受到影响。
 
-在没有实例化之前`Car()`底下有一个属性`prototype`，在`prototype`中有一个构造器`constructor`，构造器指向的就是构造函数`Car`本身，在构造函数`Car()`本身又有一个`prototype`属性，存放的是`name: 'Banz'`
-> Car.prototype.constructor -> Car() -> prototype -> name:'Banz'
-
-当你实例化了以后，`this`存在了，`this`存放有`__proto__`，`__proto__`对应它实例相对应的`prototype`，`prototype`会从`constructor`里面去拿值，所以实例化的时候直接从构造器里面拿出来的属性
+传参
 ```js
-function Car(){
-  var this = {
-    __proto__: Car.prototype {
-      name: 'Banz'
-    }
-  }
+function Teacher(name, sex, weight, course){
+    this.name = name;
+    this.sex = sex;
+    this.weight = weight;
+    this.course = course;
 }
+
+var t1 = new Teahcer('Tom', 'male', 130, 'JavaScript');
+var t2  =new Teacher('Alle', 'female', '100', 'HTML')
 ```
-但是在实例化以后重新写了`prototype`，重写的是构造器`constructor`里面的。
-
-## window return 问题
-
+优化传参：传一个对象进去
 ```js
-function test(){
-  var a = 1;
-  function plus1(){
-    a++;
-    console.log(a);
-  }
-
-  return plus1;
+function Teacher(opt){
+    this.name = opt.name;
+    this.sex = opt.sex;
+    this.weight = opt.weight;
+    this.course = opt.course;
 }
 
-var plus = test();
-plus();
-plus();
-plus();
-
-// 使用window改造
-function test(){
-  var a = 1;
-  function add(){
-    a++;
-    console.log(a);
-  }
-
-  window.add = add; // 定义了一个全局变量add，等于函数add
-}
-
-test();
-add(); // 2
-add(); // 3
-add(); // 4
-
-// 立即执行函数 再次改造
-var add = (function(){
-  var a = 1;
-  function add(){
-    a++;
-    console.log(a);
-  }
-  return add;
-})();
-
-add(); // 2
-add(); // 3
-add(); // 4
+var t1 = new Teacher({
+    name: 'Tom',
+    sex: 'male',
+    weight: '130',
+    course: 'JavaScript'
+})
 ```
-
-## js插件的写法    
-立即执行函数里面写一个构造函数，将这个构造函数保存到window上的一个变量。
-```js
-(function(){
-
-  function Test(){
-
-  }
-
-  window.Test = Test
-})();
-
-var test = new Test();
-```
-:::tip
-一个自启动函数，插件的标配
-:::
-
 ### 练习
-1. 写一个插件，任意传两个数字调用插件内部方法可进行加减乘除功能
+1. 写一个构造函数，接受数字类型的参数，参数数量不定，完成参数相加和相乘的功能。
 ```js
-;(function(){
-  function Compute(opt){
-      this.firstNum = opt.firstNum;
-      this.secondNum  = opt.secondNum;
-  }
-  Compute.prototype = {
-    plus: function(){
-      var sum = 0;
-      sum = this.firstNum + this.secondNum;
-      console.log(sum)
-    },
-
-    minus: function(){
-      var res = 0;
-      res = this.firstNum - this.secondNum
-      console.log(res)
-    },
-
-    multiply: function(){
-      var acc = 1
-      acc = this.firstNum * this.secondNum
-      console.log(acc);
-    },
-
-    divide: function(){
-      var res = 1;
-      res = this.firstNum / this.secondNum;
-      console.log(res);
+function Compute(opt){
+    this.nums = opt.nums;
+    this.add = function(){
+        var sum = 0;
+        for(var i = 0; i < this.nums.length; i++){
+            sum += this.nums[i]
+        }
+        console.log(sum)
     }
-  }
-
-  window.Compute = Compute
-})()
+    this.aMutiply = function(){
+        var accumulate = 1;
+        for(var i = 0; i < this.nums.length; i++){
+            accumulate *= this.nums[i]
+        }
+        console.log(accumulate)
+    }
+}
 
 var compute = new Compute({
-  firstNum: 10,
-  secondNum: 2
-})
-compute.plus();
-compute.minus();
-compute.multiply();
-compute.divide();
-```
-::: tip
-参数可以在调用方法的时候传递，所以可不写在构造函数上，写在方法上
-:::
+    nums: [2,5,8,10]
+});
+compute.add()
+compute.aMutiply()
 
+// 老师写
+function Compute(){
+    var args = arguments,
+        res;
+    this.plus = function(){
+        res = 0
+         loop('add', res);
+        // for(var i = 0; i < args.length; i++){
+        //     var item = args[i];
+        //     res += item;
+        // }
+        // console.log(res);
+    }
+    this.times = function(){
+        res = 1;
+        loop('mul', res);
+        // for(var i = 0; i < args.length; i++){
+        //     var item = args[i];
+        //     res *= item;
+        // }
+        // console.log(res)
+    }
+
+    function loop(method, res){
+        for(var i = 0; i < args.length; i++){
+            var item = args[i];
+
+            if(method === 'add'){
+                res += item;
+            }else if(method == 'mul'){
+                res *= item;
+            }
+        }
+        console.log(res);
+    }
+}
+```
+
+2. 写一个构造车的函数，可设置车的品牌，颜色，排量。再写一个构造消费者的函数，设置用户的名字，年龄，收入，通过选车的方法实例化该用户喜欢的车，在设置车的属性。
+```js
+function Car(opt){
+    this.brand = opt.brand;
+    this.color = opt.color;
+    this.displacement = opt.displacement;
+}
+
+function User(opt){
+    this.name = opt.name;
+    this.age = opt.age;
+    this.income = opt.income;
+    this.choose = function(){
+        var car = new Car(opt.car)
+        console.log(this.name + '挑选了一辆排量为' + car.displacement + '的' + car.color + car.brand);
+    }
+}
+
+var Tom = new User({
+    name: 'Tom',
+    age: 19,
+    avenu: 10000,
+    car:{
+        brand: 'BYD',
+        color: 'white',
+        displacement: 5
+    }
+})
+
+Tom.choose()
+```
+
+## 构造函数
+```js
+function Car(opt){
+    this.color = opt.color;
+    this.brand = opt.brand;
+    this.drive = function(){
+        console.log("I am running");
+    }
+}
+```
+当执行
+```js
+Car(); 
+```
+函数执行，可以在作用域链中找到函数`AO`，`AO`里面保存了`this`对象，`this`指向`window`。  
+`this`什么时候存在？  
+如果不实例化构造函数，`this`指向`window`。当实例化构造函数后，`this`的指向发生改变，指向实例化的对象。
+```js
+var car = new Car() // this = car
+```
+
+### `new`一个对象发生了什么？  
+
+当构造函数被实例化时，相当于`Car()`执行了，一旦要执行就会有AO，AO产生后自动默认保存this
+```js
+Ao = {
+    this：{}
+}
+```
+`this`保存为空对象，当`new`对象时，相当于把`Car()`中的内容都跑完了
+```js
+Ao = {
+    this：{
+        color: color,
+        brand: brand
+    }
+}
+```
+
+总结：`new` 相当于系统帮你把`this`指向实例化对象
+```js
+/**
+GO = {
+    Car: (function),
+    car: {
+        color: 'red',
+        brand: 'Benz'
+    }
+}
+
+AO = {
+    this: {
+        color: color,
+        brand: brand
+    }
+}
+*/
+function Car(){
+    /**
+    this: {
+        color: color,
+        brand: brand
+    }
+    */
+    this.color = color;
+    this.brand = brand;
+    // return this;
+}
+
+var car1 = new Car('red', 'Benz');
+```
+模拟`new`操作：
+```js
+function Car(color, brand){
+    var me = {};
+    me.color = color;
+    me.brand = brand;
+    return me;
+}
+var car = Car('red', 'Mazda');
+```
+
+### return问题
+```js
+function Car(color, brand){
+    this.color = color;
+    this.brand = brand;
+
+    return {}
+}
+var car = new Car('red', 'Benz');
+```
+构造函数里面，原本是隐式`return this`。如果故意`return`引用值，`car`就就是引用值，如果`return`原始值，`car`不会改变。
