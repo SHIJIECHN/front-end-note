@@ -40,6 +40,7 @@ teacher.address = '上海';
 teacher.drink = function(){
     console.log('I am drinking beer.')
 };
+
 // 删
 delete teacher.address;
 delete teacher.teach(); //能成功删除吗？ 不能，后边有个执行 (笔试题)
