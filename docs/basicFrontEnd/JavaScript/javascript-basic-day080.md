@@ -293,7 +293,7 @@ compute.mul(1, 2);
 compute.div(1, 2);
 ```
 
-### 练习
+## 练习
 1. 年龄为多少岁，姓名为xx，买了一辆排量为xx的xx颜色的xx牌子的车(使用call/apply)
 ```js
 function Car(opt){
