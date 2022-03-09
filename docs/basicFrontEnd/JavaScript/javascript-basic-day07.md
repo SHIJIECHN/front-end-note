@@ -219,7 +219,7 @@ var Tom = new User({
 Tom.choose()
 ```
 
-## 构造函数
+## 构造函数实例化原理
 ```js
 function Car(opt){
     this.color = opt.color;
@@ -228,21 +228,23 @@ function Car(opt){
         console.log("I am running");
     }
 }
+
 ```
+只定义构造函数，没有执行`this`不存在。  
 当执行
 ```js
 Car(); 
 ```
 函数执行，可以在作用域链中找到函数`AO`，`AO`里面保存了`this`对象，`this`指向`window`。  
-`this`什么时候存在？  
+`this`什么时候存在呢？   
 如果不实例化构造函数，`this`指向`window`。当实例化构造函数后，`this`的指向发生改变，指向实例化的对象。
 ```js
 var car = new Car() // this = car
 ```
 
-### `new`一个对象发生了什么？  
+### `new`一个对象发生了什么  
 
-当构造函数被实例化时，相当于`Car()`执行了，一旦要执行就会有AO，AO产生后自动默认保存this
+当构造函数被实例化时，相当于`Car()`执行了，一旦要执行就会有AO，AO产生后自动默认保存`this`
 ```js
 Ao = {
     this：{}
@@ -258,7 +260,11 @@ Ao = {
 }
 ```
 
-总结：`new` 相当于系统帮你把`this`指向实例化对象
+总结：`new` 时相当于系统帮你把`this`指向实例化对象
+- 1. 保存一个空的`this`对象
+- 2. 执行构造函数内容，将 [this.属性] 赋给`this`
+- 3. 隐式在最后`return this`
+
 ```js
 /**
 GO = {
@@ -301,14 +307,18 @@ function Car(color, brand){
 var car = Car('red', 'Mazda');
 ```
 
+
 ### return问题
 ```js
 function Car(color, brand){
     this.color = color;
     this.brand = brand;
 
-    return {}
+    //return 123; // 还是return this
+    return {}; // {} []
 }
 var car = new Car('red', 'Benz');
 ```
-构造函数里面，原本是隐式`return this`。如果故意`return`引用值，`car`就就是引用值，如果`return`原始值，`car`不会改变。
+构造函数里面，原本是隐式`return this`。
+  - 如果`return`引用值，`car`就就是引用值
+  - 如果`return`原始值，`car`不会改变还是`return this`。

@@ -4,323 +4,241 @@ sidebarDepth: 3
 title: day08 
 ---
 
-## 原型与原型链深入
-- 原型链的顶端是`Object.prototype`。`object`仍然是有原型的。
-- `Object.prototype`底下保存了一个`toString`的方法。
-- 原型链上的增删改只能是它自己本身
+## 目标
+- 掌握包装类型属性访问
+- 字符串`length`属性访问原理
+- 数组使用`length`截断
+- `charCodeAt`获取字符位置
 
-例一
+## 包装类
+原始值没有自己的属性和方法
+- `new Number`
+- `new String`
+- `new Boolean`
+
 ```js
-Professor.prototype.tSkill = 'JAVA'
-function Professor(){}
-var professor = new Professor();
+var a = 1; // 原始值
+console.log(a); // 1
 
-Teacher.prototype = professor;
-function Teacher(){
-  this.mSkill = 'JS/JQ';
-  this.success = {
-    alibaba: '28',
-    tencent: '30'
-  }
-}
-var teacher = new Teacher();
-
-Student.prototype = teacher;
-function Student(){
-  this.pSkill = 'HTML/CSS';
-}
-var student = new Student()
-
-// console.log(student)
-console.log(student.success);
-```
-更改`studen`t的父级元素（就是`teacher`的属性）
-```js
-student.success.baidu = '100';
-console.log(teacher, student);
-
-student.success.alibaba = '29';
-console.log(teacher);
-```
-`teacher.success`加上了`baidu`属性，不是赋值到`student`实例里，赋值到了`student`实例的原型里面。这是因为`teacher`赋值给了`Student.prototype`，`teacher`在`student`实例的原型对象里。  
-**`student`可以修改`teacher`的引用属性**
-
-例二
-```js
-Professor.prototype.tSkill = 'JAVA'
-function Professor(){}
-var professor = new Professor();
-
-Teacher.prototype = professor;
-function Teacher(){
-  this.mSkill = 'JS/JQ';
-  this.students = 500;
-}
-var teacher = new Teacher();
-
-Student.prototype = teacher;
-function Student(){
-  this.pSkill = 'HTML/CSS';
-}
-var student = new Student()
-console.log(student.students); // 500
-
-student.students++;
-console.log(teacher);
-console.log(student);
-```
-`teacher`和`student`分别有什么变化？  
-`teacher`没有变，`student`增加了一个`students`属性值为`501`。   
-`student`不能去修改`teacher`的原始值属性，但是会将`teacher.students`复制下来，他认为你想给`student`增加一个`students`属性。
-> student.students = student.students + 1  
-
-`student.students`取值，因为往上找能找到为`500`，所以是`500+1`。   
-**`student`不可以修改`teacher`的原始值，但是会复制一份到自己实例上再修改**   
-但是不推荐这样修改继承的原型值。
-
-例三（笔试题）
-```js
-function Car(){
-  this.brand = 'Banz'
+var b = new Number(a);
+b.len = 1;
+b.add = function(){
+  console.log(1);
 }
 
-Car.prototype = {
-  brand: 'Mazda',
-  intro: function(){
-    console.log('我是'+ this.brand + '车');
-  }
-}
+var d = b + 1;
+console.log(d); // 2 参与运算，返回的是原始值
 
-var car = new Car()
-car.intro(); // Benz
-
-/**
- * function Car(){
- *    var this = {
- *      brand: 'Benz'
- *    }
- * }
- * Car.prototype --> intro()
-*/
+console.log(b); // 对象
 ```
-分析：实例化过程就是`this`产生的环节，在调用`intro()`的时候，`this`中没有，所以去`Car.prototype`原型里面找，在`intro()`里的`this`指向对象本身，在对象中有`brand`，那`this`就指向自己的`brand`了。
-
-::: tip
-谁在使用this，this就指向谁
-:::
-
-想要打印`Mazda`呢？
-```js
-Car.prototype.intro(); // Mazda
-```
-
-例四
-- 普通函数不写返回值，默认返回`undefined`
-- 构造函数通过实例化后，返回`this`
+当一个数字经过`new Number()`以后，就会变成一个对象，成为对象后就可以给它设置属性和方法。
 
 ```js
-function Person(){
-  /**
-   * this = {
-   *    weight: 129;
-   * }
-  */
-  this.smoke = function(){
-    this.weight--;
-  }
-}
+consoole.log(new Number(undefined)); // 对象 NaN
+consoole.log(new Number(null)); // 0
 
-Person.prototype = {
-  weight: 130;
-}
+console.log(new String(undefined)); // "undefined"
+console.log(new String(null)); // "null"
 
-var person = new Person();
-person.smoke();
-console.log(person);
+console.log(undefined.length); // Uncaught TypeError: Cannot read properties of undefined
+console.log(null.length); // Uncaught TypeError: Cannot read properties of null
 ```
-在`smoke`方法中执行`this.weight--`相当于
-> this.weight = this.weight - 1  
-
-取值`this.weight`, 原型里有，而`person`没有这个属性，`person`中添加`weight`属性。原型里面的`weight`属性值不变。
-
-## 声明对象
-声明对象的方法
-```js
-var obj1 = {}
-console.log(obj1);
-
-var obj2 = new Object(); // 公司不用这种，因为它和字面量声明没有区别，添加属性什么的又麻烦、乱
-console.log(obj2);
-
-function Obj(){}
-var obj3 = new Obj()
-console.log(obj3); // 用自定义的构造函数构造的。它的构造器指向的是Obj()自定义的构造器
-```
-用字面量和系统自带的构造器去声明的对象，他们的构造器都是`Object`，他们两的原型都是原型链顶端的`Object.prototype`。 
-- 除了写插件，尽量都用字面量去声明对象
-- 原型的原型一定是系统自带的`Object`构造出来的
-
-## Object.create
-`Object.create(对象/null)` 创建对象。**括号里面可以指定对象原型，放你想要的原型**
-```js
-function Obj(){}
-Obj.prototype.num = 1;
-var obj1 = Object.create(Obj.prototype);
-console.log(obj1);
-
-var obj2 = new Obj();
-console.log(obj2);
-```
-`obj1`与`obj2`就像双胞胎，他们的对象原型、构造函数是一样的。  
-::: tip
-`new`的工作：
-- 实例化`obj2`
-- 调用构造函数`Obj`的初始化属性和方法
-- 指定实例对象的原型`proto: Obj.prototype`
-:::
-
-
-创建`obj1`空对象
-```js
-var obj1 = Object.create(null); 
-console.log(obj1);// 完全空的， 对象原型都没有__proto__
-
-obj1·num = 1;
-var obj2 = Object.create(obj1);
-console.log(obj2);// obj1作为obj2的原型传进来的，所以就会挂载到__proto__中
-```
-`Object.create`的作用：
-- 需要自定义`prototype`时候，可以使用`Object.create`来指定原型
-- 把其他对象作为当前对象的原型（继承关系）
-
-::: tip
-是不是所有的对象都应该继承 `Object.prototype` 呢？   
-不是，`Object.create(null)`这种对象就不会继承
-:::
+`undefined` 和 `null` 是不可以设置任何属性和方法的。
 
 ```js
-var obj = Object.create(null);
-obj.num = 1;
-var obj1 = {
-  count: 2;
-}
-obj.__proto__ = obj1;
-console.log(obj.count); // undefined
+var a = 123;
+a.len = 1;
+// new Number(123).len = 3 保存不了，所以又删除
+console.log(a.len);// undefined 原始值没有属性和方法
+
+var str = 'abc';
+console.log(str.length);
 ```
-手动指定`__proto__`属性的值无效，`__proto__`必须是系统内置的，可以更改，但是不能自造。
-
-## `undefined`与`null`
-`undefined`与`null`不能使用`toString()`方法。原始值是没有属性的。`undefined`和`null`不能经过包装类，且没有原型。
+为什么`string`可以有`length`？-->通过包装类来访问（或者说字符对象即`new String()`, 有这个属性）
 ```js
-var num = 1;
-num.toString(); // new Number(1) -> toString(); 经过了包装类
-```
-为什么`Number`有一个自己的`toString()`方法，而不是继承自`Object.prototype`里面的`toString()`？
+var str = 'abc';
 
-```js
-var num = 1;
-var obj = {};
-var obj2 = Object.create(null);
-document.write(num);
-document.write(obj); // [object Object]
-document.write(obj2); // Cannot convert object to primitive value
+str.length = 1; // 原始值，new String(str).length = 1; (执行后发现没地方保存)
+//delete 
 
-// 手动添加toString()方法
-obj2.toString = function(){
-  return 'hello'
-}
-document.write(obj2.toString); // hello 
-```
-`document.write()`打印的时候有一个隐式转换，通过原型链找到`toSring()`方法，转换成`string`。但是`obj2`没有原型。
-
-## toString方法重写
-Number、String、Boolean、Array都有toString方法
-```js
-Object.prototype.toString.call(1); // [object Number] 对象类型的Number构造函数
-Number.prototype.toString.call(1); // '1'
+// 又重新包装了一次  new String(str).length 经过包装类来访问
+console.log(str.length);
 ```
 
-## call、apply
-更改this的指向。
+数组可以通过`length`属性来截断
 ```js
-function test(){
-  console.log('a');
-}
+var arr = [1, 2, 3, 4, 5];
+arr.length = 3;
+console.log(arr); // [1, 2, 3]
 
-test(); // test.call() 隐式添加了call
-
-/******************************/
-
-function Car(brand, color){
-  this.brand = brand;
-  this.color = color;
-}
-
-var newCar = {};
-
-Car.call(newCar, 'Benz', 'red');
-Car.apply(newCar, ['Benz', 'red']);
-console.log(newCar);
-```
-使用call和apply以后，newCar可以使用Car中的属性和方法。
-案例分析
-```js
-function Compute(){
-  this.plus = function(a, b){
-    console.log(a + b);
-  },
-  this.minus = function(a, b){
-    console.log(a - b);
-  }
-}
-
-function FullCompute(){
-  Compute.apply(this);
-
-  this.mul = function(a, b){
-    console.log(a * b);
-  },
-
-  this.div = function(a, b){
-    console.log(a / b);
-  }
-}
-
-var compute = new FullCompute();
-compute.plus(1, 2);
-compute.minus(1, 2);
-compute.mul(1, 2);
-compute.div(1, 2);
+arr.length = 6;
+console.log(arr); // [1, 2, 3, empty, empty, empty]
 ```
 
 ### 练习
-1. 年龄为多少岁，姓名为xx，买了一辆排量为xx的xx颜色的xx牌子的车(使用call/apply)
+1. 例一（笔试题）
 ```js
-function Car(opt){
-  console.log(opt)
-  this.color = opt.color;
-  this.brand = opt.brand;
-  this.displacement = opt.displacement;
-}
-function Person(opt){
-  // Car.apply(this, opt);
-  Cars.call(this,opt);
-  this.name = opt.name;
-  this.age = opt.age;
+var name = 'languiji';
+name += 10;  // languiji10
 
-  this.buy = function(){
-    console.log(`年龄为${this.age}岁，姓名为${this.name}，买了一辆排量为${this.displacement}的${this.color}的${this.brand}的车`);
-  }
+var type = typeof(name); // 'string'
+if(type.length === 6){
+  type.text = 'string'; // type是原始值，那你是顾客你要求的所以只能给你操作一遍
+  // new String(type).text = 'string'; 执行完之后发现没有地方储存，所以自动删除
+  // delete
 }
 
-var p1 = new Person({
-  name: 'Tom',
-  age: '20',
-  color: 'red',
-  brand: 'Benz',
-  displacement: '3.0'
-});
-console.log(p1)
-p1.buy();
+console.log(type.text); // undefined
+```
+偏要让你输出type.text，怎么办？
+```js
+var type = new String(typeof(name));
 ```
 
+2. 例二
+```js
+function Car(brand, brand){
+  this.brand = 'Benz';
+  this.color = 'red';
+}
+
+var car = new Car('Mazda', 'blank');
+console.log(car); // Car {brand: 'Benz', color: 'red'}  没有把参数赋值，所以还是原来写好的值
+```
+
+3. 例三（笔试题）
+```js
+function Test(a, b, c){
+  var d = 1;
+  this.a = a;
+  this.b = b;
+  this.c = c;
+
+  function f(){
+    d++;
+    console.log(d); // 先d++再打印的d, 所以加了1
+  }
+
+  this.g = f;
+  // return this; -> 闭包。把Test构造函数的AO带出去了
+}
+
+var test1 = new Test();
+test1.g(); // 2
+test1.g(); // 3
+
+var test2 = new Test();
+test2.g(); // 2
+```
+4. 例四（笔试题）
+```js
+var x = 1,
+    y = z = 0;
+function add(n){
+  return n = n + 1;
+}
+
+y = add(x);
+
+function add(n){
+  return n = n + 3;
+}
+
+z = add(x);
+
+console.log(x, y, z); // 1  4  4
+
+/**
+GO = {
+  x: undefined -> 1,
+  y: undefined -> 0 -> 4,
+  add: function add(){n+1} -> function add(){n+3},
+  z: 0 -> 4,
+}
+
+AO = {
+  n: undefined -> 1
+}
+*/
+```
+
+5. 例五（笔试题）：下列函数哪个能输出1,2,3,4,5
+```js
+function foo1(x){
+  console.log(arguments); 
+  return x;
+}
+foo1(1,2,3,4,5)
+
+function foo2(x){
+  console.log(arguments); 
+  return x;
+}(1,2,3,4,5); // 这个函数没有执行，被看成函数声明 和 一个表达式(1,2,3,4,5)
+// function foo2(x){
+//   console.log(arguments); 
+//   return x;
+// } 
+// (1,2,3,4,5)
+
+(function foo3(x){
+  console.log(arguments); 
+  return x;
+})(1,2,3,4,5)
+```
+foo1和foo3
+> arguments存储传递的所有实参，不管你形参有几个，你实参传了几个都会被存储进去
+
+6. 例六（面试题）
+```js
+function b(x, y, a){
+  a = 10;
+  console.log(arguments[2]); // 实参
+
+  // 另一种
+  arguments[2] = 10;
+  console.log(a); // 映射关系
+}
+b(1,2,3); // 10
+```
+
+- ASCII码：表1（0 - 127），表2（128 - 255） 所有字符都是1个字节 byte
+- Unicode码 涵盖ASCII码  256以后是2个字节.  
+
+打印在Unicode中的位置`charCodeAt`方法：
+```js
+var str = 'a'
+var pos = str.charCodeAt(0);
+console.log(pos); // 97
+```
+
+### 作业
+1. 写一个函数，接受任意一个字符串，算出这个字符串的总字节数
+```js
+function calculateByte(str){
+  var totalByte = 0;
+  for(var i = 0; i < str.length; i++){
+    var pos = str.charCodeAt(i)
+    if(pos < 256){
+      totalByte += 1;
+    }else {
+      totalByte += 2;
+    }
+  }
+  return totalByte;
+}
+console.log(calculateByte('123456是'))
+
+// 老师写
+function getBytes(str){
+  var bytes = str.length;
+  for(var i = 0; i < str.length; i++){
+    var pos = str.charCodeAt(i);
+    if(pos > 255){
+      bytes++
+    }
+  }
+  return bytes;
+}
+
+console.log(getBytes("你好，世界！Hello world!"))
+```
