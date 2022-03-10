@@ -4,7 +4,7 @@ sidebarDepth: 3
 title: day14
 ---
 ## 数组基础
-声明数组
+创建数组
 ```js
 // 数组字面量
 var arr1 = [];
@@ -18,7 +18,7 @@ console.log(arr2.__proto__);
 console.log(arr3.__proto__);
 ```
 三种方式创建的数组原型都是`Array.prototype`，所有数组都继承于`Array.prototype`。所有`Array.prototype`下面的方法和属性，数组都可以使用。  
-对象
+创建对象
 ```js
 // 对象字面量
 var obj1 = {};
@@ -30,7 +30,7 @@ var obj3 = Object();
 所有对象都继承于`Object.prototype`。
 
 ```js
-var arr = [1,2,3,4,5];
+var arr = [1, 2, 3, 4, 5];
 // index 数组元素的下标（索引值）
 var obj = {
     0: 1,

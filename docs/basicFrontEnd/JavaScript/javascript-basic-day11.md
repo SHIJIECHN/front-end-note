@@ -250,9 +250,34 @@ initCompute();
 3. 打印从0到一个数的累加值
 ```js
 ;(function(){
-    var MyTest = function(){
-        
+  var myTest = function(){
+    var div = function(n){
+      if(n % 3 === 0 || n % 5 === 0 || n % 7 === 0){
+        return n;
+      }
     }
-    return MyTest;
-})();
+    
+    // 打印斐波那契数列的第N位
+    var fib = function (n){
+      if(n == 1 || n == 2){
+        return 1;
+      }
+      if(n < 0){
+        return 0;
+      }
+      return fib(n - 1) + fib(n - 2);
+    }
+    
+    // 打印从0到一个数的累加值
+    
+    var sum = function(n){
+      var res = 0
+      for(var i = 0; i <= n; i++){
+        res += i;
+      }
+      return res;
+    }
+  }
+  return myTest;
+})
 ```
