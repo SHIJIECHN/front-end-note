@@ -4,170 +4,291 @@ sidebarDepth: 3
 title: day13
 ---
 
-## 错误信息
-JS错误信息类型
-1. `SyntaxError` 语法错误
-   1. 变量名不规范
-    ```js
-    var 1 = 1; // Uncaught SyntaxError: Unexpected number
-    var 1ab = 1; // Uncaught SyntaxError: Invalid or unexpected token
-    ```
-   2. 关键字不可赋值
-   ```js
-   new = 5; // Uncaught SyntaxError: Unexpected token '='
-   function = 1; // Uncaught SyntaxError: Unexpected token '='
-   ```
-   3. 基本的语法错误
-   ```js
-   var a = 5: // Uncaught SyntaxError: Unexpected token ':'
-   function 1test(){} // Uncaught SyntaxError: Invalid or unexpected token
-   ```
-   4. 给无法被赋值的对象赋值的时候
-   ```js
-   var a = 1 = 2; // Uncaught SyntaxError: Invalid left-hand side in assignment
-   ``` 
-
-2. `ReferenceError` 引用错误
-   1. 变量或者函数未被声明
-   ```js
-   test(); // Uncaught ReferenceError: test1 is not defined
-   ```
-   2. 给无法被赋值的对象赋值的时候
-   ```js
-   console.log(1) = 1; // Uncaught ReferenceError: Invalid left-hand side in assignment
-   ```
-
-3. `RangeError` 范围错误
-   1. 数组长度赋值为负数
-   ```js
-   var arr = [1,2,3];
-   arr.length = -1;
-   console.log(arr); // Uncaught RangeError: Invalid array length
-   ```
-   2. 对象方法参数超出可行范围
-   ```js
-   var num = new Number(66.66);
-   console.log(num.toFixed(-1)); // Uncaught RangeError: toFixed() digits argument must be between 0 and 100
-   ```
-
-4. `TypeError` 类型错误
-   1. 调用不存在的方法
-   ```js
-   123(); // Uncaught TypeError: 123 is not a function
-
-   var obj = {};
-   obj.say(); // Uncaught TypeError: obj.say is not a function
-   ```
-   2. 实例化原始值
-   ```js
-   var a = new 'string'; // Uncaught TypeError: "string" is not a constructor
-   ```
-
-5. `URIError` `URI`错误
-   ```js
-   var url = 'http://www.baidu.com?name=张三';
-   var newUrl = enCodeURI(url);
-   console.log(newUrl);
-   var newNewUrl = deCodeURI(newUrl);
-   console.log(newNewUrl);
-
-   var str = deCodeURI('%fdsdf%'); // Uncaught URIError: URI malformed
-   ```
-
-6. `EvalError` `eval`函数执行错误
-
-人为抛出错误
+## 对象克隆
+- 浅拷贝
+- 深拷贝
+  
+## 浅拷贝
 ```js
-var error = new Error('代码错误');
-console.log(error);
-```
-
-## try catch finally throw
-```js
-try{
-    console.log('正常执行1');
-    console.log(a); // 执行报错，后面都不会再执行
-    console.log(b); // 不执行
-    console.log('正常执行2');
-}catch(e){
-    console.log(e.name +':'+ e.message);
-}finally{
-     console.log('正常执行3');
-}
- console.log('正常执行4');
-```
-例一
-```js
-var jsonStr = '';
-try{
-    if(jsonStr == ''){
-        throw 'JSON字符串为空';
+var person1 = {
+    name: 'Tom',
+    age: 20,
+    height: 180,
+    weight: 140,
+    son: {
+        first: 'Jucy',
+        second: 'Marry'
     }
-    console.log('我要执行啦！！');
-    var json = JSON.parse(jsonStr);
-    console.log(json);
-}catch(e){
-    console.log(e);
-    var errorTip = {
-        name: '数据传输失败',
-        errorCode: '10010'
+}
+
+var person2 = {}
+
+for(var key in person1){
+    person2[key] = person1[key];
+}
+console.log(person2)
+```
+此时person2中的属性与person1相同，如果改变person2中son的值
+```js
+person2.son.third = 'Asha';
+```
+则person1中son属性的属性值也会发生改变。使用clone函数优化拷贝
+```js
+function clone(origin, target){
+    for(var key in origin){
+        target[key] = origin[key];
     }
-    console.log(errorTip);
 }
 ```
-
-## `ES5`严格模式
-`ECMAScript`：`JavaScript`方法规范
-- 1997年 1.0
-- 1998年 2.0
-- 1999年 3.0 JS通行标准
-- 2007年 4.0草案 仅`Mozilla`支持
-- 2008年 4.0中止  容易改善3.1->`ECMAScript5`  Harmony
-- 2009年 5.0发布，Harmony-> 1/2 JS.NEXT 1/2 JS.next.next
-- 2011年 5.1 ISO国际标准
-- 2013年 ES6 = JS.NEXT  JS.next.next 7  ES6草案发布
-- 2015年 ES6正式发布 ECMAScript2015
-
-`ES5`中分为正常模式和严格模式。`IE9`及以下`IE`不支持严格模式。在3.0的基础上加上了严格模式。严格模式关键字`use strict`。
-
-严格模式的作用
+当在对象原型上添加属性后再次拷贝
 ```js
-'use strict'
-var a = 1;
-var pbj = {
-    a: 2
+var person1 = {
+    name: 'Tom',
+    age: 20,
+    height: 180,
+    weight: 140,
+    son: {
+        first: 'Jucy',
+        second: 'Marry'
+    }
 }
+var person2 = {}
+Object.prototype.num = 1;
+clone(person1, person2);
+consoe.log(person2);
+```
+此时原型上的属性num也会在person2属性中显示。要求不显示原型属性，再次优化
+```js
+function clone(origin, target){
+    for(var key in origin){
+        if(origin.hasOwnProperty(key)){
+            target[key] = origin[key];
+        }
+    }
+}
+```
+对clone优化
+```js
+function clone(origin, target){
+    var tar = target || {};
+    for(var key in origin){
+        fi(origin.hasOwnProperty(key)){
+            tar[key] = origin[key];
+        }
+    }
+    return tar;
+}
+
+var person2 = clone(person1);
+person2.son.third = 'Ben';
+```
+修改person2中son属性，也会导致person1中son的属性发生改变。这是浅拷贝本身的问题。
+
+## 深拷贝
+```js
+Object.prototype.num = 1;
+var person1 = {
+    name: '张三',
+    age: 18,
+    sex: 'male',
+    children: {
+        first: {
+            name: 'One',
+            age: 13
+        },
+        second: {
+            name: 'Two',
+            age: 18
+        },
+        third: {
+            name: 'Three',
+            age: 20
+        }
+    },
+    car: ['Benz', 'Mazda']
+}
+
+function deepClone(origin, target) {
+    var target = target || {},
+        toStr = Object.prototype.toString,
+        arrType = '[object Array]';
+    for (var key in origin) {
+        if (origin.hasOwnProperty(key)) {
+            if (typeof(origin[key]) === 'object' && origin[key] !== null) {
+                if (toStr.call(origin[key]) === arrType) {
+                    target[key] = [];
+                } else {
+                    target[key] = {}
+                }
+                deepClone(origin[key], target[key]);
+            } else {
+                target[key] = origin[key]
+            }
+        }
+    }
+    return target;
+}
+
+var person2 = deepClone(person1);
+console.log(person2);
+person2.children.forth = {
+    name: 'Four',
+    age: 20
+}
+console.log(person2);
+```
+可以使用JSON
+
+### 练习
+1. 例一
+```js
 function test(){
-    var a = 3;
-    with(window){
-        console.log(a); // 报错
-    }
-}
-test();
-```
-`with`可以改变作用域链，严格模式下不可用。`caller`, `callee`也不能使用。  
-严格模式下
-- 函数的参数不能重复
-```js
-'use strict';
-function test(a, a){
+    console.log(foo);
+    var foo = 2;
+    console.log(foo);
     console.log(a);
 }
 test();
-// Uncaught SyntaxError: Duplicate parameter name not allowed in this context
+/**
+ * undefined
+ * 2
+ * Uncaught ReferenceError: a is not defined
+*/
 ```
-- 对象的属性名不能重复，但是不报错
+2. 例二
 ```js
-'use strict';
-var obj = {
-    a: 1,
-    a: 2
+function a(){
+    var test;
+    test();
+    function test(){
+        console.log(1);
+    }
 }
-console.log(obj.a); // 2 
+a();
+/**
+ * 1
+*/
 ```
-- `eval`
+3. 例三
 ```js
-'use strict';
-eval('var a = 1; console.log(a);');
-console.log(a);
+var name = '222';
+var a = {
+    name: '111',
+    say: function(){
+        console.log(this.name);
+    }
+}
+
+var fun = a.say;
+// var fun = function(){
+//     console.log(thi.name)
+// }
+fun(); // '222'
+a.say(); // '111'
+var b = {
+    name: '333',
+    say: function(fun){
+        fun();
+    }
+}
+b.say(a.say); // '222'
+b.say = a.say;
+b.say(); // '333'
+```
+4. 例四
+```js
+function test(){
+    var marty = {
+        name: 'marty',
+        printName: function(){
+            console.log(this.name);
+        }
+    }
+
+    var test1 = {
+        name: 'test1'
+    }
+    var test2 = {
+        name: 'test2'
+    }
+    var test3 = {
+        name: 'test3'
+    }
+    test3.printName = marty.printName;
+    marty.printName.call(test1); // test1
+    marty.printName.apply(test2); // tets2
+    marty.printName(); // marty
+    test3.printName(); // test3
+}
+test();
+```
+5. 例五
+```js
+var bar = {
+    a: '1'
+};
+function test(){
+    bar.a = 'a';
+    Object.prototype.b = 'b';
+    return function inner(){
+        console.log(bar.a); // a
+        console.log(bar.b); // b
+    }
+}
+test()();
+```
+
+### 作业
+1. 写出下列输出结果
+```js
+function Foo(){
+    getName = function(){
+        console.log(1);
+    }
+    return this;
+}
+Foo.getName =function(){
+    console.log(2);
+}
+Foo.prototype.getName = function(){
+    console.log(3);
+}
+var getName = function(){
+    console.log(4);
+}
+function getName(){
+    console.log(5);
+}
+Foo.getName(); // 2
+getName(); // 4
+Foo().getName(); // 1
+getName();// 1
+new Foo.getName();// new (Foo.getName())  2
+new Foo().getName();// (new Foo()).getName()  3
+new new Foo().getName();// 3
+```
+
+2. 请用`window.prompt`接受用户输入的年份，判断是否是闰年？请用三目运算来做
+```js
+
+var year = window.prompt('请输入年份');
+/**
+ * 1. 整除4 并且不能整除100
+ * 2. 整除400
+ */
+console.log(isLeapYear(year));
+
+function isLeapYear(year) {
+    // if ((year % 4 === 0 && year % 100 !== 0) ||
+    //     year % 400 === 0) {
+    //     return '是闰年';
+    // } else {
+    //     return '不是闰年';
+    // }
+
+    return (year % 4 === 0 && year % 100 !== 0) ||
+    (year % 400 === 0) ?
+    '闰年' :
+    '不是闰年';
+}
 ```
