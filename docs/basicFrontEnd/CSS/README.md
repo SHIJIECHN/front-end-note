@@ -1,5 +1,5 @@
 ---
-sidebarDepth: 3
-sidebar: auto
+title: 简介
 ---
+
 # 前端基础  CSS
