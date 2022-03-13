@@ -405,5 +405,260 @@ em：当前元素内文本宽度的倍数。默认字体大小是16px，所以�
 ```
 
 ## 文本修饰
+text-decoration: none | underline | line-through | overline   
+语义化标签：
+<ins></ins>下横线   
+<del></del>上横线
 
+## 光标
+cursor: pointer | not-allowed | help | resize
+```html
+<style>
+    span {
+        color: purple;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    
+    button,
+    input[type="submit"] {
+        cursor: not-allowed;
+    }
+</style>
+<a href="">百度一下，你就知道了。</a>
+<span>
+    百度一下，你就知道了。
+</span>
+<br>
+<button disabled="disabled">提交</button>
+<input type="submit" disabled="disabled" />
+```
+
+## 文本显示 
+单行文本截断和显示省略号的三大件
+```html
+<style>
+    div {
+        width: 200px;
+        height: 22px;
+        border: 1px solid #000;
+        white-space: nowrap;
+        /*不换行*/
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /*隐藏部分加省略号*/
+    }
+</style>
+
+<div>
+    <span>我想非常想成为优秀的前端工程师</span>
+</div>
+```
+
+## display
+display: inline | inline-block | block
+
+内联或者内联块只要有换行，都会当成一个文本分隔符
+
+## 伪类选择器
+- :hover
+```html
+<style>
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    a {
+        text-decoration: none;
+    }
+    
+    .header {
+        width: 100%;
+        min-width: 1024px;
+        height: 60px;
+        background-color: #000;
+    }
+    
+    .header ul {
+        height: 100%;
+    }
+    
+    .header ul li {
+        float: left;
+        width: 150px;
+        height: 100%;
+    }
+    
+    .header ul li a {
+        display: block;
+        width: 100%;
+        height: 100%;
+        color: #fff;
+        line-height: 60px;
+        text-align: center;
+        font-size: 16px;
+    }
+    
+    .header ul li.active a {
+        color: #FD5;
+        background-color: #333;
+    }
+    
+    .header ul li a:hover {
+        color: #FD5;
+        background-color: #333;
+    } 
+</style>
+
+<div class="header">
+    <ul>
+        <li class="active">
+            <a href="">首页</a>
+        </li>
+        <li>
+            <a href="">服务号</a>
+        </li>
+        <li>
+            <a href="">微课堂</a>
+        </li>
+        <li>
+            <a href="">系列课</a>
+        </li>
+    </ul>
+</div>
+```
+
+- :disable  
+按钮禁用状态
+```html
+<style>
+    button:disabled {
+        background-color: #333;
+    }
+</style>
+
+<button disabled="disabled">按钮</button>
+```
+- checked
+相关内容：
+- 1. 透明度opacity
+- 2. \+ 兄弟选择器：同父级、相邻、再其之后
+```html
+<style>
+    .checkbox {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #000;
+        border-radius: 50%;
+    }
+    
+    .checkbox label {
+        display: block;
+        width: 20px;
+        height: 20px;
+        margin: 10px;
+        background-color: #000;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        border-radius: 50%;
+    }
+    
+    .checkbox input[type="checkbox"] {
+        display: none;
+    }
+    
+    .checkbox input[type="checkbox"]:checked+label {
+        opacity: 1;
+        filter: alpha(opacity=100)
+    }
+</style>
+
+<div class="checkbox">
+    <input type="checkbox" id="checkbox">
+    <label for="checkbox"></label>
+</div>
+```
+
+
+:::tip
+display:none和visibility:hidden的区别：   
+visibility:hidden保留占据的文档空间，display:none不保留占据的文档空间。
+:::
+
+选择第一个和最后一个元素：
+- :first-child
+- :last-child
+- nth-child(n | odd | even)
+
+## 文本对齐
+行内块元素和行内元素之间文本对齐：  
+vertical-align: top | bottom | middle | 像素
+```html
+<style>
+    img {
+        width: 150px;
+        border: 1px solid #000;
+        vertical-align: middle;
+    }
+</style>
+
+<img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
+<span>123</span>
+```
+没有文本的行内块元素对齐是在最下面的，有文本的时候对齐是最上面的。
+```html
+<style>
+    .block {
+        display: inline-block;
+        width: 150px;
+        height: 60px;
+        border: 1px solid #000;
+        vertical-align: middle;
+    }
+</style>
+
+<span class="block">123</span>
+<span>123</span>
+```
+
+容器内多行文本居中的方法：
+- 1.将容器的display设置为table
+- 2.将容器内的文本设置成table-cell（表格单元格属性）
+- 3.容器内的文本的vertical-align设置成middle
+```html
+<style>
+    div {
+        display: table;
+        width: 100px;
+        height: 100px;
+        font-size: 12px;
+        border: 1px solid #000;
+    }
+    
+    span {
+        display: table-cell;
+        vertical-align: middle;
+    }
+</style>
+
+<div>
+    <span>百度一下，你就知道！百度一下，你就知道！百度一下，你就知道！</span>
+</div>
+```
+多张图片之间的空格处理
+```html
+<style>
+    img {
+        width: 100px;
+        border: 1px solid #000;
+    }
+</style>
+
+<img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
+<img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
+<img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
+<img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
+```
 
