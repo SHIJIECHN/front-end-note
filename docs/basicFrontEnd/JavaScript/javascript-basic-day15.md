@@ -1,7 +1,7 @@
 ---
 autoGroup-1: ECMAScript
 sidebarDepth: 3
-title: day13
+title: day15
 ---
 
 ## 错误信息
@@ -171,3 +171,10 @@ console.log(obj.a); // 2
 eval('var a = 1; console.log(a);');
 console.log(a);
 ```
+
+## 变量生命周期
+
+## 垃圾回收机制
+1. 找出不再使用的变量
+2. 释放其占用内存
+3. 固定的时间间隔进行
