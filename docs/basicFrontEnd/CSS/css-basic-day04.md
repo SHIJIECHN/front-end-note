@@ -6,5 +6,264 @@ title: day04
 
 ## 盒子阴影
 box-shadow: 水平位置  垂直位置 模糊距离 阴影的尺寸 阴影颜色 阴影的种类
+```html
+<style>
+    .box {
+        width: 300px;
+        height: 150px;
+        margin: 100px;
+        background-color: orange;
+        /* box-shadow: 10px 20px; */
+        box-shadow: 0 10px;
+        /* 垂直向下模糊10px */
+        box-shadow: 10px 0;
+        /*水平向右模糊10px*/
+        box-shadow: 10px 10px 5px 5px;
+        box-shadow: 0 0 10px 10px;
+        /*当偏移量为0时，扩展阴影，四周一圈阴影*/
+        box-shadow: 0 15px 10px 10px #f40 inset;
+        /*inset 向内扩散 没有inset是向外扩散*/
+    }
+</style>
+```
+上方阴影遮挡
+```html
+<style>
+    body {
+        margin: 0;
+    }
+    
+    .header {
+        position: relative;
+        z-index: 1;
+        /* 层级覆盖遮挡方法*/
+        width: 100%;
+        height: 60px;
+        background-color: yellow;
+    }
+    
+    .box {
+        width: 200px;
+        height: 200px;
+        background-color: orange;
+        margin-left: 200px;
+        box-shadow: 0 0 10px #000;
+        -webkit-box-shadow: 0 0 30px #000;
+        /*webkit Chrome safari*/
+        -moz-box-shadow: 0 0 30px #000;
+        /*firefox*/
+        -o-box-shadow: 0 0 30px #000;
+        /*presto opera*/
+    }
+</style>
+
+<div class="header"></div>
+<div class="box"></div>
+```
 
 ## 边框圆角
+border-radius
+```html
+<style>
+    .box1 {
+        width: 200px;
+        height: 200px;
+        background-color: orange;
+        border-radius: 20px;
+        /*可以设置像素*/
+        border-radius: 50%;
+        /*宽高相等时设置圆*/
+        -webkit-border-radius: 50%;
+        -moz-border-radius: 50%;
+        -o-border-radius: 50%;
+    }
+    
+    .box2 {
+        width: 200px;
+        height: 100px;
+        background-color: orange;
+        border-radius: 50px;
+        /*设置半圆角 height/2 */
+    }
+</style>
+
+<div class="box1"></div>
+<div class="box2"></div>
+```
+圆角容器被非圆角元素遮盖
+```html
+<style>
+    .box {
+        width: 440px;
+        height: 248px;
+        border: 1px solid #000;
+        border-radius: 20px;
+        overflow: hidden;
+        /* 图片溢出的部分隐藏*/
+    }
+    
+    img {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<div class="box">
+    <img src="https://imgcps.jd.com/img-cubic/creative_server_cia/v2/2000366/42975469816/FocusFullshop/CkRqZnMvdDEvMTkzNzI2LzEwLzEyMTUwLzQ0MTQxMy82MGU2YjUwZkVlZmVmMTg2Ni82NjY4NDYwMjFmMWMwODQyLnBuZxIJNS10eV8wXzU2MAI47ot6QhQKDuWlvei0p-Wkp3BhcnR5EAAYAUITCg_lhajmsJHmiqLotK3kuK0QAUIQCgznq4vljbPmiqLotK0QAkIKCgbnp43ojYkQB1j4waaMoAE/cr/s/q.jpg"
+        alt="">
+</div>
+
+```
+
+## 背景
+背景颜色：background-color   
+背景图片：background-image
+
+```html
+<style>
+    .box {
+        width: 440px;
+        height: 248px;
+        margin: 100px;
+        border: 1px solid #000;
+        background-image: url(https://imgcps.jd.com/img-cubic/creative_server_cia/v2/2000366/42975469816/FocusFullshop/CkRqZnMvdDEvMTkzNzI2LzEwLzEyMTUwLzQ0MTQxMy82MGU2YjUwZkVlZmVmMTg2Ni82NjY4NDYwMjFmMWMwODQyLnBuZxIJNS10eV8wXzU2MAI47ot6QhQKDuWlvei0p-Wkp3BhcnR5EAAYAUITCg_lhajmsJHmiqLotK3kuK0QAUIQCgznq4vljbPmiqLotK0QAkIKCgbnp43ojYkQB1j4waaMoAE/cr/s/q.jpg);
+        /*图片的尺寸显示不正确 需要background-size调整尺寸*/
+        background-size: 100% 100%;
+        background-size: 50% 50%;
+        /*导致重复显示 需要background-repeat*/
+        background-repeat: no-repeat;
+        /*默认repeat，可以设置no-repeat，repeat-x，repeat-y*/
+        background-position: center center;
+        /*图片居中在大盒子里 (50% 50%), (top, right)...*/
+    }
+    
+    img {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<div class="box"></div>
+```
+大背景图片，窗口拖动背景图片不变形。backgound-size
+```html
+<style>
+    body {
+        margin: 0;
+    }
+    
+    .banner {
+        width: 100%;
+        height: 600px;
+        background-color: orange;
+        background-image: url(https://gw.alicdn.com/imgextra/i3/O1CN01iyYdem1GQd1yGgA0a_!!6000000000617-0-tps-2500-600.jpg);
+        background-size: cover;
+        /*不管盒子多大，始终占满整个盒子，即banner盒子的宽高始终被占满*/
+        background-position: center center;
+        background-size: contain;
+        /*图片始终完全显示*/
+        background-repeat: no-repeat;
+    }
+</style>
+
+<div class="banner"></div>
+```
+背景图不滚动，内容可滚动
+```html
+<style>
+    html {
+        height: 100%;
+        background-color: green;
+        background-image: url(https://gw.alicdn.com/imgextra/i3/O1CN01iyYdem1GQd1yGgA0a_!!6000000000617-0-tps-2500-600.jpg);
+        background-size: 100% 100%;
+        background-attachment: fixed;
+        /*背景图不滚动*/
+    }
+</style>
+```
+backgound 顺序： background-color background-image background-repeat background-attachment background-position/background-size
+
+## logo
+当css加载不出来的时候我们希望网页也能够正常使用。logo部分的处理方案。
+```html
+<style>
+    h1 {
+        margin: 0;
+    }
+    
+    .logo {
+        width: 142px;
+        height: 58px;
+    }
+    
+    .logo h1 .logo-hd {
+        display: block;
+        width: 142px;
+        height: 0;
+        padding-top: 58px;
+        background: url(img/taobao-logo.png) no-repeat 0 0/142px 58px;
+        overflow-y: hidden;
+    }
+</style>
+
+<div class="logo">
+    <h1>
+        <!--网站css加载不出来时，网站能正常点击-->
+        <a href="" class="logo-hd">淘宝网</a>
+    </h1>
+</div>
+```
+
+## table
+table标签中定义border和css中定义border的区别：css中写border属性，单元格中没有边框。
+```html
+<style>
+    table {
+        width: 300px;
+        height: 300px;
+        /* border: 1px solid #000; */
+        /*只写这个 单元格没有边框*/
+        /* caption-side: bottom; */
+        /*标题的位置，默认top*/
+        border-collapse: collapse;
+        /*单元格之间两个边框合并成一个*/
+        table-layout: fixed;
+        /*单元格宽度一定，不可调整，还有一个值是automatic(默认)*/
+    }
+    /*中间一列居中*/
+    
+    table tr td:nth-child(2) {
+        text-align: center;
+    }
+    /*偶数行背景颜色#eee*/
+    
+    table tr:nth-child(even) {
+        background-color: #eee;
+    }
+    /*鼠标移入每一行时，发生变法*/
+    
+    table tr:hover {
+        background-color: #ddd;
+    }
+</style>
+
+<table border="1">
+    <caption>测试表格</caption>
+    <tr>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>5</td>
+        <td>6</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>8</td>
+        <td>9</td>
+    </tr>
+</table>
+```
+使用ul模拟table
