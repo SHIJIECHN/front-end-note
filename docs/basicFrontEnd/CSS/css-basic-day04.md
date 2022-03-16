@@ -266,4 +266,323 @@ table标签中定义border和css中定义border的区别：css中写border属性
     </tr>
 </table>
 ```
-使用ul模拟table
+使用ul模拟table。    
+方法一
+```html
+<style>
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .clearfix::after {
+        content: "";
+        display: table;
+        clear: both
+    }
+    
+    .table {
+        width: 300px;
+    }
+    /*双边框，单元格之间有重合*/
+    /* .table li {
+        float: left;
+        width: 100px;
+        height: 100px;
+        border: 1px solid #000;
+        box-sizing: border-box;
+    } */
+    
+   
+    .table li {
+        float: left;
+        width: 101px;
+        /*因为margin-top/letf：-1px；所以宽高都必须加1px，才能填满整个table*/
+        height: 101px;
+        margin-top: -1px;
+        margin-left: -1px;
+        border: 1px solid #000;
+        box-sizing: border-box;
+    }
+
+</style>
+
+<ul class="table clearfix">
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+    <li>4</li>
+    <li>5</li>
+    <li>6</li>
+    <li>7</li>
+    <li>8</li>
+    <li>9</li>
+</ul>
+
+```
+方法二
+```html
+<style>
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .clearfix::after {
+        content: "";
+        display: table;
+        clear: both
+    }
+    
+    .table {
+        width: 300px;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+    }
+    
+    .table li {
+        float: left;
+        width: 100px;
+        height: 100px;
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        box-sizing: border-box;
+    }
+</style>
+
+<ul class="table clearfix">
+    <li>1</li>
+    <li>2</li>
+    <li>3</li>
+    <li>4</li>
+    <li>5</li>
+    <li>6</li>
+    <li>7</li>
+    <li>8</li>
+    <li>9</li>
+</ul>
+```
+外层左右边框不显示
+```html
+<style>
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .clearfix::after {
+        content: "";
+        display: table;
+        clear: both
+    }
+    
+    .box {
+        width: 300px;
+        overflow: hidden;
+    }
+    
+    .table {
+        width: 302px;
+        margin-left: -1px;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+    }
+    
+    .table li {
+        float: left;
+        width: 33.33%;
+        height: 100px;
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        box-sizing: border-box;
+    }
+</style>
+
+<div class="box">
+    <ul class="table clearfix">
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+        <li>6</li>
+        <li>7</li>
+        <li>8</li>
+        <li>9</li>
+    </ul>
+</div>
+
+```
+## BFC特性
+BFC(block formatting contexts)块级格式化上下文。  
+控制元素布局方案：普通流、浮动流（float flow）、绝对定位（absolute position）。  
+
+BFC元素：
+- BODY
+- float: left | right
+- position: absolute | fixed
+- display: inline-block | table-cell
+- overflow: hiddle | auto | scroll
+
+BFC可以解决的问题  
+1. margin合并问题
+```html
+<style>
+    .box {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .box.box1 {
+        background-color: green;
+        margin-bottom: 100px;
+    }
+    
+    .box.box2 {
+        background-color: orange;
+        margin-top: 100px;
+        /*不起作用*/
+    }
+</style>
+
+<div class="box box1"></div>
+<div class="box box2"></div>
+```
+box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元素包裹
+```html
+<style>
+    .container {
+        overflow: hidden;
+    }
+    
+    .box {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .box.box1 {
+        background-color: green;
+        margin-bottom: 100px;
+    }
+    
+    .box.box2 {
+        background-color: orange;
+        margin-top: 100px;
+        /*不起作用*/
+    }
+</style>
+
+<div class="container">
+    <div class="box box1"></div>
+</div>
+<div class="container">
+    <div class="box box2"></div>
+</div>
+```
+2. 浮动流造成父级元素坍塌问题
+```html
+<style>
+    .box {
+        /* float: left; */
+        /* overflow: hidden; */
+        /* position: absolute; */
+        display: inline-block;
+        width: 200px;
+        border: 10px solid #000;
+    }
+    
+    .box1 {
+        float: left;
+        width: 100px;
+        height: 100px;
+        background-color: green;
+    }
+    
+    .box2 {
+        float: left;
+        width: 100px;
+        height: 100px;
+        background-color: orange;
+    }
+</style>
+
+<div class="box">
+    <div class="box1"></div>
+    <div class="box2"></div>
+</div>
+```
+
+3. margin-top父级元素坍塌问题
+```html
+<style>
+    .box1 {
+        width: 300px;
+        height: 300px;
+        background-color: #000;
+        /* 解决方法 */
+        /* overflow: hidden; */
+        /* display: inline-block;    */
+        /* float: left; */
+        position: absolute;  
+    }
+    
+    .box2 {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        margin-top: 100px;
+        /*会带着box1父级盒子一起下移10px*/
+        background-color: orange;
+    }
+</style>
+
+<div class="box1">
+    <div class="box2"></div>
+</div>
+```
+解决：让父级元素触发BFC，塌陷就可以解决。
+
+4. 浮动元素覆盖问题
+```html
+ <style>
+    .box1 {
+        width: 100px;
+        height: 100px;
+        background-color: #000;
+        float: left;
+    }
+    /* box2不要再浮动盒子box1底下*/
+    
+    .box2 {
+        /* float: left; */
+        /* display: inline-block; */
+        overflow: hidden;
+        width: 200px;
+        height: 200px;
+        background-color: orange;
+    }
+</style>
+
+<div class="box1">我是float</div>
+<div class="box2">我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素</div>
+```
+
+## 规范
+css书写顺序
+显示属性：display, position, float, clear   
+自身属性：width, height, margin, padding, border, background  
+文本属性：color, font, text-align, vertical-align, white-space   
+
+font:   
+font-style font-weight font-size line-weight font-family
+
+## 选择器命名
+选择器复合单词 -> 中横线-   
+JS钩子ID -> 下划线_    
+选择器 -> 小写
+
+
+
