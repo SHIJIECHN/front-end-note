@@ -150,7 +150,7 @@ if (1) {
 // 相当于将a的值进行修改了
 /*******************************************/
 ```
-let本质上就是为js增加一个块级作用域。不建议在块级作用域中，函数声明的方式来声明函数，而用函数表达式的方式。
+let本质上就是为js增加一个块级作用域。不建议在块级作用域中，采用函数声明的方式来声明函数，而用函数表达式的方式。
 
 块级作用域是没有返回值的。
 ```js
@@ -165,5 +165,58 @@ var a = for(;1;1){
 
 函数提升，是提升到当前块级作用域上，不能提升到外面。
 ```js
+{
+    let a = 1;
+    {
+        function a(){}
+    }
+    console.log(a); // 1
+}
 
+```
+
+## const
+1. 一旦定义必须赋值，值不能被更改。
+2. 有块级作用域，不能提升，有暂时性死区。
+3. 与let一样不能重复声明。
+
+冻结对象
+```js
+const obj = {};
+
+Object.freeze(obj);
+obj.name = 'zhangsan'; // // Cannot add property name, object is not extensible
+console.log(obj); // {} 冻结的对象不能修改
+
+/****************************************/
+function myFreeze(obj) {
+    Object.freeze(obj);
+    for (var key in obj) {
+        if (typeof(obj[key] === 'object') && obj[key] !== null) {
+            Object.freeze(obj[key])
+        }
+    }
+}
+
+var person = {
+    son: {
+        name: 'zhangsan',
+        age: 19
+    },
+    car: ['benz', 'mazda', 'BMW']
+}
+
+myFreeze(person);
+person.son.weight = 140; //  Cannot add property weight, object is not extensible
+person.car[3] = 'toyota';
+console.log(person);
+```
+
+补充
+```js
+var a = 1; 
+{
+    let a = a; // Cannot access 'a' before initialization。 TDZ(Temporal Dead Zone)暂时性死区
+    console.log(a);
+}
 ```
