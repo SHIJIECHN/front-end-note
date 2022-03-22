@@ -6,7 +6,7 @@ title: day03
 
 ## 元素节点的方法-创建
 ### 创建元素
-document.createElement
+`document.createElement`
 ```html
 <body>
     <script type="text/javascript">
@@ -20,7 +20,7 @@ document.createElement
 ```
 
 ### 创建文本节点和注释
-createTextNode('')和createComment('')
+`createTextNode()`和`createComment()`
 ```html
 <body>
     <script type="text/javascript">
@@ -34,7 +34,7 @@ createTextNode('')和createComment('')
 </body>
 ```
 ### appendChild
-增加子节点。方法在Node.prototype中。body和head是在document中的，如果放在Document.prototype中，element无法使用。而放在Element.prototype中，Document无法使用。终上所述，放在Node.prototype中最合适。   
+增加子节点。方法在`Node.prototype`中。`body`和`head`是在`document`中的，如果放在`Document.prototype`中，`element`无法使用。而放在`Element.prototype`中，`Document`无法使用。终上所述，放在`Node.prototype`中最合适。   
 动态增加节点
 ```html
 <body>
@@ -70,7 +70,7 @@ createTextNode('')和createComment('')
 ```
 
 ### insertBefore
-c.insertBefore(new, origin)：插入节点。在父级c节点下的子节点origin之前插入new节点。方法在Node.prototype中.
+`c.insertBefore(new, origin)`：插入节点。在父级`c`节点下的子节点`origin`之前插入`new`节点。方法在`Node.prototype`中。
 ```html
 <body>
     <div>
@@ -91,9 +91,10 @@ c.insertBefore(new, origin)：插入节点。在父级c节点下的子节点orig
 
 ## 元素节点的方法-删除
 
-### removeChild
-父节点.removeChild(子节点)。实际上只是剪切掉了，节点还在堆内存中。    
-DOM对象就是元素节点。
+### `removeChild`
+父节点.`removeChild`(子节点)。实际上只是剪切掉了，节点还在堆内存中。    
+
+`DOM`对象就是元素节点。
 ```html
 <body>
     <div>
@@ -105,7 +106,7 @@ DOM对象就是元素节点。
         var div = document.getElementsByTagName('div')[0]; // 元素
         var p = document.getElementsByTagName('p')[0];
         div.removeChild(p);
-        // 通常我们获取到的是div元素，但是在文档中的是div节点，因此appendChild需要经过元素变为节点的过程
+        // 我们获取到的是div元素，但是在文档中的是div节点，因此appendChild需要经过元素变为节点的过程
         // 元素 -> 元素节点
         // 元素节点有属性和方法(nodeName, nodeValue, nodeType, attribute, hasChildNodes)
         // 元素(div) -> 构造函数实例化过程(new HTMLDivElement)，div DOM对象。存到内存中 -> div节点
@@ -113,7 +114,7 @@ DOM对象就是元素节点。
     </script>
 </body>
 ```
-getElementsByTagName实际过程
+`getElementsByTagName`实际过程
 ```js
 var p = document.getElementsByTagName('p')[0];
 function getElementsByTagName(element){
@@ -124,7 +125,7 @@ function getElementsByTagName(element){
 }
 ```
 
-### remove
+### `remove`
 完全销毁。
 ```html
 <body>
@@ -141,8 +142,8 @@ function getElementsByTagName(element){
 </body>
 ```
 
-## innerHTML, innerText
-两者在HTMLElement.prototype中。innerHTML在Element.prototype中也有。
+## `innerHTML`和`innerText`
+两者在`HTMLElement.prototype`中。`innerHTML`在`Element.prototype`中也有。
 ```html
 <body>
     <div>
@@ -164,7 +165,7 @@ function getElementsByTagName(element){
 </body>
 ```
 
-innerText：获取标签中的文本。老版火狐不支持，替代品textContent，但是IE老版本不支持textContent。
+`innerText`：获取标签中的文本。老版火狐不支持，替代品`textContent`，但是`IE`老版本不支持`textContent`。
 ```html
 <body>
     <div></div>
@@ -174,10 +175,10 @@ innerText：获取标签中的文本。老版火狐不支持，替代品textCont
     </script>
 </body>
 ```
-innerHTML会将'<, >, /'显示成字符实体，而innerText不能。
+`innerHTML`会将`<`, `>`, `/`显示成字符实体，而`innerText`不能。
 
 ## 节点替换
-parent.replaceChild(new, origin)
+`parent.replaceChild(new, origin)`
 ```html
 <body>
     <div>
@@ -188,14 +189,14 @@ parent.replaceChild(new, origin)
         var h1 = document.getElementsByTagName('h1')[0];
         var h2 = document.createElement('h2');
 
-        div.replaceChild(h2, h1);
+        div.replaceChild(h2, h1); // 将h1节点替换成h2节点
     </script>
 </body>
 ```
 
-## setAttribute, getAttribute
-setAttribute: 给元素设置属性。   
-getAttribute: 获取元素属性值。
+## setAttribute和getAttribute
+`setAttribute`: 给元素设置属性。   
+`getAttribute`: 获取元素属性值。
 ```html
 <body>
     <div class="box1"></div>
@@ -209,7 +210,7 @@ getAttribute: 获取元素属性值。
 ```
 
 ## data-*属性
-HTML5 给元素增加一个data-*属性
+`HTML5` 给元素增加一个`data-*`属性
 ```html
 <body>
     <p data-name="zhangsan" data-age="18">我叫张三</p>
@@ -228,7 +229,7 @@ HTML5 给元素增加一个data-*属性
 ```
 
 ## createDocumentFragment
-document.createDocumentFragment：创建文档片段（碎片）
+`document.createDocumentFragment()`：创建文档片段（碎片）
 ```html
 <body>
     <ul id="list"></ul>
@@ -246,8 +247,7 @@ document.createDocumentFragment：创建文档片段（碎片）
     </script>
 </body>
 ```
-回流：重新计算几何数据再渲染。每次循环都需要进行计算，回流会消耗渲染引擎的性能。那有没有办法只进行一次渲染就可以把列表渲染出来呢？也就是说帮我们不要每次都将节点追加上去，找一个不在节点树上的元素div，先把循环出来的li放到一个不在节点树上的元素div，最后循环结束，在再将这个元素div，追加到ul中。如何让一个元素不在节点树？新创建一个元素节点。   
-这种方法就会多出一个节点。因此我不创建一个节点，就创建一个文档碎片。文档碎片有一个很好的属性，就是不在DOM树中。
+回流：重新计算几何数据再渲染。每次循环都需要进行计算，回流会消耗渲染引擎的性能。那有没有办法只进行一次渲染就可以把列表渲染出来呢？也就是说我们不要每次都将节点追加上去，找一个不在节点树上的元素div，先把循环出来的li放到一个不在节点树上的元素div，最后循环结束，在再将这个元素div，追加到ul中。如何让一个元素不在节点树？新创建一个元素节点。这种方法就会多出一个节点。我们可以不创建一个节点，就创建一个文档碎片。文档碎片有一个很好的特性，就是不在DOM树中。
 ```html
 <body>
     <ul id="list"></ul>
@@ -265,10 +265,10 @@ document.createDocumentFragment：创建文档片段（碎片）
     </script>
 </body>
 ```
-在实际应用中，我们都需要createDocumentFragment保存列表的DOM结构，然后再交给外层的容器。
+在实际应用中，我们都需要`createDocumentFragment`保存列表的`DOM`结构，然后再交给外层的容器。
 
 ## 练习
-1. 原型上编程，hasChildren判断父元素有没有子元素节点。
+1. 原型上编程，`hasChildren`判断父元素有没有子元素节点。
 ```js
 Element.prototype.hasChildren = function() {
     var isElementNode = false;
@@ -285,8 +285,21 @@ Element.prototype.hasChildren = function() {
 }
 ```
 2. 在原型上编程，寻找兄弟元素节点。参数N为正，找之后的第N个，参数N为负，找之前的第N个，参数N为0，找到自己。
-```html
-
+```js
+Element.prototype.searchElement = function(n) {
+    var node = this;
+    if (n == 0) {
+        return node;
+    }
+    for (var i = 0; i < Math.abs(n); i++) {
+        if (n < 0) {
+            node = node.previousElementSibling;
+        } else {
+            node = node.nextElementSibling;
+        }
+    }
+    return node;
+}
 ```
 3. JS创建如下DOM树结构
 ```html
@@ -346,6 +359,27 @@ Element.prototype.hasChildren = function() {
         </div>
     </div>
 </body>
+```
+解答：
+```js
+function searchChild(node) {
+    var temp = {
+        "length": 0,
+        "splice": Array.prototype.splice,
+        "push": Array.prototype.push
+    };
+    var children = node.childNodes;
+    for (var i = 0; i < children.length; i++) {
+        if (children[i].nodeType === 1) {
+            if (children[i].hasChildNodes) {
+                searchChild(children[i]);
+            } else {
+                temp.push(children[i]);
+            }
+        }
+    }
+    return temp;
+}
 ```
 5. 原型上封装inertAfter方法。
 ```html

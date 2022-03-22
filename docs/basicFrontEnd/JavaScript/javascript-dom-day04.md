@@ -84,10 +84,10 @@ function getScrollSize(){
 <style>
     .box {
         position: absolute;
-        top: 200px;
-        left: 200px;
-        width: 200px;
-        height: 200px;
+        top: 50px;
+        left: 50px;
+        width: 100px;
+        height: 100px;
         background-color: green;
     }
 </style>
@@ -97,5 +97,148 @@ function getScrollSize(){
     var box = document.getElementsByClassName('box')[0];
     var info = box.getBoundingClientRect();
     console.log(info);
+    console.log(box.offsetLeft); // 50
+    console.log(box.offsetTop); // 50
 </script>
 ```
+offsetLeft和offsetTop：当父级元素有定位（position），则相对父级定位；如果父级没有定位，则相对于body。
+案例一：父级有定位，则返回相对于父级定位。
+```html
+    <style>
+        body {
+            margin: 0;
+        }
+        
+        .parent {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 300px;
+            height: 300px;
+            background-color: #999;
+        }
+        
+        .son {
+            width: 100px;
+            height: 100px;
+            margin: 50px;
+            background-color: green;
+        }
+    </style>
+
+<body>
+    <div class="parent">
+        <div class="son"></div>
+    </div>
+    <script type="text/javascript">
+        var box = document.getElementsByClassName('son')[0];
+        console.log(box.offsetLeft); // 50
+        console.log(box.offsetTop); // 50
+    </script>
+</body>
+```
+案例二：父级没有定位，则返回相对于body的定位。
+```html
+    <style>
+        body {
+            margin: 0;
+        }
+        
+        .parent {
+            width: 300px;
+            height: 300px;
+            margin: 100px;
+            overflow: hidden;
+            background-color: #999;
+        }
+        
+        .son {
+            width: 100px;
+            height: 100px;
+            margin: 50px;
+            background-color: green;
+        }
+    </style>
+
+<body>
+    <div class="parent">
+        <div class="son"></div>
+    </div>
+    <script type="text/javascript">
+        var box = document.getElementsByClassName('son')[0];
+        console.log(box.offsetLeft); // 150
+        console.log(box.offsetTop); // 150
+    </script>
+</body>
+```
+offsetParent：返回有定位的父级元素。   
+封装盒子相对于HTML文档的定位，不管父级有没有定位。
+```html
+    <style>
+        body {
+            margin: 0;
+        }
+        
+        .grandPa {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 360px;
+            height: 360px;
+            background-color: #ccc;
+        }
+        
+        .parent {
+            position: absolute;
+            left: 30px;
+            top: 30px;
+            width: 300px;
+            height: 300px;
+            background-color: #999;
+            overflow: hidden;
+        }
+        
+        .son {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 100px;
+            height: 100px;
+            background-color: green;
+        }
+    </style>
+
+<body>
+    <div class="grandPa">
+        <div class="parent">
+            <div class="son"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var son = document.getElementsByClassName('son')[0];
+
+        function getElemDocPosition(el) {
+            var parent = el.offsetParent, // 有定位的父级
+                offsetLeft = el.offsetLeft,
+                offsetTop = el.offsetTop;
+            // parent存在，说明本次循环出来的肯定是元素
+            while (parent) {
+                offsetLeft += parent.offsetLeft;
+                offsetTop += parent.offsetTop;
+                parent = parent.offsetParent;
+            }
+            return {
+                left: offsetLeft,
+                top: offsetTop
+            }
+        }
+
+        console.log(getElemDocPosition(son)); // 150
+    </script>
+</body>
+```
+
+## 操作滚动条
+window.scroll(x, y)与window.scrollTo(x, y)相同
+window.scrollBy(x, y)

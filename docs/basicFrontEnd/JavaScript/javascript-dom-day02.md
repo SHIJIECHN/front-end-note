@@ -8,6 +8,11 @@ title: day02
 <img :src="$withBase('/basicFrontEnd/JavaScript/DOM.png')" alt="DOM"> 
 
 ## 节点属性 
+1. `nodeName`：返回节点的`nodeName`大写，只读。   
+2. `nodevalue`：可写，属性、注释、文本节点可用。  
+3. `nodeType`：返回节点类型值。
+4. `attributes`：返回属性集合。
+5. `hasChildNodes`：是否有子节点。返回`true`或`false`。
 ```html
 <body>
     <div class="box" id="box">
@@ -37,13 +42,8 @@ title: day02
     </script>
 </body>
 ```
-nodeName：返回节点的nodeName大写，只读。   
-nodevalue：可写，属性、注释、文本节点可用。  
-nodeType：返回节点类型值。
-attributes：返回属性集合。
-hasChildNodes：是否有子节点。返回true或false。
 
-childNodes返回元素节点，寻找子元素集合。
+6. `childNodes`返回元素节点，寻找子元素集合。
 ```js
 var div = document.getElementsByTagName('div')[0];
 
@@ -88,12 +88,12 @@ function elemChildren(node) {
 
 console.log(elemChildren(div));
 ```
-document 构造你函数 -> HTMLDocument   
-HTMLDocument 构造函数 -> Document   
-HTMLDocument构造出来的对象里面有__proto__：Document.prototype
+`document` 构造函数是 `HTMLDocument`  
+`HTMLDocument` 构造函数是 `Document`   
+`HTMLDocument`构造出来的对象里面有`__proto__`：`Document.prototype`
 ```js
 document.__proto__ = HTMLDocument.prototype;
-HTMLDocument.prototype = Document.prototype;
+HTMLDocument.__proto__ = Document.prototype;
 ```
 案例一
 ```js
@@ -106,8 +106,9 @@ Document.prototype.eat = function() {
 document.say(); // 我刚刚睡醒
 document.eat(); // 我刚刚吃饭
 ```
+`document`可以访问`Document.prototype`和`HTMLDocument.prototype`上的方法。
 
-## Element
+## `Element`
 ```html 
 <body>
     <div>123</div>
@@ -138,9 +139,9 @@ document.eat(); // 我刚刚吃饭
 </body>
 ```
 
-## DOM操作深入
-1. getElementById()
-只有Document.prototype有这个方法，Element.prototype HTMLElement.prototype没有这个方法.
+## `DOM`操作深入
+1. `getElementById()`
+只有`Document.prototype`有这个方法，`Element.prototype`和`HTMLElement.prototype`没有这个方法.
 ```html
 <body>
     <div>123</div>
@@ -151,12 +152,12 @@ document.eat(); // 我刚刚吃饭
     </script>
 </body>
 ```
-div是由HTMLElement构造出来的。
+`div`是由`HTMLElement`构造出来的。
 
-2. getElementsByName
-Document.prototype有这个方法，Element.prototype，没有
-3. getElementsByTagName、getElementsByClassName、querySelector、querySelectorAll
-Document.prototype和Element.prototype都有
+2. `getElementsByName()`
+`Document.prototype`有这个方法，`Element.prototype`没有
+3. `getElementsByTagName()`、`getElementsByClassName()`、`querySelector()`、`querySelectorAll()`
+`Document.prototype`和`Element.prototype`都有
 ```html
 <body>
     <div>
@@ -173,7 +174,7 @@ Document.prototype和Element.prototype都有
 </body>
 ```
 
-## 通配符*
+## 通配符
 ```html
 <body>
     <div>
@@ -185,8 +186,8 @@ Document.prototype和Element.prototype都有
     </script>
 </body>
 ```
-HTMLDocument提供了两个便捷的方法body和head，分别可以获取head和body。即在HTMLDocument.prototype中有两个属性head和body可以直接访问。   
-Document.prototype提供了获取html文档的便捷方法：documentElement
+`HTMLDocument`提供了两个便捷的方法`body`和`head`，分别可以获取文档的`head`和`body`。即在`HTMLDocument.prototype`中有两个属性`head`和`body`可以直接访问。   
+`Document.prototype`提供了获取`html`文档的便捷方法：`documentElement`
 ```html
 <body>
     <div>
@@ -224,7 +225,7 @@ Document.prototype提供了获取html文档的便捷方法：documentElement
         </ul>
     </div>
     <script type="text/javascript">
-        HTMLElement.prototype.getElemChidren = function() {
+        Element.prototype.getElemChidren = function() {
             var arg = arguments[0],
                 elemChildrenNodes = elemChildren(this.childNodes);
             if (typeof(arg) === 'undefined') {
@@ -258,6 +259,27 @@ Document.prototype提供了获取html文档的便捷方法：documentElement
 ```
 
 2. 在原型上编程，找出一个元素的第N层父级元素
+```html
+<body>
+    <div class="parent">
+        <div class="son"></div>
+    </div>
+    <script type="text/javascript">
+        var div = document.getElementsByClassName('son')[0];
+
+        Element.prototype.getParentNode = function(n) {
+            var node = this;
+            for (var i = 0; i < n; i++) {
+                node = node.parentNode;
+            }
+            return node;
+
+        }
+        console.log(div.getParentNode(4));
+            // console.log(div.parentNode.parentNode.parentNode.parentNode)
+    </script>
+</body>
+```
 
 
 
