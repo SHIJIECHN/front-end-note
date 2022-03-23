@@ -5,10 +5,11 @@ title: day04
 ---
 
 ## 滚动距离与高度
-查看滚动条的距离。   
-常规：window.pageXOffset/pageYOffset。IE9/IE8及以下不支持。   
-IE9/IE8及以下：document.body.scrollLeft/scrollTop或者document.documentElement.scrollLeft/scrollTop。不会同时可用。  
-不常见：window.scrollX/scrollY   
+查看滚动条的距离。浏览器滚动条滚动后，页面与窗口的距离。left是页面左侧到窗口左侧的距离，top是页面顶部到窗口顶部的距离。   
+- 常规：`window.pageXOffset/pageYOffset`。`IE9/IE8`及以下不支持。   
+- `IE9/IE8`及以下：`document.body.scrollLeft/scrollTop`或者`document.documentElement.scrollLeft/scrollTop`。不会同时可用。  
+- 不常见：`window.scrollX/scrollY `。
+  
 滚动条距离兼容性写法：
 ```js
 function getScrollOffset() {
@@ -27,14 +28,14 @@ function getScrollOffset() {
 ```
 
 ## 浏览器的怪异模式和标准模式
-判断模式：document.compatMode   
-当文档最上方写\<!DOCTYPE html>时，返回CSS1Compat，这是兼容W3C规范的标准模式。   
-当文档最上方没有写\<!DOCTYPE html>时，返回BackCompat，这是浏览器默认的向后兼容的模式，就是怪异模式。
+判断模式：`document.compatMode`  
+- 当文档最上方写\<`!DOCTYPE html`>时，返回`CSS1Compat`，这是兼容`W3C`规范的标准模式。   
+- 当文档最上方没有写\<`!DOCTYPE html`>时，返回`BackCompat`，这是浏览器默认的向后兼容的模式，就是怪异模式。
 
 ## 可视区域
 浏览器可视区域的尺寸（窗口的宽高）。  
-常规：window.innerWidth/innerHeight    
-IE9/IE8及以下：document.documentElement.clientWidth/clientHeight（标准模式），document.body.clientWidth/clientHeight（怪异模式）
+- 常规：`window.innerWidth/innerHeight`    
+- `IE9/IE8`及以下：`document.documentElement.clientWidth/clientHeight`（标准模式），`document.body.clientWidth/clientHeight`（怪异模式）
 ```js
 function getViewportSize() {
             if (window.innerWidth) {
@@ -59,10 +60,10 @@ function getViewportSize() {
 ```
 
 ## 整个页面宽高
-不管看不看得见，就是整个HTML文档的宽高
-document.body.scrollHeight/scrollWidth  
-document.documentElement.scrollHeight/scrollWidth   
-window.innerWidth + window.pageXOffset
+不管看不看得见，就是整个`HTML`文档的宽高
+- `document.body.scrollHeight/scrollWidth ` 
+- `document.documentElement.scrollHeight/scrollWidth`   
+- `window.innerWidth` + `window.pageXOffset`
 ```js
 function getScrollSize(){
     if(document.body.scrollWidth){
@@ -101,7 +102,7 @@ function getScrollSize(){
     console.log(box.offsetTop); // 50
 </script>
 ```
-offsetLeft和offsetTop：当父级元素有定位（position），则相对父级定位；如果父级没有定位，则相对于body。
+`offsetLeft`和`offsetTop`：当父级元素有定位（`position`），则相对父级定位；如果父级没有定位，则相对于`body`。
 案例一：父级有定位，则返回相对于父级定位。
 ```html
     <style>
@@ -137,7 +138,7 @@ offsetLeft和offsetTop：当父级元素有定位（position），则相对父�
     </script>
 </body>
 ```
-案例二：父级没有定位，则返回相对于body的定位。
+案例二：父级没有定位，则返回相对于`body`的定位。
 ```html
     <style>
         body {
@@ -171,8 +172,8 @@ offsetLeft和offsetTop：当父级元素有定位（position），则相对父�
     </script>
 </body>
 ```
-offsetParent：返回有定位的父级元素。   
-封装盒子相对于HTML文档的定位，不管父级有没有定位。
+`offsetParent`：返回有定位的父级元素。   
+封装盒子相对于`HTML`文档的定位，不管父级有没有定位。
 ```html
     <style>
         body {
@@ -240,5 +241,5 @@ offsetParent：返回有定位的父级元素。
 ```
 
 ## 操作滚动条
-window.scroll(x, y)与window.scrollTo(x, y)相同
-window.scrollBy(x, y)
+`window.scroll(x, y)`与`window.scrollTo(x, y)`相同
+`window.scrollBy(x, y)`
