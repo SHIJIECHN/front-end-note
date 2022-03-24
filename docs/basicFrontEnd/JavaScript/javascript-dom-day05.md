@@ -132,5 +132,3 @@ getComputedStyle第二个参数是为了获取伪元素属性预留的。只读�
     </script>
 </body>
 ```
-
-## 元素运动初探
