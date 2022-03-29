@@ -38,25 +38,25 @@ function getScrollOffset() {
 - `IE9/IE8`及以下：`document.documentElement.clientWidth/clientHeight`（标准模式），`document.body.clientWidth/clientHeight`（怪异模式）
 ```js
 function getViewportSize() {
-            if (window.innerWidth) {
-                return {
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                }
-            } else {
-                if (document.compatMode === 'BackCompat') {
-                    return {
-                        width: document.body.clientWidth,
-                        height: document.body.clientHeight
-                    }
-                } else {
-                    return {
-                        widht: document.documentElement.clientWidth,
-                        height: document.documentElement.clientHeight
-                    }
-                }
+    if (window.innerWidth) {
+        return {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+    } else {
+        if (document.compatMode === 'BackCompat') {
+            return {
+                width: document.body.clientWidth,
+                height: document.body.clientHeight
+            }
+        } else {
+            return {
+                widht: document.documentElement.clientWidth,
+                height: document.documentElement.clientHeight
             }
         }
+    }
+}
 ```
 
 ## 整个页面宽高

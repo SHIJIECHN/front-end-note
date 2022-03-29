@@ -120,8 +120,8 @@ function elemDrag(elem) {
         y;
 
     addEvent(elem, 'mousedown', function(e) {
-        var e = e || window.event
-        x = pagePos(e).X - getStyles(this, 'left'),
+        var e = e || window.event,
+            x = pagePos(e).X - getStyles(this, 'left'),
             y = pagePos(e).Y - getStyles(this, 'top');
 
         addEvent(document, 'mousemove', mouseMove);
