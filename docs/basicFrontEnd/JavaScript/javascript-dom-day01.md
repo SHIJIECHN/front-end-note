@@ -1,7 +1,7 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: day01
+title: document对象/元素/节点/遍历树
 ---
 
 ## DOM
@@ -21,9 +21,10 @@ title: day01
 `DOM`目的：通过浏览器提供的这一套方法表示或者操作`HTML`和`XML`。
 
 ## document
+document对象是HTMLDocument（继承自Document类型）的一个实例，表示整个HTML页面。  
 元素设置`id`属性，`IE8以`下，`id`不分大小写，即`box`与`Box`一样的。而且如果给元素设置`name="box"`属性，通过`getElementById('box')`也可以匹配上。
 
-获取节点方法：
+### 获取节点方法
 - `getElementsByTagName`与`getElementsByClassName`
 ```html
 <body>

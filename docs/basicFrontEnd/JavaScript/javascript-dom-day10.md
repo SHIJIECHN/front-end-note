@@ -202,6 +202,7 @@ oBox1.onmouseleave = function(e) {
     this.style.backgroundColor = 'black'
 }
 ```
+复杂的情况下用mouseenter与mouseleave，因为可控性比较强。
 
 
 

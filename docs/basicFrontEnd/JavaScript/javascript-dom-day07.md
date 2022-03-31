@@ -9,7 +9,7 @@ title: day07
 1. IE提出事件冒泡流（Event Bubbling）
 2. Netscape提出事件捕获流（Event Capturing）
 
-事件流的三个阶段：事件捕获阶段，处于目标阶段，事件冒泡阶段。处于目标阶段实际上就是事件源绑定的事件处理函数触发阶段。
+事件流的三个阶段：事件捕获阶段（不执行），处于目标阶段，事件冒泡阶段。处于目标阶段实际上就是事件源绑定的事件处理函数触发阶段。
 ```html
     <style type="text/css">
         .wrapper {
@@ -26,7 +26,7 @@ title: day07
         var wrapper = document.getElementsByClassName('wrapper')[0];
         wrapper.onclick = function(e) {
             // IE传到window.event，就是在window下面定义了一个event = {...}，把e中的所有属性都传给event
-            // target srcElement 事件源对象。两针完全一样，火狐只有target，IE只有srcElement。
+            // target srcElement 事件源对象。两个完全一样，火狐只有target，IE只有srcElement。
 
             // 事件兼容性写法
             var e = e || window.event;
