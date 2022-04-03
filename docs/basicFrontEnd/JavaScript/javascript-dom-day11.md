@@ -37,3 +37,6 @@ function pointInTriangle(p, a, b, c) {
     return sameSymbols(R1, R2) && sameSymbols(R2, R3);
 }
 ```
+
+## 练习
+京东菜单

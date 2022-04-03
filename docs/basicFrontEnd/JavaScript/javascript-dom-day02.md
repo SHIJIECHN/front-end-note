@@ -1,11 +1,12 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: day02
+title: DOM结构/节点属性与操作/节点方法
 ---
 
 ## DOM树结构
 <img :src="$withBase('/basicFrontEnd/JavaScript/DOM.png')" alt="DOM"> 
+
 
 ## 节点属性 
 1. `nodeName`：返回节点的`nodeName`大写，只读。   

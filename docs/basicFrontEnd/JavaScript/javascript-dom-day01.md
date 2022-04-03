@@ -32,8 +32,8 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
     <div class="box">456</div>
 
     <script type="text/javascript">
-        var boxes = document.getElementsByTagName('div'); // 全部支持
-        console.log(boxes);
+        var boxes = document.getElementsByTagName('div'); // 全部支持，返回类数组
+        console.log(boxes); 
 
         var boxes1 = document.getElementsByClassName('box'); // IE8及以下没有该方法
         console.log(boxes1);
@@ -48,7 +48,7 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
 
     <script type="text/javascript">
         var input = document.getElementsByName('username');
-        console.log(input)
+        console.log(input);
     </script>
 </body>
 ```
@@ -134,11 +134,11 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
 </body>
 ```
 
-## 遍历节点数
+## 遍历节点树
 节点不等于元素，节点包含元素，元素节点就是DOM节点 
 | 节点名称       | 值   |
 | --------   | ------- |
-| 元素节点  |1|
+|元素节点  |1|
 |属性节点  |2|
 |文本节点 `text` | 3|
 |注释节点 `comment`|  8|
@@ -163,7 +163,7 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
     </script>
 </body>
 ```
-2. `childNodes` 子节点集合
+2. `childNodes` 子节点集合：元素节点、属性节点、文本节点、注释节点、`document`、`DocumentFragment`
 ```html
 <body>
     <ul>
@@ -183,7 +183,8 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
 3. 第一个子节点`firstChild`, 最后一个子节点`lastChild`
 4. 下一个兄弟节点`nextSibling`, 前一个兄弟节点`previousSibling` 
 
-## 遍历元素节点   
+## 遍历元素节点树 
+均返回元素节点。  
 1. `parentElement`:  `IE9`及以下不支持   
 2. `children`:   `IE7`及以下不支持
 3. `childElementCount=children.length`:  `IE9`及以下不支持    

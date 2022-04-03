@@ -121,3 +121,97 @@ TODO List
 - 点击某一项编辑，内容会放到input输入框中，按钮内容变成编辑第几项，编辑好后点击内容就发生改变
 - 删除一项，
 
+## 从事件冒泡到事件代理机制
+给ul创建50个li 并且给li添加删除功能，考虑性能。  
+```html
+<body>
+    <script type="text/javascript">
+        // 创建ul
+        var oList = document.createElement('ul'),
+            oFrag = document.createDocumentFragment(); // 文档碎片，不占空间
+
+        // 创建li
+        for (var i = 0; i < 50; i++) {
+            var oLi = document.createElement('li');
+            oLi.innerHTML = '这是第' + (i + 1) + '项<button>删除</button>';
+            oFrag.appendChild(oLi);
+        }
+        oList.appendChild(oFrag);
+        document.body.appendChild(oList)
+    </script>
+</body>
+```
+缺点：多创建oFrag，用document.createElement的方式没有必要，除非必须用appendChild方法，才需要document.createElement。   
+改进：直接使用字符串
+```html
+<body>
+    <script type="text/javascript">
+        // 创建ul
+        var oList = document.createElement('ul'),
+            list = '';
+        // 创建li
+        for (var i = 0; i < 50; i++) {
+            list += '<li>这是第' + (i + 1) + '项<button>删除</button></li>';
+        }
+        oList.innerHTML = list;
+        document.body.appendChild(oList)
+    </script>
+</body>
+```
+最终：使用模板
+```html
+<body>
+    <script type="text/html" id="tpl">
+        <li>这是第{{num}}项<button>删除</button></li>
+    </script>
+    <script type="text/javascript">
+        // 创建ul
+        var oList = document.createElement('ul'),
+            tpl = document.getElementById('tpl').innerHTML,
+            list = '';
+        // 创建li
+        for (var i = 0; i < 50; i++) {
+            list += tpl.replace(/{{.*?}}/, i + 1);
+        }
+        oList.innerHTML = list;
+        document.body.appendChild(oList)
+    </script>
+</body>
+```
+
+事件代理解决：多次绑定的事件处理函数。   
+JS的事件有向上传递的特性，也就是说，内部的元素在点击的同时，这个事件的影响会向父级传递，并且触发父级的事件处理函数的执行，这种现象就是事件的冒泡行为。冒泡最多能到body。   
+事件对象和事件源对象：事件代理的核心。
+```html
+<body>
+    <script type="text/html" id="tpl">
+        <li>这是第{{num}}项<button>删除</button></li>
+    </script>
+
+    <script type="text/javascript">
+        // 创建ul
+        var oList = document.createElement('ul'),
+            tpl = document.getElementById('tpl').innerHTML,
+            list = '';
+        // 创建li
+        for (var i = 0; i < 50; i++) {
+            list += tpl.replace(/{{.*?}}/, i + 1);
+        }
+        oList.innerHTML = list;
+        document.body.appendChild(oList)
+            // 绑定事件处理函数
+        oList.addEventListener('click', removeItem, false);
+
+        function removeItem(e) {
+            var e = e || window.event,
+                tar = e.target || e.srcElement,
+                tagName = tar.tagName.toLowerCase();
+
+            if (tagName === 'button') {
+                tar.parentNode.remove();
+            }
+        }
+    </script>
+</body>
+```
+不需要给每一个删除按钮都绑定事件处理函数，只需要给他们的父级元素ul绑定，通过事件源对象找到相应的具体点击的元素。

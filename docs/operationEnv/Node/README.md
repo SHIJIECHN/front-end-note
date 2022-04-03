@@ -1,5 +1,4 @@
 ---
-sidebarDepth: 3
-sidebar: auto
+title: 简介
 ---
 # Node
