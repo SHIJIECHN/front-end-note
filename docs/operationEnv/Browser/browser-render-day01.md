@@ -82,6 +82,8 @@ DOM操作消耗新能，原因就是回流，在DOM操作优化的时候，一�
 浏览器优化：队列策略。  
 
 减少回流方法：
+
+1. 方法一：使用类名。
 ```html
     <style type="text/css">
         div {
@@ -115,6 +117,7 @@ DOM操作消耗新能，原因就是回流，在DOM操作优化的时候，一�
     </script>
 </body>
 ```
+2. 方法二：cssText。   
 如果获取的值是动态的呢？
 ```html
 <body>
@@ -138,4 +141,32 @@ DOM操作消耗新能，原因就是回流，在DOM操作优化的时候，一�
     </script>
 </body>
 ```
-文档碎片
+3. 方法三：使用文档碎片：document.createDocumentFragment()
+4. 方法四：display：none
+```html
+<body>
+    <div class="box"></div>
+    <script type="text/javascript">
+        var oBox = document.getElementsByClassName('box')[0],
+            oBoxStyle = oBox.style;
+
+        oBox.onmouseover = function() {
+            // 回流两次，重绘两次
+            oBoxStyle.display = 'none'; // 一次回流，一次重绘
+            oBoxStyle.width = '200px';
+            oBoxStyle.height = '200px';
+            oBoxStyle.backgroundColor = 'green';
+            oBoxStyle.border = '5px solid orange';
+            oBoxStyle.display = 'block'; // 一次回流，一次重绘
+        }
+    </script>
+</body>
+```
+
+5. 当需要offset时，使用offset时，缓存使用
+```js
+var oLeft = div.offsetLeft;
+div.style.left = oLeft + 10 +'px';
+```
+
+5. 动画元素一定要绝对定位。不要用动画。

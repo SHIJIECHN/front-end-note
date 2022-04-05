@@ -293,6 +293,217 @@ compute.mul(1, 2);
 compute.div(1, 2);
 ```
 
+## bind
+bind改变this指向后，返回一个新的函数，不执行。call改变this指向并立即执行。
+```js
+var p1 = {
+    name: '张三',
+    hobby: this.hobby,
+    play: function(sex, age) {
+        console.log('年龄为' + age + '岁，性别为' + sex + '的' + this.name + '喜欢' + this.hobby);
+    }
+}
+
+var p2 = {
+    name: '李四',
+    hobby: '踢足球'
+}
+
+p1.play.call(p2, '男', 20);
+p1.play.bind(p2, '男', 20)();
+// 一般采用下面的方式
+var fn = p1.play.bind(p2, '男', 20);
+fn();
+```
+
+使用场景:    
+事件处理函数改变this指向
+```js
+bindEvent: function() {
+  var _self = this;
+  // 使用call修改this指向，this.tabClick.call(this)是会直接执行的，改变了this指向以后立马执行tabClick，但是我并没有点击，就执行了，肯定是不对的。而事件处理函数，在没有click是不会执行的，所以使用一个匿名函数。
+  this.tab.addEventListener('click', function() {
+      _self.tabClick.call(_self); 
+  }, false);
+
+  // 使用bind，bind返回一个新的函数，不会立马执行。
+  this.tab.addEventListener('click', this.tabClick.bind(this), false);
+},
+```
+
+只要函数里面嵌套函数、事件处理函数，在面向对象的写法中都会涉及this指向.
+
+bind挂载在Function.prototype，是无法直接访问到的。 
+使用call和apply模拟bind方法：
+```js
+var p = {
+    age: 18
+}
+
+function Person() {
+    console.log(this);
+    console.log(this.age);
+}
+
+Person.call(p);
+Person.apply(p);
+Person.bind(p)();
+```
+
+```js
+var p = {
+    age: 18
+}
+
+function Person() {
+    console.log(this);
+    console.log(this.age);
+}
+
+var person2 = Person.bind(p); // this指向失败
+new person2();
+/**
+ * bind仅仅是返回一个新的函数，把这个函数交给person2，在new person2()的时候this指向也发生了改变，此时的this指向了实例化后的对象本身：var p2 = new person2()。这个bind失效了。因为new的时候，this指向Person了。所以var person2 = Person.bind(p);等于没有用。
+ * 
+ * var person2 = Person.bind(p);  // Person`()
+ * var p2 = new person2();
+ * 等效于
+ * var p2 = new Person().
+ * 
+ * 
+ * function Person(){
+ *      this -> window
+ *      'use strict' - this -> null
+ *  }
+ * 
+ * new Person() Person(){
+ *      this -> 实例对象
+ *  }
+ * 
+ * function Person(){...}作为普通函数情况下，this指向window，使用Person.bind(p)之后，相当于，修改了普通函数Person的this指向，把this从window修改为p。
+ * 同时Person.bind(p)返回了一个新的函数Person()`，person2和Person`指向同一个引用，使用new的时候是将person2中的this指向实例对象。只要使用new，person2就是一个构造函数，它里面的this就指向实例对象。
+*/
+```
+
+bind的两个特点：1. 不执行。2. 实例化失效。   
+1. 不执行：
+```js
+var p = {
+    age: 20
+}
+
+function Person() {
+    console.log(this);
+    console.log(this.age);
+}
+
+// 更改this指向，实际上更改执行器上下文->context
+Function.prototype.bindy = function(context) {
+    // 使用的this肯定是指向调用bindy的function，但是return函数中this指向的是window
+    var _self = this; // 调用bindy的function
+
+    // 不执行，肯定return一个函数。因为this.apply(context);会直接执行，而bind不执行
+    return function() {
+        _self.apply(context);
+    }
+}
+Person.bind(p)();
+Person.bindy(p)();
+```
+
+2. 传入参数：
+```js
+// 传入参数第一种情况
+Person.bind(p, '张三', 'male')();
+// 传入参数第二种情况
+var p1 = Person.bind(p, '张三');
+p1('male');
+```
+实现：
+```js
+var p = {
+    age: 20
+}
+
+function Person(name, sex) {
+    console.log(this);
+    console.log(this.age);
+    console.log(name, sex); // 1.新增
+}
+
+Function.prototype.bindy = function(context) {
+    var _self = this;
+    args = Array.prototype.slice.call(arguments, 1); // 返回一个数组。第一个参数是this，去掉第一个参数，后面才是需要的参数。
+    console.log(args);
+    return function() {
+        var newArgs = Array.prototype.slice.call(arguments); // 匿名函数的参数列表
+        console.log(args, newArgs);
+        _self.apply(context, args.concat(newArgs));
+    }
+}
+Person.bindy(p, '张三')('male');
+```
+3. 实例化失效
+要求
+```js
+var p2 = Person.bind(p, '张三');
+new p2('male'); // this指向构造函数的实例对象
+```
+实际上，此时的this指向p对象。
+```js
+Function.prototype.bindy = function(context) {
+    var _self = this;
+    args = Array.prototype.slice.call(arguments, 1);
+    return function() {
+        var newArgs = Array.prototype.slice.call(arguments);
+        console.log(this); // 实例化对象，因为new了
+        console.log(_self); // 构造函数Person
+        console.log(this instanceof _self);// false。因为_self在bindy时已经改变了this指向， 那怎么样让它是_self构造出来的呢？
+
+        // this如果是构造函数构造出来的，也就是new出来的，那么原本的context就要指向this；
+        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
+    }
+}
+
+var p2 = Person.bindy(p, '张三');
+new p2('male'); // this指向p
+```
+想让匿名函数里面的this是_self构造出来的，
+```js
+var p = {
+    age: 20
+}
+
+function Person(name, sex) {
+    console.log(this);
+    console.log(this.age);
+    console.log(name, sex);
+}
+
+Function.prototype.bindy = function(context) {
+    var _self = this;
+    args = Array.prototype.slice.call(arguments, 1);
+    // 实现
+    var fn = function() {
+        var newArgs = Array.prototype.slice.call(arguments);
+        console.log(this); // fn()
+        console.log(this instanceof _self); // true
+        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
+    }
+    console.log(this); // Person
+    // fn和this指向一样，让他们构造器相等
+    fn.prototype = this.prototype;
+    return fn;
+}
+var p2 = Person.bindy(p, '张三');
+new p2('male');
+```
+优化：
+
+
+
+
+
 ## 练习
 1. 年龄为多少岁，姓名为xx，买了一辆排量为xx的xx颜色的xx牌子的车(使用call/apply)
 ```js
