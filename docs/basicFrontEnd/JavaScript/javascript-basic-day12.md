@@ -178,7 +178,7 @@ console.log(Object.prototype.toString.call(arr)); //[object Array]
 - 3. `Object.prototype.toString.call(arr)` -> `[object Array]`
 :::
 
-## this
+## this指向问题
 函数内部的`this`，指向谁？   
 在全局中的`this`和在函数内部的`this` 
 ```js

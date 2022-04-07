@@ -498,11 +498,54 @@ Function.prototype.bindy = function(context) {
 var p2 = Person.bindy(p, '张三');
 new p2('male');
 ```
-优化：
+发现问题
+```js
+Function.prototype.bindy = function(context) {
+    var _self = this,
+        args = Array.prototype.slice.call(arguments, 1),
+        tempFn = function(){};
+    var fn = function() {
+        var newArgs = Array.prototype.slice.call(arguments);
+        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
+    }
 
+    fn.prototype = this.prototype;
+    fn.prototype.num = 2; // 会修改Person.prototype.num的值
+    return fn;
+}
+```
 
+利用圣杯模式解决：
+```js
+var p = {
+    age: 20
+}
 
+Person.prototype.num = 1;
 
+function Person(name, sex) {
+    console.log(this);
+    console.log(this.age);
+    console.log(name, sex);
+}
+
+Function.prototype.bindy = function(context) {
+    var _self = this,
+        args = Array.prototype.slice.call(arguments, 1),
+        tempFn = function() {};
+    var fn = function() {
+        var newArgs = Array.prototype.slice.call(arguments);
+        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
+    }
+
+    tempFn.prototype = this.prototype;
+    fn.prototype = new tempFn();
+    fn.prototype.num = 2; // 会修改Person.prototype.num的值
+    return fn;
+}
+var p2 = Person.bindy(p, '张三');
+p2('male');
+```
 
 ## 练习
 1. 年龄为多少岁，姓名为xx，买了一辆排量为xx的xx颜色的xx牌子的车(使用call/apply)
