@@ -141,7 +141,7 @@ title: HTTP报文
 `Referer`（`referrer`：来源域名）：`Referer`是`request header`的一部分，当浏览器向`web`服务器发送请求的时候，一般会带上`Referer`，告诉服务器我是从哪个页面链接过来的。   
 好处： 可通过`Referer`分析不同渠道的流量分布、用户搜索的关键词。   
 案例一：
-不发送`Refere`r信息：\<meta name="referrer" content="no-referrer">    
+不发送`Referer`信息：\<meta name="referrer" content="no-referrer">    
 `Referrer Policy: no-referrer`    
 无`referrer`字段    
 

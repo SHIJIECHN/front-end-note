@@ -91,7 +91,7 @@ xhr.send('status=1'); // 参数
 ```js
 var $ = (function() {
     var o = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject('Microsoft.XMLHTTP');
-    var t = null;
+    var t = null; // 设置超时
 
     if (!o) {
         throw new Error('您的浏览器不支持异步发起HTTP请求')
@@ -201,21 +201,21 @@ $.get('url?status=1&flag=2', function(data) {
 腾讯课堂评论模块
 
 ## AJAX状态码
-xhr.status/xhr.status.Text：服务器回应的HTP状态码/服务器发送的状态提示    
+`xhr.status/xhr.status.Text`：服务器回应的`HTTP`状态码/服务器发送的状态提示    
 
 五个事件：
-1. xhr.onloadstart：绑定HTTP请求发出的监听函数
-2. xhr.onerror：绑定请求失败完成的监听函数（修改封装的AJAX）
-3. xhr.onload：绑定请求成功完成的监听函数
-4. xhr.onabort：绑定请求终止（调用了abort()方法）的监听函数
-5. xhr.onloadend：绑定请求完成（不管成功与失败、终止）的监听函数
+1. `xhr.onloadstart`：绑定`HTTP`请求发出的监听函数
+2. `xhr.onerror`：绑定请求失败完成的监听函数（修改封装的`AJAX`）
+3. `xhr.onload`：绑定请求成功完成的监听函数
+4. `xhr.onabort`：绑定请求终止（调用了`abort()`方法）的监听函数
+5. `xhr.onloadend`：绑定请求完成（不管成功与失败、终止）的监听函数
 
-顺序：loadstart -> readyState === 4 -> load/error/abort/ -> loadend
+顺序：`loadstart` -> `readyState === 4` -> `load/error/abort/` -> `loadend`
 
 
 请求超时：   
-xhr.timeout：多少毫秒后，如果请求仍然没有得到结果，结汇自动终止，如果该属性等于0表示没有事件限制    
-xhr.ontimeout：绑定请求超时一个监听函数，如果发生timeout事件，就会执行这个监听函数    
+`xhr.timeout`：多少毫秒后，如果请求仍然没有得到结果，结汇自动终止，如果该属性等于`0`表示没有事件限制    
+`xhr.ontimeout`：绑定请求超时一个监听函数，如果发生`timeout`事件，就会执行这个监听函数    
 
 ```js
 var t = null;
@@ -235,9 +235,9 @@ t = setTimeout(function(){
 ```
 
 ## 异步与同步
-async的值：   
-异步（默认）（async=true）：Ajax异步发送请求时，不影响页面加载、用户操作以及AJAX程序后的程序执行。   
-同步（async=false）：Ajax同步发送请求时，浏览器必须等到请求完成并响应成功后，AJAX程序后续的程序才会执行。    
+`async`的值：   
+异步（默认）（`async=true`）：`Ajax`异步发送请求时，不影响页面加载、用户操作以及`AJAX`程序后的程序执行。   
+同步（`async=false`）：`Ajax`同步发送请求时，浏览器必须等到请求完成并响应成功后，`AJAX`程序后续的程序才会执行。    
 解决同步异步的配置问题：   
 成功的回调函数给全局作用域上的变量赋值的案例
 ```js
