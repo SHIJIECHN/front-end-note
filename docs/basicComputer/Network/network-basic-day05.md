@@ -5,7 +5,7 @@ title: 跨域
 ---
 
 ## iframe
-1. 案例一：`iframe`加载了一个页面，那么`iframe`就是这个页面的窗口，想获得这个`iframe`的窗口对象：`myIframe.contentWindow`。
+1. 案例一：`iframe`加载了一个页面，那么`iframe`就是这个页面的窗口，想获得这个`iframe`的窗口对象`window`：`myIframe.contentWindow`。
 ```html
 <!--***********************index.html*******************-->
 <body>

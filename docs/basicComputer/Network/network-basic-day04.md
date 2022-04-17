@@ -116,9 +116,9 @@ var $ = (function() {
             if (o.readyState === 4) {
                 if((o.status >= 200 && o.status < 300) || o.status === 304){
                     success(JSON.parse(o.responseText));
-                }    
-            }else{
-                error();
+                }else{
+                    error();
+                }   
             }
             complete();
             clearTimeout(t);

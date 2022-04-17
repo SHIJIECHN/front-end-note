@@ -5,7 +5,7 @@ title: JSONP跨域
 ---
 
 ## JSONP
-JSONP - JSON with Padding: 跨域获取JSON数据的一种非官方的使用模式  
+JSONP（JSON with Padding）: 跨域获取JSON数据的一种非官方的使用模式  
 
 1. JSON和JSONP不是一个类型
 2. JSON树数据交换格式，JSONP是一种跨域获取JSON数据的交互技术
@@ -133,15 +133,18 @@ jQuery是如何使用JSONP实现跨域的？
 
 封装Ajax增加JSONP功能：
 ```js
-var $ = (function() {
-    var o = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject('Microsoft.XMLHTTP');
-    var t = null; // 设置超时
-
-    if (!o) {
-        throw new Error('您的浏览器不支持异步发起HTTP请求')
-    }
+var xhr = (function() {
 
     function _doAjax(opt) {
+        var o = window.XMLHttpRequest ?
+            new XMLHttpRequest() :
+            new ActiveXObject('Microsoft.XMLHTTP');
+        var t = null; // 设置超时
+
+        if (!o) {
+            throw new Error('您的浏览器不支持异步发起HTTP请求')
+        }
+
         var opt = opt || {},
             type = (opt.type || 'GET').toUpperCase(),
             async = '' + opt.async === 'false' ? false : true,
@@ -183,19 +186,31 @@ var $ = (function() {
         o.onreadystatechange = function() {
             if (o.readyState === 4) {
                 if ((o.status >= 200 && o.status < 300) || o.status === 304) {
-                    success(JSON.parse(o.responseText));
+                    switch (dataType.toUpperCase()) {
+                        case 'JSON':
+                            success(JSON.parse(o.responseText));
+                            break;
+                        case 'TEXT':
+                            success(o.responseText);
+                            break;
+                        case 'XML':
+                            success(o.responseXML);
+                            break;
+                        default:
+                            success(JSON.parse(o.responseText));
+                    }
+                } else {
+                    error();
                 }
-            } else {
-                error();
+                complete();
+                clearTimeout(t);
+                t = null;
+                o = null;
             }
-            complete();
-            clearTimeout(t);
-            t = null;
-            o = null;
         }
 
         o.open(type, url, async);
-        type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www.form-urlencoded');
+        type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         o.send(type === 'GET' ? null : formatDatas(data));
         t = setTimeout(function() {
             o.abort();
@@ -228,19 +243,26 @@ var $ = (function() {
         ajax: function(opt) {
             _doAjax(opt);
         },
-        post: function(url, data, callback) {
+        post: function(url, data, dataType, successCB, errorCB, completeCB) {
             _doAjax({
                 type: 'POST',
                 url: url,
                 data: data,
-                success: callback
+                dataType: dataType,
+                success: csuccessCB,
+                error: errorCB,
+                complete: completeCB
             });
         },
-        get: function(url, callback) {
+
+        get: function(url, dataType, successCB, errorCB, completeCB) {
             _doAjax({
                 type: 'GET',
                 url: url,
-                success: callback
+                dataType: dataType,
+                success: csuccessCB,
+                error: errorCB,
+                complete: completeCB
             })
         }
     }
