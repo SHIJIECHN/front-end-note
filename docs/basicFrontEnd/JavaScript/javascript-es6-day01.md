@@ -5,59 +5,115 @@ title: day01
 ---
 
 ## let
-let的特征：
-1. 在同一作用域下不可重复声明
+与let相关的概念：块级作用域。    
 ```js
+// 1. if
+if(1){
+
+}
+
+// 2. for
+for(;1;){
+
+}
+
+// 3. 括号{}
+{
+
+}
+```
+let的特征：
+1. let在同一作用域下不可重复声明。
+```js
+// 全局作用域
+let a = 1;
+let a = 1; // Identifier 'a' has already been declared
+
+// 函数作用域: let和var都不行
+// 1) 重复let声明
+function test(){
+    let a = 1;
+    let a = 2; // Identifier 'a' has already been declared
+}
+test(); 
+// 2) 使用var声明
 function test(){
     let a = 1;
     var a = 1; // 报错 不能重复声明
 }
-
-
+test();
+// 3) 形参和let，形参变量a在预编译的时候已经定义了
 function test(a){
     let a = 10; // Identifier 'a' has already been declared
     console.log(a);
 }
 test(1); // 报错
+
+// 括号块级{}
+function test(a){
+    {
+        let a = 10;
+        console.log(a); // 10
+    }
+    console.log(a); //undefined 
+}
+test()
 ```
-2. 不会提升会产生一个暂时性死区
+2. let不会声明提升，会产生一个暂时性死区
 ```js
+// 全局环境
 console.log(a); //  Cannot access 'a' before initialization
 let a = 10;
-/**************************************/
+
+// 函数作用域
+function test(){
+    console.log(a); //  Cannot access 'a' before initialization
+    let a = 10;
+}
+test();
+// 在let所对应的作用域范围内，let都不会提升。
+
+
+/***************练习***********************/
 var a = a;
 console.log(a); // undefined
-/**************************************/
+
 let b = b; // Cannot access 'b' before initialization
 console.log(b);
-/**************************************/
+
 function test(x = y, y = 2) { // Cannot access 'y' before initialization
     console.log(x, y);
 }
 test();
-/**************************************/
-console.log(typeof a); // Cannot access 'a' before initialization
-let a;
+
+// typeof不再安全
+console.log(typeof c); // Cannot access 'c' before initialization
+let c;
 ```
-3. 只能在当前的作用域下生效
+3. let只能在当前的作用域下生效
 ```js
+// 括号块级{}
 {
     let a = 1;
 }
 console.log(a); // a is not defined
 
+// if 
 if(1){
     let a = 1;
 }
 console.log(a); // a is not defined
 
+// for
 for(;1;){
     let a = 1;
     break;
 }
 console.log(a); // a is not defined
 
-for(let i = 0; i < 10; i++){}
+for(let i = 0; i < 10; i++){
+    //...
+}
 console.log(i); // i is not defined
 /*******************************************/
 var arr = [];
@@ -91,13 +147,21 @@ var i = 0;
 for (; i < 10;) {
     i = 'a';
     console.log(i); // a
-    i++;
-    console.log(i); // NaN
+    i++; // 此时i = 'a'; i++为NaN
+    console.log(i); //  NaN
 }
 /*******************************************/
 for (var i = 0; i < 10; i++) {
     var i = 'a';
     console.log(i); // 'a'
+}
+// 分析：
+var i = 0;
+var i; // 声明提升
+for(;i < 10; ){
+    i = 'a';
+    console.log(i); // a
+    i++; // NaN
 }
 /*******************************************/
 for (var i = 0; i < 10; i++) {
@@ -120,34 +184,46 @@ for (let i = 0; i < 10; i++) {
 }
 /*
 运行结果：a a a a a a a a a a
+*/
+// 等同于
 {
-    let i = 0;
+    let i = 1; 
     {
-        let i = 'a';
-        console.log(i);
+        let i = 'a'; // 内部重新定义了变量i，和外面i没有关系
+        console.log(i); // a
     }
     i++;
+    console.log(i); // 2
 }
-*/
 // for循环中小括号()的作用域类似与父级作用域
-if (1) {
-    let a = 1; 
-    {
-        let a = 10;
-        console.log(a); // 10
-    }
-    console.log(a); // 1
-}
 
-if (1) {
-    let a = 1; 
+for(let i = 0; i < 10; i++){
+    i = 'a';
+    console.log(i);
+}
+// 等同于
+{
+    let i = 1; 
     {
-        a = 10;
-        console.log(a); // 10
+        i = 'a'; // 内部没有i，会向父级作用域查询，所以改变的是外部i的值
+        console.log(i); // a
     }
-    console.log(a); // 10
+    i++;
+    console.log(i); // NaN
 }
 // 相当于将a的值进行修改了
+
+var x = 1;
+function foo(x, y = function(){ x = 2; console.log(x)}){
+    var x = 3;
+    y();
+    console.log(x);
+}
+foo();
+console.log(x);
+/**
+运行结果：2 3 1
+*/
 /*******************************************/
 ```
 for循环设置循环变量的那部分是一个父作用域，而循环体内是一个单独的子作用域。    
@@ -164,7 +240,7 @@ var a = for(;1;1){
 }
 ```
 
-函数提升，是提升到当前块级作用域上，不能提升到外面。
+函数声明提升，是提升到当前块级作用域上，不能提升到外面。
 ```js
 {
     let a = 1;

@@ -1,5 +1,5 @@
 ---
-autoGroup-2: JSON
+autoGroup-4: JSON
 sidebarDepth: 3
 title: day01
 ---
