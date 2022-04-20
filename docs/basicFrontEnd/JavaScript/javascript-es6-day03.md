@@ -130,6 +130,39 @@ var t1 = f.call({id: 2})()(); // id: 1
 var t2 = f().call({id: 3})(); // id: 1
 var t3 = f()().call({id: 4}); // id: 1
 // this的指向只有一个，就是函数foo的this，这是因为所有的内层函数都是箭头函数，都没有自己的this，它们的this其实都是最外层foo函数的this。
+
+function foo() {
+    console.log('id: ', this.id);
+    return function() {
+        console.log('id: ', this.id);
+        return function() {
+            console.log('id: ', this.id);
+            return function() {
+                console.log('id: ', this.id);
+            }
+        }
+    }
+}
+
+
+var f = foo.call({id: 1});
+/**
+    * 运行结果：1
+    */
+var t1 = f.call({id: 2})()();
+/**
+    * 运行结果：1， 2， undefined， undefined
+    */
+var t2 = f().call({id: 3})();
+/**
+    * 运行结果：1， undefined， 3， undefined
+    * f是全局函数，this指向window
+    */
+var t3 = f()().call({id: 4});
+/**
+    * 运行结果：1， undefined， undefined，4
+    */
+
 ```
 2. 不能作为构造函数来使用
 3. 没有arguments对象，用rest（扩展运算符）替代
