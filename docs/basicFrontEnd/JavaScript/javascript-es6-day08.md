@@ -107,4 +107,8 @@ let obj = {
 for (let i of obj) {
     console.log(i); // 1, 3, 2, 4, 5, 7, 6
 }
+
+// 扩展运算符
+let arr = [...obj];
+console.log(arr); // [1, 3, 2, 4, 5, 7, 6]
 ```
