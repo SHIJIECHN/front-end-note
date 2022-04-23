@@ -179,7 +179,35 @@ console.log(map.get(k2)); // 222
 
 ### 遍历
 ```js
+let m = new Map();
+let x = {
+        id: 1
+    },
+    y = {
+        id: 2
+    };
+m.set(x, 'foo').set(y, 'bar');
+console.log(m.keys()); // MapIterator {}
+console.log(m.values()); // MapIterator {'foo', 'bar'}
+console.log(m.entries()); // MapIterator {}
 
+for (let key of m.keys()) {
+    console.log(key); // {id: 1}, {id: 2}
+}
+
+for (let value of m.values()) {
+    console.log(value); // foo, bar
+}
+
+for (let en of m.entries()) {
+    console.log(en); // { {...}, 'foo', {...}, 'bar'}
+}
+
+// 默认是entries
+for (let [key, value] of m) {
+    console.log(key, value);
+}
+console.log(m[Symbol.iterator] === m.entries); // true
 ```
 ### 实例操作方法
 ```js
@@ -198,4 +226,196 @@ console.log(m.has(x)); // true
 console.log(m.delete(x)); // true
 m.clear();
 console.log(m);
+```
+
+### Map与数组
+```js
+// Map转数组：扩展运算符(...)
+const map = new Map();
+map.set(true, 7)
+    .set({
+        'foo': 3
+    }, ['abc']);
+console.log([...map]);
+
+// 数组转Map
+const map = new Map(
+    [
+        [true, 7],
+        [{foo: 3},['abc']]
+    ]
+);
+console.log(map); // {true => 7, {…} => Array(1)}
+```
+
+### Map与对象
+```js
+// map转对象
+const map = new Map();
+map.set(true, 7)
+    .set('a', 123);
+
+function mapToObj(strMap) {
+    let obj = Object.create(null);
+    for (let [key, value] of strMap.entries()) {
+        console.log(key, value);
+        obj[key] = value;
+    }
+    return obj;
+}
+
+let obj = mapToObj(map);
+console.log(obj); // {true: 7, a: 123}
+
+// 对象转map
+function objToMap(obj) {
+    let map = new Map();
+    for (let key of Object.keys(obj)) {
+        map.set(key, obj[key])
+    }
+
+    return map;
+}
+
+let m = objToMap({
+    true: 7,
+    a: 123
+})
+console.log(m); //{'true' => 7, 'a' => 123}
+```
+
+## Map与Array
+```js
+let map = new Map();
+let array = new Array();
+// 增
+map.set('t', 1);
+array.push({
+    't': 1
+})
+console.log('map: ', map); // {'t' => 1}
+console.log('array: ', array); // [{ 't': 1}]
+
+// 查
+let map_exist = map.has('t'); // true
+let arr_exist = array.find((val) => val.t);
+console.log('map: ', map_exist); // true
+console.log('array: ', arr_exist); // {'t': 1}
+
+// 改
+map.set('t', 2);
+array.forEach(item => item.t ? item.t = 2 : '');
+console.log('map: ', map); // {'t' => 2}
+console.log('array: ', array); // [{ 't': 2}]
+
+// 删
+map.delete('t');
+let idx = array.findIndex(item => item.t);
+array.splice(idx, 1);
+console.log('map: ', map); // {}
+console.log('array: ', array); // []
+```
+
+## Set与Array
+```js
+let set = new Set();
+let array = new Array();
+let o = {
+    't': 1
+};
+// 增
+set.add(o);
+array.push(o)
+console.log('set: ', set); // { {'t': 1} }
+console.log('array: ', array); // [{ 't': 1}]
+
+// 查
+let set_exist = set.has(o);
+let arr_exist = array.find((val) => val.t);
+console.log('set: ', set_exist); // true
+console.log('array: ', arr_exist); // {'t': 1}
+
+// 改
+set.forEach(item => item.t ? item.t = 2 : '');
+array.forEach(item => item.t ? item.t = 2 : '');
+console.log('set: ', set); // { {t: 2} }
+console.log('array: ', array); // [{ 't': 2}]
+
+// 删
+set.forEach(item => item.t ? set.delete(item) : '');
+let idx = array.findIndex(item => item.t);
+array.splice(idx, 1);
+console.log('set: ', set); // {}
+console.log('array: ', array); // []
+```
+
+## WeakMap与WeakSet
+特征：没有任何遍历方法；成员只能是对象.
+```js
+const ws = new WeakSet();
+ws.add(1); // Invalid value used in weak set
+
+const wm = new WeakMap();
+// 只接受对象作为键名
+wm.set('a', 1); // Invalid value used as weak map key
+```
+键名所引用的对象都是弱引用，即垃圾回收机制不将该引用考虑在内。  
+垃圾回收机制：如果其他对象都没有引用WeakMap和WeakSet的话，垃圾回收机制会直接回收当前对象所占的内存，而不会考虑WeakMap和WeakSet。
+
+## Proxy
+代理。在目标之间设置了一个“拦截”层，外界访问必须先通过这一层。
+```js
+let star = {
+    name: 'zhangsan',
+    age: 25,
+    phone: 'start 18822228888'
+}
+
+let agent = new Proxy(star, {
+    // 读取操作：
+    get: function(target, key) {
+        if (key === 'phone') {
+            return 'agent: 13355556666'
+        }
+
+        if (key === 'price') {
+            return 120000;
+        }
+
+        return target[key];
+    },
+
+    // 赋值操作
+    set: function(target, key, value) {
+        if (value < 100000) {
+            throw Error('价格太低！');
+        } else {
+            target[key] = value;
+            return true;
+        }
+
+    },
+
+    // has 拦截in操作符。不能拦截for...in循环
+    has: function(target, key) {
+        console.log('请联系agent：13355556666');
+        if (key === 'customPrice') {
+            return target[key];
+        } else {
+            return false;
+        }
+    },
+
+});
+
+// get
+console.log(agent.phone); // agent: 13355556666
+console.log(agent.price); // 120000
+console.log(agent.name); // zhangsan
+console.log(agent.age); // 25
+// set
+agent.customPrice = 150000;
+console.log(agent.customPrice); // 150000
+// has
+console.log('customPrice' in agent); // true
 ```
