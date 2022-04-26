@@ -6,16 +6,17 @@ title: Promise
 
 ## Promise
 1. 三种状态：
-   - 1. pending（进行中）
-   - 2. fufilled（resolve）（已成功）
-   - 3. reject（已失败）  
+   - 1. `pending`（进行中）
+   - 2. `fulfilled`（`resolve`）（已成功）
+   - 3. `reject`（已失败）  
   
 对象的状态不受外界影响。
 
 
-2. 状态不可逆。promise固化以后，再对promise对象添加回调，是可以直接拿到这个结果的；如果是事件的话，一旦错过再去监听，是得不到结果的。
+2. 状态不可逆。`promise`固化以后，再对`promise`对象添加回调，是可以直接拿到这个结果的；如果是事件的话，一旦错过再去监听，是得不到结果的。
 
 ```js
+// Promise接受一个函数为参数，该函数的两个参数分别是resolve和reject。
 const promise = new Promise(function(resolve, reject) {
 
     if ( /**异步操作成功 */ ) {
@@ -31,11 +32,14 @@ promise.then((value) => {
     // failure
 })
 ```
+resolve：Promise对象的状态从pending变为resolved时调用；   
+reject：Promise对象的状态从pending变为rejectd时调用。   
+
 Promise新建后会立即执行
 ```js
 const promise = new Promise(function(resolve, reject) {
     console.log(0);
-    resolve(1)
+    resolve(1);
 })
 
 promise.then((value) => {
@@ -128,9 +132,31 @@ promise.then(value => {
     console.log('reject: ', reason); // reject:  ReferenceError: a is not defined
 })
 ```
+调用resolve或reject并不会终结Promise的参数函数执行
+```js
+new Promise((resolve, reject) => {
+        resolve(1);
+        console.log(2);
+    }).then(r => {
+        console.log(r);
+    })
+    /**
+     * 2
+     * 1
+     */
+```
+resolve后面的console.log(2)还是会执行。在resolve后面执行其他语句，还是会执行。但是不应该在resolve或reject后面再进行其他操作，所以，最好在resolve前加上return语句。
+```js
+const p = new Promise(function(resolve, reject) {
+    return resolve('ok');
+    // resolve后面不应该进行其他操作，最好加return语句，后面就不会再执行
+    console.log(1);
+})
+```
 
 
 ## Promise.prototype.then()
+链式调用
 ```js
 new Promise((resolve, reject) => {
     resolve(1);
@@ -142,6 +168,9 @@ new Promise((resolve, reject) => {
 })
 ```
 第一个回调函数完成以后，会将结果作为参数，传入第二个回调函数。
+
+
+## Promise.prototype.catch()
 ```js
 p.then( val => console.log('fulfilled: ', val))
     .catch( err => console.log('reject: ', err));
@@ -150,9 +179,7 @@ p.then( val => console.log('fulfilled: ', val))
 p.then( val => console.log('fulfilled: ', val))
     .then( null, err => console.log('reject: ', err));
 ```
-catch相当于then回调中第一个参数为null。
-
-## Promise.prototype.catch()
+catch相当于then回调中第一个参数为null的别名。
 ```js
 let p = new Promise((resolve, reject) => {
     //...
@@ -164,7 +191,7 @@ p.then(res => {
     console.log(r);
 })
 ```
-p与then回调运行时发生的错误均可被catch()捕获。
+p和then回调运行时发生的错误均可被catch()捕获。
 
 ```js
 const p = new Promise(function(resolve, reject) {
@@ -188,18 +215,49 @@ p.then(value => console.log(value))
     // ok
     // 1
 ```
-在resolve后面执行其他语句，还是会执行。但是不应该在resolve或reject后面再进行其他操作，所以，最好在resolve前加上return语句。
-```js
-const p = new Promise(function(resolve, reject) {
-    return resolve('ok');
-    // resolve后面不应该进行其他操作，最好加return语句，后面就不会再执行
-    console.log(1);
-})
+Promise对象的错误具有“冒泡”性质，会一直向后传递，直到被捕获为止。   
 
-p.then(value => console.log(value))
-    .catch(error => console.log(error))
-    // ok
+```js
+const someAsyncThing = function() {
+    return new Promise(function(resolve, reject) {
+        // 下面一行会报错，因为x没有声明
+        resolve(x + 2);
+    })
+}
+
+someAsyncThing().then(() => {
+    console.log('everything is great');
+});
+
+setTimeout(() => {
+    console.log(123)
+}, 20);
+/**
+    * Uncaught (in promise) ReferenceError: x is not defined
+    * 123
+    */
 ```
+Promise内部有错误不会影响到Promise外部的代码执行。   
+catch()方法返回的还是一个Promise对象，因此还可以接着调用then方法 
+```js
+const someAsyncThing = function() {
+    return new Promise(function(resolve, reject) {
+        // 下面一行会报错，因为x没有声明
+        resolve(x + 2);
+    })
+}
+
+someAsyncThing().catch((e) => {
+    console.log(e); 
+}).then(() => {
+    console.log('carry on'); 
+})
+/**
+ * ReferenceError: x is not defined
+ * carry on
+ */
+```
+如果没有报错，就会直接跳过catch方法，直接执行then方法。
 
 ## Promise.all()
 ```js
@@ -270,9 +328,9 @@ p.then(res => console.log(res)) // p1: resolve 1000ms
 ```
 
 ## Promise.resolve()
-参数
+Promise.resolve()的参数情况。
 1. 参数是thenable   
-具有then方法的对象
+具有then方法的对象。将thenable对象转为Promise对象，然后立即执行thenable对象的then方法
 ```js
 let thenable = {
     then: function(resolve, reject) {
@@ -309,7 +367,7 @@ console.log('one');
  */
 ```
 
-## 练习
+## 自定义promisify
 ```js
 import { readFile } from 'fs';
 
