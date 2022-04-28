@@ -39,8 +39,7 @@ module.exports = {
 npx webpack --config ./webpack.dev.config.js
 ```
 
-## loader
-### 图片
+## 图片
 图片loader： file-loader、url-loader
 ```javascript
 // index.js
@@ -282,6 +281,7 @@ module.exports = {
 ### 字体文件
 新增配置
 ```javascript
+// webpack.config.js
 module.exports = {
     module: {
         rules: [
