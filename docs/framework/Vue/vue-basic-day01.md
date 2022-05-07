@@ -1,17 +1,17 @@
 ---
-autoGroup-4: Vue
+autoGroup-1: Vue
 sidebarDepth: 3
 title: 指令基础/设计模式
 ---
 
 ## 多页面应用 vs 单页面应用
-多页面应用：每次都请求对应的HTML文件。优点：1. 首屏时间快；2. SEO优化好。缺点：页面切换可能不较慢。   
-单页面应用：首屏慢，SEO差；页面切换快。 
+- 多页面应用：每次都请求对应的`HTML`文件。优点：1. 首屏时间快；2. `SEO`优化好。缺点：页面切换可能比较慢。   
+- 单页面应用：首屏慢，`SEO`差；页面切换快。 
 
 
 index.html移动端配置：  
-- width=device-width：处理iPhone与iPad上视口问题，设置可以达到最佳的视口；initial-scale=1.0处理IE的视口问题；
-- 禁止用户缩放：minimum-scale=1.0,maximum-scale=1.0;user-scalable=no
+- `width=device-width`：处理`iPhone`与`iPad`上视口问题，设置可以达到最佳的视口；`initial-scale=1.0`处理`IE`的视口问题；
+- 禁止用户缩放：`minimum-scale=1.0,maximum-scale=1.0,user-scalable=no`
 
 
 初始化文件配置：reset.css, border.css, fastclick包
@@ -46,7 +46,6 @@ computed:{
 ```
 
 滚动插件：better-scroll   
-
 
 
 ## Git

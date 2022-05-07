@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Vue
+autoGroup-2: Vue
 sidebarDepth: 3
 title: MVC
 ---

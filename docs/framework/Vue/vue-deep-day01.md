@@ -1,32 +1,32 @@
 ---
-autoGroup-4: Vue
+autoGroup-2: Vue
 sidebarDepth: 3
-title: day01
+title: 认识Vue
 ---
 
 ## 认识Vue
-渐进式框架：vue对自己框架和其他框架对比后，生产的一个特定的名词。
+渐进式框架：`vue`对自己框架和其他框架对比后，生产的一个特定的名词。
 
-1. Angular -> 综合性框架，开发平台 -> 项目应用 -> 不关注视图渲染/状态的管理 X -> 大型应用
-2. React -> 用户界面 View视图层 -> 怎么把数据渲染到试图中 -> 关注点：视图 -> 库 -> 需要另外的状态中央管理（Redux），路由（react-router）
-3. Vue -> 用户界面View视图层 -> 怎么把数据渲染到视图中 -> 一个点：视图 -> 核心库 -> vuex（选择集成），vue-router（选择集成）
+1. `Angular` -> 综合性框架，开发平台 -> 项目应用 -> 不关注视图渲染/状态的管理 -> 大型应用
+2. `React` -> 用户界面 `View`视图层 -> 怎么把数据渲染到视图中 -> 关注点：视图 -> 库 -> 需要另外的状态中央管理（`Redux`），路由（`react-router`）
+3. `Vue` -> 用户界面`View`视图层 -> 怎么把数据渲染到视图中 -> 一个点：视图 -> 核心库 -> `vuex`（选择集成），`vue-router`（选择集成）
 
 
 数据绑定与数据流
 1. 数据绑定 -> 数据与视图渲染直接的关系。
-   - React：单向数据绑定 -> event -> state更改 -> 视图变更
-   - Vue：双向数据绑定 -> event -> state/data更改 -> 视图变更。v-model -> 视图变换 ->state/data变更
+   - `React`：单向数据绑定 -> `event` -> `state`更改 -> 视图变更
+   - `Vue`：双向数据绑定 -> `event` -> `state/data`更改 -> 视图变更。`v-model` -> 视图变换 ->`state/data`变更
 2. 数据流 -> 数据流淌的方向 -> 父子组建中 数据按照什么方向流动
    - 单向数据流
-   - React/vue -> 父组件 -> state -> 子组件 -> props
+   - `React/vue` -> 父组件 -> `state` -> 子组件 -> `props`
 
-vue3错误：   
-[Vue warn]: Property "$createElement" was accessed during render but is not defined on instance.     
-[Vue warn]: Property "_self" was accessed during render but is not defined on instance.    
-[Vue warn]: Unhandled error during execution of render function 
-  at <App>       
-Uncaught TypeError: Cannot read properties of undefined (reading '_c')    
-由于vue和vue-loader版本不一致。   
+`vue3`错误：   
+`[Vue warn]: Property "$createElement" was accessed during render but is not defined on instance`.     
+`[Vue warn]: Property "_self" was accessed during render but is not defined on instance.`    
+`[Vue warn]: Unhandled error during execution of render function 
+  at <App>  `     
+`Uncaught TypeError: Cannot read properties of undefined (reading '_c') `   
+由于`vue`和`vue-loader`版本不一致。   
 ```json
 // package.json
 // Vue CDN版本引入<script src="https://unpkg.com/vue@3.1.2/dist/vue.global.js"></script>
@@ -100,10 +100,10 @@ module.exports = {
 
 
 ## 基本用法
-1. Vue的核心（系统）：模板语法 -> 核心库 -> 编译模板 -> 渲染DOM
-2. vue文件：组件逻辑的本质就是一个对象，里面有很多特定的属性
-3. vue将数据与DOM进行关联，并建立响应式关联：数据改变，视图更新。数据 -> ViewModel核心库 -> 视图，数据 <- ViewModel核心库 <- 视图。
-4. vue完成了数据双向绑定机制，我们的业务关注点全部可放到业务逻辑层，视图层交给了ViewModel绑我们完成数据绑定、渲染和更新
+1. `Vue`的核心（系统）：模板语法 -> 核心库 -> 编译模板 -> 渲染`DOM`
+2. `vue`文件：组件逻辑的本质就是一个对象，里面有很多特定的属性
+3. `vue`将数据与`DOM`进行关联，并建立响应式关联：数据改变，视图更新。数据 -> `ViewModel`核心库 -> 视图，数据 <- `ViewModel`核心库 <- 视图。
+4. `vue`完成了数据双向绑定机制，我们的业务关注点全部可放到业务逻辑层，视图层交给了`ViewModel`绑我们完成数据绑定、渲染和更新
 ```vue
 <template>
   <!--组件模板-->
@@ -116,13 +116,13 @@ module.exports = {
 </style>
 ```
 
-v-on: onclick/addEventListener 绑定事件处理函数   
-v-bind: 属性绑定，引号内部看做变量，vue会对它进行解析    
-v-* 都是vue的指令   
-v-model: oninput -> value -> myComment
+`v-on`: `onclick/addEventListener` 绑定事件处理函数   
+`v-bind`: 属性绑定，引号内部看做变量，`vue`会对它进行解析    
+`v-*` 都是`vue`的指令   
+`v-model`: `oninput` -> `value `-> `myComment`
 
 ## 组件化
-vue组件化核心：组件系统。Vue利用ES模块化完成Vue组件系统的构建。   
+`vue`组件化核心：组件系统。`Vue`利用`ES`模块化完成`Vue`组件系统的构建。   
 组件化：抽象小型、独立、可预先定义配置的、复用的组件
   - 小型：页面的构成拆分成一个一个的小单元
   - 独立：每一个小单元尽可能都独立开发
@@ -131,7 +131,7 @@ vue组件化核心：组件系统。Vue利用ES模块化完成Vue组件系统的
   - 可复用：小单元可以在多个地方使用。可复用性要适当的考量，有些组件确实是不需要复用，可配置性越高，功能性越强。组件最大的作用是独立开发，预先配置，都是为了更好的维护和扩展。
 
 ## 应用实例与组件实例
-应用实例(app)： 通过creatApp创建App，返回一个应用实例。应用实例主要是用来注册全局组件。
+应用实例(`app`)： 通过`creatApp`创建`App`，返回一个应用实例。应用实例主要是用来注册全局组件。
 ```javascript
 const { createApp } = Vue;
 
@@ -166,7 +166,7 @@ app.component('MyTitle', {
 }).mount('#app')
 ```
 
-根组件实例(vm)
+根组件实例(`vm`)
 ```javascript
 /**
  * 根组件的本质就是一个对象 {}
