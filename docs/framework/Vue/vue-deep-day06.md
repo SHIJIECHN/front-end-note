@@ -56,3 +56,81 @@ const vm = app.mount('#app');
 // 实例中直接挂载methods中的每一个方法
 console.log(vm);
 ```
+
+## 实例方法挂载实现
+```javascript
+var Vue = (function() {
+
+    function Vue(options) {
+        this.$data = options.data();
+        this._methods = options.methods;
+
+
+        this._init(this);
+    }
+
+    Vue.prototype._init = function(vm) {
+        initData(vm);
+        initMethods(vm);
+    }
+
+    function initData(vm) {
+        for (var key in vm.$data) {
+            (function(k) {
+                Object.defineProperty(vm, k, {
+                    get: function() {
+                        return vm.$data[k];
+                    },
+                    set: function(newValue) {
+                        vm.$data[k] = newValue
+                    }
+                })
+            })(key)
+        }
+    }
+
+    function initMethods(vm) {
+        for (var key in vm._methods) {
+            vm[key] = vm._methods[key]
+        }
+    }
+
+    return Vue;
+})();
+
+var vm = new Vue({
+    data() {
+        return {
+            a: 1,
+            b: 2
+        }
+    },
+    methods: {
+        increaseA(num) {
+            this.a += num;
+        },
+        increaseB(num) {
+            this.b += num;
+        },
+        getTotal() {
+            console.log(this.a + this.b);
+        }
+    }
+})
+
+console.log(vm); // $data和所有的方法都放在实例上
+
+vm.increaseA(1);
+vm.increaseA(1);
+vm.increaseA(1);
+vm.increaseA(1);
+// a 5
+
+vm.increaseB(2);
+vm.increaseB(2);
+vm.increaseB(2);
+vm.increaseB(2);
+// b 10
+
+vm.getTotal(); // 15
+```

@@ -39,6 +39,7 @@ console.log(vm); // 在$data中是没有author的。$data是响应式数据对�
 
 `$`, `_`, `__` 这些都是`Vue`提供的内置`API`。开发者尽量避免用这些前缀命名自己的变量和方法名。   
 
+## 数据响应式实现
 `data`为什么必须要是一个函数?   
 当`data`不是函数是就会报错： `dataOptions.call is not a function.`    
 实现`data`：
