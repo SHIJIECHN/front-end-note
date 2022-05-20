@@ -18,7 +18,7 @@ index.html移动端配置：
 
 轮播图：  
 vue-awesome-swiper@2.6.7
-样式穿透：.sw-wrapper >>> .swiper-pagination-bullet-active     
+样式穿透：`.sw-wrapper >>> `.swiper-pagination-bullet-active     
 异步处理：
 ```vue
 // 父组件：swiperList是异步请求返回的数据
@@ -35,7 +35,7 @@ computed:{
     }
 }
 ```
-
+样式
 ```css
 /*给盒子设置ellipsis不起作用，需要加上min-width*/
 .list-item .item-info{
@@ -45,7 +45,31 @@ computed:{
 }
 ```
 
-滚动插件：better-scroll   
+滚动插件：better-scroll 
+代码插件使用：
+```javascript
+// template使用,结构必须是两层div，并且最外层设置ref属性
+<div class="scroll-wrapper" ref="wrapper">
+    <div class="scroll-content"></div>
+</div>
+
+
+// 导入
+import BScroll from 'better-scroll'
+
+export default {
+  name: 'CityList',
+  data () {
+    return {
+        scroll: null
+    };
+  },
+  // 在mounted中挂载
+  mounted(){
+    this.scroll = new BScroll(this.$refs.wrapper);
+  }
+}
+```
 
 
 ## Git

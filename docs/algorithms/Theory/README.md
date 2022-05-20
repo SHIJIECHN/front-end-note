@@ -1,5 +1,4 @@
 ---
-sidebarDepth: 3
-sidebar: auto
+title: 简介
 ---
-# 数据结构与算法
+# 编程学习
