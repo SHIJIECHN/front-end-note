@@ -4,21 +4,25 @@ sidebarDepth: 3
 title: 认识Vue
 ---
 
-## 认识Vue
-渐进式框架：`vue`对自己框架和其他框架对比后，生产的一个特定的名词。
+## 三大框架比较
+渐进式框架（progresive framework）：`vue`对自己框架和其他框架对比后，生产的一个特定的名词。
 
-1. `Angular` -> 综合性框架，开发平台 -> 项目应用 -> 不关注视图渲染/状态的管理 -> 大型应用
-2. `React` -> 用户界面 `View`视图层 -> 怎么把数据渲染到视图中 -> 关注点：视图 -> 库 -> 需要另外的状态中央管理（`Redux`），路由（`react-router`）
-3. `Vue` -> 用户界面`View`视图层 -> 怎么把数据渲染到视图中 -> 一个点：视图 -> 核心库 -> `vuex`（选择集成），`vue-router`（选择集成）
+1. `Angular`：是综合性框架，开发平台，更关注项目应用，而不是关注视图渲染/状态的管理，是先有需求，再提供应用。适合应用于大型应用。
+2. `React`：关注用户界面也就是`View`视图层，怎么把数据渲染到视图中。关注点：视图，所以它是提供了管理视图的库。上手简单，但是深入学习很难，因为官方不提供中央管理和路由。需要另外学习状态中央管理（`Redux`）和路由（`react-router`）
+3. `Vue`：关注用户界面`View`视图层，怎么把数据渲染到视图中，关注点：视图。核心库是视图层。与React不同的点是，提供了选择集成`vuex`和`vue-router`。有接口直接配置。Vue想完成大型应用的需求。
 
 
-数据绑定与数据流
-1. 数据绑定 -> 数据与视图渲染直接的关系。
-   - `React`：单向数据绑定 -> `event` -> `state`更改 -> 视图变更
-   - `Vue`：双向数据绑定 -> `event` -> `state/data`更改 -> 视图变更。`v-model` -> 视图变换 ->`state/data`变更
-2. 数据流 -> 数据流淌的方向 -> 父子组建中 数据按照什么方向流动
+## 数据绑定与数据流
+1. 数据绑定：数据与视图渲染直接的关系。
+   - `React`：单向数据绑定。`event` -> `state`更改 -> 视图变更
+   - `Vue`：双向数据绑定。 `event` -> `state/data`更改 -> 视图变更，`v-model` -> 视图变更 ->`state/data`变更
+2. 数据流：数据流淌的方向。父子组件中，数据按照什么方向流动。
    - 单向数据流
-   - `React/vue` -> 父组件 -> `state` -> 子组件 -> `props`
+   - `React/vue`：父组件 -> `state` -> 子组件 -> `props`
+  `props: immutable value`  
+  `state/data: mutable value`
+
+## 手动搭建vue
 
 `vue3`错误：   
 `[Vue warn]: Property "$createElement" was accessed during render but is not defined on instance`.     
