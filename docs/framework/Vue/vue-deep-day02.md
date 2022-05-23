@@ -1,176 +1,146 @@
 ---
 autoGroup-2: Vue
 sidebarDepth: 3
-title: MVC
+title: 认识Vue以及它的基本用法
 ---
 
-## MVC
+## Vue的核心
+Vue的核心：用模板语法的方式 -> 用核心库 -> 编译模板 -> 然后再渲染DOM
+
+```vue
+ <!--组件模板-->
+<template>
+    <div>123</div>
+</template>
+
+<!-- 组件逻辑，组件逻辑块-->
+<script>
+export default {
+    name: 'App'
+}
+  
+</script>
+<style>
+  /* 组件的样式 */
+</style>
+```
+1. 组件逻辑的本质就是一个对象，里面有很多特定的属性。<br>
+2. vue将数据与DOM进行关联，并建立响应式关联，也就是说，数据改变，视图更新。<br>
+3. Vue做了一件事情： 
+数据改变 -> ViewModel核心库帮助  -> 更新视图
+数据改变 <- ViewModel核心库帮助  <- 更新视图<br>
+
+4. vue完成了数据双向绑定的机制。我们的业务关注点全部可以放在业务逻辑层，视图交给了ViewModel帮我们完成渲染和更新。
+
+## 基本指令的使用
+|<div style="width: 150px;">指令</div>  | 描述   |
+| :---------:  | :----: |
+| {{}} | 插值表达式 |
+| v-on | 绑定事件处理函数 |
+| v-bind | 绑定属性 - 引号内部看做变量，vue会对它进行解析 |
+| v-model | oninput -> value -> myComment 能轻松实现表单输入和应用状态之间的双向绑定|
+| v-for | 可以绑定数组的数据来渲染一个项目列表|
+### index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="article">
+            <!-- 插值表达式 -->
+            <h1>{{ title }}</h1>
+            <p>
+                <span>{{ author }} {{ dateTime }}</span>
+            </p>
+            <p>
+                <span>Like: {{ like }}</span>
+                <!-- v-on -> onclick/addEventListener 绑定事件处理函数-->
+                <!-- <button v-on:click="likeThisArticle">Like</button> -->
+                <!-- v-* 都是vue的指令-->
+                <button v-if="isLogin" @click="likeThisArticle">Like</button>
+                <button v-else disable>Please login first!</button>
+            </p>
+            <p>
+                <button @click=followAction>{{ isFollowed ? 'Followed': 'Follow'}}</button>
+            </p>
+            <!-- <p title="content"></p>-->
+            <!-- v-bind 绑定属性 - 引号内部看做变量，vue会对它进行解析-->
+            <!-- <p v-bind:title="content">{{ content }}</p> -->
+            <p :title="content">{{ content }}</p>
+            <div class="form">
+                <!-- v-model: input的时候 -> 将value -> 交给myComment-->
+                <p>{{ myComment}}</p>
+                <input type="text" placeholder="请填写评论" v-model="myComment">
+                <button @click="submitComment">Submit</button>
+            </div>
+            <div class="comment">
+                <ul>
+                    <!-- key in obj -> 对象
+                        item in arr -> 数组
+                    -->
+                    <li v-for="item of commentList" :key="item.id">
+                        <p>
+                            <span>{{ item.dateTime }}</span>
+                        </p>
+                        <p>{{ item.content }}</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/vue@3.1.2/dist/vue.global.js"></script>
+</body>
+</html>
+```
+
+### main.js
 ```javascript
-/**
- * M：Model 数据模型 -> 操作数据库（对数据进行增删改查的操作）
- * V：View 视图层 -> 显示视图或视图模板
- * C：Controller 控制器层 -> 逻辑层 数据和视图关联挂载和基本的逻辑操作
- *      服务端渲染
- *      View需要数据 -> Controller对应的方法 -> 调用Model的方法 -> 
- *      获取数据 -> 返回给Controller对应的方法 -> render到View中
- * 
- *      前端渲染
- *                          API层 前端请求的API对应的是控制器中的方法
- *      前端-> 异步请求URL -> 控制器中的方法 
- *      -> Model层的方法 -> 操作数据库 -> 获取数据
- *      -> 返回给控制器方法 -> 响应回前端
- * 
- * 前端MVC
- * Model -> 管理视图所需要的数据 -> 数据与视图关联 
- * View -> HTML模板 + 视图渲染
- * Controller -> 管理事件逻辑
- * 
- * 加减乘除计算器
- * 
- * Model -> data -> a b s r
- *        watch -> data change -> update view
- * 
- * View -> template -> render
- * 
- * Controller -> event trigger -> model/data
- * 
- * controller -> model -> view
- * view -> controller -> model
- * 
- * MVVM模型雏形  ViewModel  M data/逻辑  V view
- * vue -> 关注于视图渲染  ref -> DOM节点   MV -> ViewModel whatever
- * ViewModel -> 收集依赖、模板编译、数据劫持
- */
-(function() {
-    function init() {
-        model.init(); // 组织数据 + 数据监听操作 / 数据代理
-        view.render(); // 组织HTML模板 + 渲染HTML模板 
-        controller.init(); // 事件处理函数的定义与绑定 
-    }
+const { createApp } = Vue;
 
-    var model = {
-      // 管理数据
-        data: {
-            a: 0,
-            b: 0,
-            s: '+',
-            r: 0
+const Article = {
+    data() {
+        return {
+            title: 'This is a TITLE',
+            author: 'Xiaoye',
+            dateTime: '2022-5-23',
+            content: 'This is a CONTENT',
+            like: 0,
+            isLogin: true,
+            isFollowed: false,
+            myComment: '',
+            commentList: []
+        }
+    },
+    // 组件里的方法
+    methods: {
+        likeThisArticle() {
+            this.like++;
         },
-        // 对数据劫持监听
-        init: function() {
-            var _this = this;
-
-            for (var k in _this.data) {
-                (function(k) {
-                    Object.defineProperty(_this, k, {
-
-                        get: function() {
-                            // model -> a -> get
-                            return _this.data[k];
-                        },
-                        set: function(newValue) {
-                            // model.a = 123 -> set
-                            _this.data[k] = newValue;
-                            // 渲染
-                            view.render({
-                                [k]: newValue
-                            })
-                        }
-                    })
-                })(k);
+        followAction() {
+            this.isFollowed = !this.isFollowed;
+        },
+        submitComment() {
+            if (this.myComment.length > 0) {
+                this.commentList.push({
+                    id: new Date().getTime(),
+                    dateTime: new Date(),
+                    content: this.myComment
+                })
+                console.log(this.commentList);
             }
         }
+
     }
+}
 
-    var view = {
-        el: '#app',
-        template: `
-        <p>
-          <span class="cal-a">{{ a }}</span>
-          <span class="cal-s">{{ s }}</span>
-          <span class="cal-b">{{ b }}</span>
-          <span>=</span>
-          <span class="cal-r">{{ r }}</span>
-        </p>
-        <p>
-          <input type="text" placeholder="Number a" class="cal-input a" />
-          <input type="text" placeholder="Number b" class="cal-input b" />
-        </p>
-        <p>
-          <button class="cal-btn">+</button>
-          <button class="cal-btn">-</button>
-          <button class="cal-btn">*</button>
-          <button class="cal-btn">/</button>
-        </p>
-      `,
-        render: function(mutedData) {
-          // 初始化，没有传入操作数据时
-            if (!mutedData) {
-              // 直接初始化，把{{}} 替换
-                this.template = this.template.replace(
-                    /\{\{(.*?)\}\}/g,
-                    function(node, key) {
-                        return model[key.trim()];
-                    }
-                )
-                // append到页面中去
-                var container = document.createElement('div');
-                container.innerHTML = this.template;
-                document.querySelector(this.el).appendChild(container)
-            } else { // 有传入操作数据
-                for (var k in mutedData) {
-                  // 直接更改mutedData属性中对应的textContent
-                    document.querySelector('.cal-' + k).textContent = mutedData[k];
-                }
-            }
-
-        }
-    }
-
-    // 事件处理函数的绑定
-    var controller = {
-        init: function() {
-            var oCalInput = document.querySelectorAll('.cal-input'),
-                oCalBtns = document.querySelectorAll('.cal-btn'),
-                inputItem,
-                btnItem;
-
-            for (var i = 0; i < oCalInput.length; i++) {
-                inputItem = oCalInput[i];
-                inputItem.addEventListener('input', this.handleInput, false);
-            }
-
-            for (var i = 0; i < oCalBtns.length; i++) {
-                btnItem = oCalBtns[i];
-
-                btnItem.addEventListener('click', this.handleBtnClick, false);
-            }
-        },
-        handleInput: function(e) {
-            var tar = e.target,
-                value = Number(tar.value),
-                field = tar.className.split(' ')[1];
-
-            model[field] = value;
-
-            // model.r = eval('model.a' + model.s + 'model.b'); // 注意写法
-            with(model) {
-                r = eval('a' + s + 'b');
-            }
-        },
-
-        handleBtnClick(e) {
-            var type = e.target.textContent;
-
-            model.s = type;
-
-            with(model) {
-                r = eval('a' + s + 'b');
-            }
-        }
-    }
-
-    init();
-
-})();
+createApp(Article).mount('#app');
 ```
