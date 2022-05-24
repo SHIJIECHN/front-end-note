@@ -93,7 +93,7 @@ export function matchBracket(str: string): boolean{
         if(leftSymbols.includes(s)){  // includes的时间复杂度是O(n)，但是leftSymbols是一个常量和输入没有关系。而且非常短。
             stack.push(s); // 左括号，压栈  空间复杂度O(n)
         }else if(rightSymbols.includes(s)){ // 判断是否是右括号
-            const top = stack[stack.length -1]; // 左括号
+            const top = stack[stack.length -1]; // 左括号 ************注意此处取值
             // 左括号与右括号匹配
             if(isMatch(top, s)){
                 stack.pop(); // 右括号，出栈

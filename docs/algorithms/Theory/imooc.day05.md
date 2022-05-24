@@ -53,12 +53,28 @@ React Fiber 就把 vdom 树转换为一个链表，这样才有可能随时中�
 ## 扩展
 
 思考：用数组和链表实现队列，哪个性能更好？<br>
-分析：数组是连续存储，push很快，shift很慢；链表是非连续存储，add和delete都很快（但查找很慢）。<br>
-结论：链表实现队列会更快。队列是一种先进先出的结构，如果使用数组实现，每次进，就push一个元素，但是每次出队列的时候，shift操作，后面的元素都要移动。而链表不一样，只需要改变指向就可以了。<br>
 
+### 分析
+数组是连续存储，push很快，shift很慢；链表是非连续存储，add和delete都很快（但查找很慢）。<br>
+
+### 结论
+链表实现队列会更快。队列是一种先进先出的结构，如果使用数组实现，每次进，就push一个元素，但是每次出队列的时候，shift操作，后面的元素都要移动。而链表不一样，只需要改变指向就可以了。<br>
+
+### 思路
 链表实现队列：单向链表就可以实现，但要同时需要记录head和tail。要从tail入队，从head出队，否则出队时tail不好定位，length要实时记录，不可比案例链表获取
 
+### 答案
 参考 queue-with-list.ts 和 queue-with-list.test.ts
+
+### 性能分析
+- 空间复杂度都是O(n)
+- add时间复杂度：链表O(1)；数组O(1)
+- delete时间复杂度：链表O(1)；数组O(n)
+
+### 划重点
+- 链表，链表 vs 数组
+- 数据结构的选择，要比算法优化更重要
+- 要有时间复杂度的敏感性，如length不能遍历查找
 
 
 ## 源码
@@ -272,6 +288,27 @@ export class MyQueue {
 // console.info('length4: ', q.length);
 // console.log(q.delete());
 // console.info('length5: ', q.length);
+
+// 性能测试
+const q1 = new MyQueue();
+console.time('queue with list');
+for(let i = 0; i < 10*10000; i++){
+    q1.add(i);
+}
+for(let i = 0; i < 10*10000; i++){
+    q1.delete();
+}
+console.timeEnd('queue with list'); // 12ms
+
+const q2 = [];
+console.time('queue with array');
+for(let i = 0; i < 10*10000; i++){
+    q2.push(i);
+}
+for(let i = 0; i < 10*10000; i++){
+    q2.shift();
+}
+console.timeEnd('queue with array'); // 495ms
 ```
 
 ### queue-with-list.test.ts

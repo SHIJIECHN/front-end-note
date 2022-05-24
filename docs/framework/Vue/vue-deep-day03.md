@@ -20,7 +20,154 @@ title: 认识Vue以及组件化构建
 ## 实现todo-list
 
 ### index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <div id="app">
+        <div class="todo-list">
+            <div>
+                <todo-form @add-todo="addTodo" />
+            </div>
+            <div>
+                <ul>
+                    <todo-item v-for="item of todoList" :key="item.id" :todo="item" @change-completed="changeCompleted" @remove-todo="removeTodo" />
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/vue@3.1.2/dist/vue.global.js"></script>
+</body>
+</html>
+```
 
 ### main.js
+```javascript
+/**
+ * {
+ *  id: new Date().getTime(),
+ *  content: inputValue,
+ *  completed: false
+ * }
+ * 
+ * TodoList 组件
+ *  data
+ *      todoList
+ *  methods：
+ *      removeTodo      id
+ *      addTodo         inputValue
+ *      changeCompleted id
+ *  todo-form
+ *  todo-list ul  view
+ *      todo-item v-for  view
+ */
 
+const { createApp } = Vue;
+
+const TodoList = {
+    data() {
+        return {
+            todoList: [{
+                    id: 1,
+                    content: '123',
+                    completed: false
+                },
+                {
+                    id: 2,
+                    content: '234',
+                    completed: false
+                },
+                {
+                    id: 3,
+                    content: '345',
+                    completed: false
+                },
+            ]
+        }
+    },
+    methods: {
+        removeTodo(id) {
+            this.todoList = this.todoList.filter(item => item.id !== id);
+        },
+        addTodo(value) {
+            this.todoList.push({
+                id: new Date().getTime(),
+                content: value,
+                completed: false
+            })
+        },
+        changeCompleted(id) {
+            this.todoList = this.todoList.map(item => {
+                if (item.id === id) {
+                    console.log(id);
+                    item.completed = !item.completed;
+                }
+                return item;
+            })
+        }
+    }
+}
+
+const app = createApp(TodoList);
+app.component('todo-form', {
+    data() {
+        return {
+            inputValue: ''
+        }
+
+    },
+    template: `
+        <div>
+            <input type="text" placehoder="请填写"  v-model="inputValue"/>
+            <button @click="addTodo">增加</button>
+        </div>
+    `,
+    methods: {
+        addTodo() {
+            this.$emit('add-todo', this.inputValue);
+            this.inputValue = '';
+        }
+    }
+})
+
+app.component('todo-item', {
+    props: ['todo'],
+    emits: ['change-completed', 'remove-todo'],
+    template: `
+        <li>
+            <input  
+                type="checkbox"
+                :checked="todo.completed"
+                @click="changeCompleted(todo.id)"
+            />
+            <span
+                :style="{
+                    textDecoration:
+                        todo.completed ? 'line-through' : 'none'
+                }"
+            >
+                {{ todo.content}}
+            </span>
+            <button @click="removeTodo(todo.id)">删除</button>
+        </li> 
+    `,
+    methods: {
+        changeCompleted(id) {
+            this.$emit('change-completed', id);
+        },
+        removeTodo(id) {
+            this.$emit('remove-todo', id)
+        }
+    }
+})
+app.mount('#app');
+```
