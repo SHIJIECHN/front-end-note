@@ -1,5 +1,5 @@
 ---
-autoGroup-2: Vue
+autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
 title: 认识Vue以及它的基本用法
 ---

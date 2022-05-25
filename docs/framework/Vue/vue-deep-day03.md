@@ -1,5 +1,5 @@
 ---
-autoGroup-2: Vue
+autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
 title: 认识Vue以及组件化构建
 ---
@@ -170,4 +170,11 @@ app.component('todo-item', {
     }
 })
 app.mount('#app');
+```
+
+子组件自定义事件发生警告：
+`[Vue warn]: Extraneous non-emits event listeners (changeCompleted) were passed to component but could not be automatically inherited because component renders fragment or text root nodes. If the listener is intended to be a component custom event listener only, declare it using the “emits” option.`   
+解决方法：声明下自定义事件名称即可
+```javascript
+emits: ['change-completed']
 ```

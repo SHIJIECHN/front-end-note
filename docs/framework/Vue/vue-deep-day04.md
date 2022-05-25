@@ -1,174 +1,173 @@
 ---
-autoGroup-2: Vue
+autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: ES6深拷贝
+title: 应用实例、组件实例与根组件实例
 ---
 
 
-## 深拷贝
-ES5实现
+## 应用实例
+应用实例(`app`)： 通过`creatApp`创建`App`，返回一个应用实例。应用实例主要是用来注册全局组件。
+
+main.js
 ```javascript
-var obj = {
-    name: 'xiaoyesensen',
-    age: 34,
-    info: {
-        hobby: ['travel', 'piano', {
-            a: 1
-        }],
-        career: {
-            teacher: 4,
-            engineer: 9
-        }
-    }
-}
+const { createApp } = Vue;
 
-// ES5
-function deepClone(origin, target) {
-    var tar = target || {};
+// Application 应用
+const app = Vue.createApp({}) // {}为根组件
 
-    var arrType = '[object Array]',
-        toStr = Object.prototype.toString;
-    for (var key in origin) {
-        if (origin.hasOwnProperty(key)) {
-            if (typeof origin[key] === 'object' && origin[key] !== null) {
-                if (toStr.call(origin[key]) === arrType) {
-                    tar[key] = []
-                } else {
-                    tar[key] = {}
-                }
-                deepClone(origin[key], tar[key]);
-            } else {
-                tar[key] = origin[key];
+// 返回原本的应用实例
+const app2 = app.component('MyTitle', {
+        data() {
+            return {
+                title: 'I love Vue'
             }
+        },
+        template: `<h1 v-to-lower-case>{{title}}</h1>`
+    })
+    .directive('toLowerCase', {
+        mounted(el) {
+            el.addEventListener('click', function() {
+                this.innerText = this.innerText.toLowerCase();
+            }, false)
         }
-    }
-    return tar;
+    });
+
+console.log(app2 === app); // true
+
+app2.mount('#app');
+```
+应用实例时直接由`createApp`创建出来的。在实例上暴露了很多方法：
+ * component 注册组件
+ * directive 注册指令
+ * filter 注册过滤器
+ * use 使用插件
+大多数这样的方法都会返回createApp创建出来的应用实例，这样是为了允许链式操作。
+
+## 根组件实例
+1. 根组件的本质就是一个对象。
+2. createApp执行的时候需要一个根组件 createApp({})。也就是说，当你执行createApp的时候里面至少放过对象
+3. 根组件是Vue渲染的起点。它在渲染的时候，必须得有一个根组件才能正常的渲染。外面总需要一个东西包裹，不能只有一堆组件。只有有了根组件才能形成组件树。
+4. 根元素是一个HTML元素。createApp执行创建Vue应用实例时，需要一个HTML元素：`<div id="app"></div>`。<br> 
+5. mount方法执行返回的是根组件实例(`vm`)。
+6. vm来源于 -> viewModel -> MVVM -> VM。 Vue不是一个完整的MVVM模型
+main.js
+```javascript
+const RootComponent = {
+    data() {
+        return {
+            a: 1,
+            b: 2,
+            total: 0
+        }
+    },
+    mounted() {
+        this.plus();
+    },
+    methods: {
+        plus() {
+            this.total = this.a + this.b
+        }
+    },
+    template: `<h1>{{a}} + {{b}} = {{total}} </h1>`
 }
 
-var newObj = deepClone(obj);
-newObj.info.hobby[2].a = 123;
-console.log(newObj);
+const app = Vue.createApp(RootComponent);
+
+const vm = app.mount('#app');
+console.log(vm.a, vm.b, vm.total);
 ```
 
-WeakMap的理解:  
-WeakMap 键名只能是对象；Map键名可以是任意类型
+## 组件实例
+1. 每个组件都有自己的组件实例。
+2. 一个应用中所有的组件都共享一个应用实例（app），都是app下面的东西。
+3. 无论是根组件还是应用内其他组件，配置选项、组件的行为都是一样的。
+4.  组件实例可以添加一些属性 property。data/props/components/methods....
+5.  组件实例this -> 可以访问$attrs/$emit Vue组件实例内置方法
 ```javascript
-// 案例
-const oBtn1 = document.querySelector('#btn1');
-const oBtn2 = document.querySelector('#btn2');
-
-oBtn1.addEventListener('click', handleBtnClick1, false);
-oBtn2.addEventListener('click', handleBtnClick2, false);
-
-function handleBtnClick1() {}
-
-function handleBtnClick2() {}
-
-oBtn1.remove();
-oBtn2.remove(); // handleBtnClick2不能被自动回收
-// 手动回收
-handleBtnClick1 = null;
-handleBtnClick2 = null;
-```
-弱引用(指的是键名)：当`oBtn1.remove()`，即被删除，则在`oBtnMap`中也会被移除。`oBtn1`在外面没有引用了，在`WeakMap`中也会被移除，则`handleBtnClick1`也会被垃圾回收机制回收掉。
-```javascript
-// WeakMap
-const oBtnMap = new WeakMap();
-oBtnMap.set(oBtn1, handleBtnClick1);
-oBtnMap.set(oBtn2, handleBtnClick2);
-
-oBtn1.addEventListener('click', oBtnMap.get(oBtn1), false);
-oBtn2.addEventListener('click', oBtnMap.get(oBtn2), false);
-
-oBtn1.remove();
-oBtn2.remove();
-```
-
-ES6实现:    
-了解constructor
-```javascript
-const obj = {};
-console.log(obj); // {}
-const newObj = new obj.constructor();
-newObj.a = 1;
-console.log(newObj); // { a: 1} 与原数组obj没有任何关系
-
-const arr = [];
-console.log(arr); // []
-const newArr = new arr.constructor();
-newArr.push(1);
-console.log(newArr); // [1] 新数组与arr没有任何关系了
-```
-实现深拷贝
-```javascript
-function deepClone(origin) {
-    // origin: null, undefined 
-    if (origin == undefined || typeof origin !== 'object') {
-        return origin;
+const MyTitle = {
+    props: ['content'],
+    template: `
+        <h1 :title="content">
+            <slot></slot>
+        </h1>
+    `,
+    mounted() {
+        console.log(this); // 组件实例
     }
+};
 
-    // Date RegExp -> instanceof
-    if (origin instanceof Date) {
-        return new Date(origin);
-    }
+const MyAuthor = {
+    template: `
+        <p>
+            Author: <slot></slot>
+        </p>
+    `
+};
 
-    if (origin instanceof RegExp) {
-        return new RegExp(origin);
-    }
-
-    // {} [] 
-    const target = new origin.constructor();
-
-    for (let key in origin) {
-        if (origin.hasOwnProperty(key)) {
-            target[key] = deepClone(origin[key]);
+const MyContent = {
+    template: `
+        <p @click="toLowerCase">
+            <slot></slot>
+        </p>
+    `,
+    methods: {
+        toLowerCase() {
+            this.$emit('to-lower-case')
         }
     }
+};
 
-    return target;
-}
-```
-当是下面情况时拷贝就会死循环
-```javascript
-let test1 = {};
-let test2 = {};
-test2.test1 = test1;
-test1.test2 = test2
-
-console.log(test2);
-```
-所以需要有记录`test1`拷贝过后就不能再拷贝了。
-```javascript
-function deepClone(origin, hasMap = new WeakMap()) {
-    // origin: null, undefined 
-    if (origin == undefined || typeof origin !== 'object') {
-        return origin;
-    }
-
-    // Date RegExp -> instanceof
-    if (origin instanceof Date) {
-        return new Date(origin);
-    }
-
-    if (origin instanceof RegExp) {
-        return new RegExp(origin);
-    }
-
-    const hasKey = hasMap.get(origin);
-    if (hasKey) {
-        return hasKey;
-    }
-
-    // {} [] 
-    const target = new origin.constructor();
-    hasMap.set(origin, target);
-
-    for (let key in origin) {
-        if (origin.hasOwnProperty(key)) {
-            target[key] = deepClone(origin[key], hasMap);
+const App = {
+    components: {
+        /** title author content */
+        MyTitle,
+        MyAuthor,
+        MyContent
+    },
+    data() {
+        return {
+            title: 'This is TITLE',
+            author: 'Tom',
+            content: 'This is CONTENT'
+        }
+    },
+    template: `
+        <div>
+            <my-title :content="content">{{title}}</my-title>
+            <my-author>{{author}}</my-author>
+            <my-content @to-lower-case="toLowerCase">{{content}}</my-content>
+        </div>
+    `,
+    methods: {
+        toLowerCase() {
+            this.content = this.content.toLowerCase();
         }
     }
-
-    return target;
 }
+
+
+
+const app = Vue.createApp(App);
+const vm = app.mount('#app');
+console.log(vm);
 ```
+
+## 生命周期函数
+组件是有一个初始化过程的。在这个过程中，Vue提供了很多每个阶段运行的函数，函数会在对应的初始化阶段自动运行。
+
+| <div style="width: 150px;">生命周期</div> | <div style="width: 150px;">描述</div> |
+| :--------:   | :------: |
+|beforeCreate|组件实例被创建之初|
+|create|组件实例已完全创建|
+|beforeMount|组件挂载之前|
+|mounted|组件挂载到实例上去之后|
+|beforeUpdate|组件数据发生改变，更新之前|
+|updated|组件数据更新之后|
+|beforeDestroy|组件实例销毁之前|
+|destroyd|组件实例销毁之后|
+|activated|keep-alive缓存的组件激活时|
+|deactivated|keep-alive缓存的组件停用时调用|
+|errorCaptured|捕获一个来自子孙组件的错误时被调用|
+
+<img :src="$withBase('/framework/Vue/生命周期函数.png')" alt="生命周期函数" />
+
