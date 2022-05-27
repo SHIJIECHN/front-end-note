@@ -1,246 +1,195 @@
 ---
 autoGroup-1: ECMAScript
 sidebarDepth: 3
-title: day02
+title: 语法、规范、错误、运算符
 ---
-## 循环
-在JavaScript中有两种常用的循环：for循环与while循环。下文分别讨论这两个循环
-```js
-for(var i = 0; i < 100; i++){
-    console.log(i)
-} 
-```
-将上面循环进行分解，步骤：
-* 1、声明变量 i = 0
-* 2、if(i < 10){
-        console.log(i)
-    }
-* 3、i++
-* 4、if(i < 10){  不满足条件 停止循环
-        console.log(i)
-    }
 
-`i`的声明可以单独提到外面，即：
+## 语法、规范
+### 1. 分号结束
 ```javascript
-var i = 0;
-for(; i < 10;){
-    console.log(i)
-    i++
-}
+var a = 10;
 ```
-同`while`循环非常相似，所以也可以写成：
+### 2. 符号两边加空格
 ```javascript
-var i = 0;
-while(i < 10){
-    console.log(i);
-    i++
-}
+a + b = 3
 ```
-所以`for`循环可以转换成`while`循环。  
-不使用break终止循环。
+
+## 错误
+错误大致分为两类：语法错误和通用错误
+### 1. 语法错误（SyntaxError）
+特点：所有代码都不执行
+```javascript
+console.log(1);
+console.log(2)；
+console.log(3);
+```
+结果：Uncaught SyntaxError: Invalid or unexpected token
+
+### 2. 通用错误（ReferenceError）
+特点：中断执行，错误前的代码会执行
+```javascript
+console.log(1);
+console.log(a);
+console.log(3);
+```
+结果：
+1 <br>
+Uncaught ReferenceError: a is not defined
+
+### 3. 脚本块之间的错误，不会互相影响
+```javascript
+<script type = "text/javascript">
+	console.log(a); // Uncaught ReferenceError: a is not defined
+</script>
+ 
+<script type='text/javascript'>
+	console.log(1); // 1
+</script>
+```
+
+## 运算符
+### 1. 运算符：+ - * / %
+1. ()括号运算符 > 普通运算 > 赋值
 ```js
-var i = 1;
-for(; i;){
-    console.log(1);
-    i++;
-    if(i == 10){
-        i = 0; // 当i为假时就终止循环
-    }
-}
+// 数字运算符
+var a = 1,
+    b = 2,
+    d = 3;
+var c = (a + b) * d
+/*
+* 1、声明变量c
+* 2、变量a的值和变量b的值相加，与变量d的值相乘得到结果
+* 3、将结果赋值给变量c
+*/
+
 ```
-从0开始做加法，加到什么时候总和是小于100的
-```js
-var sum = 0;
-for(var i = 0; i < 100; i++){
-    sum += i;
-    
-    if(sum > 100){
-        break;
-    }
-    console.log(i, sum);
-}
+2. `+` 加
+`+`分为两种：数学运算、字符串拼接。    
+数学运算:
+```javascript
+var a = 1;
+    b = 2,
+    c;
+c = a + b;
+console.log(c);  // 3
 ```
-100以内的数跳过可以被7整除，或个位数是7的数
-```js
-for(var i = 0; i <= 100; i++){
-    if(i % 7 == 0 || i % 10 == 7){
-        continue;
-    }
-    console.log(i);
-}
+字符串拼接: 任何数据类型的值 + 字符串都是字符串
+```javascript
+c = 1 + 'str'; // 1str
+c = 'str' + undefined; // strundefined
+c = 'str' + null; // strnull
+c = 'str' + NaN; // strNaN
+c = 'str' + 1 + 1;  // str11
+c = 1 + 1 + 'str' + ( 1 + 1 ); // 2str2 自左向右
 ```
-打印0-99的数，（）只能有一句，不能写比较，{}不能出现i++或i--
-```js
-var i = 100;
-for(; i--;){
-    console.log(i);
-}
-```
-10的n次方
-```js
-var n = 5;
-var num = 1;
-for(var i = 0; i < n; i++){
-    num *= 10;
-}
-console.log(num);
-```
-n的阶乘
-```js
-var n = 5;
-var res = 1;
-for(var i = 1; i <= 5; i++){
-    res *= i;
-} 
-console.log(res);
-```
-789打印出字符串987
-```js
-var num = 789;
-var a = num % 10;
-var b = (num - a) % 100 /10;
-var c = (num - a - b * 10) / 100;
-console.log(''+ a + b + c);
-```
-打印三个数中的最大数
+3. `/` 除法
 ```js
 var a = 1,
     b = 2,
-    c = 3;
-if(a > b){
-    if(a > c){
-        console.log(a);
-    }else {
-        console.log(c);
-    }
-}else{
-    if(b > c){
-        console.log(b);
-    }else{
-        console.log(c);
-    }
-}
-```
-打印100以内的质数（仅能被1和自己整除的数）
-```js
-var c = 0;
-for(var i = 2; i < 100; i++){
-    for(var j = 1; j <= i; j++){
-        if(i % j == 0 ){
-            c++;
-        }
-    }
-    if(c == 2){
-        console.log(i);
-    }
+    c;
 
-    c = 0;
-}
-```
-## typeof
-number string boolean function undefined    
-object = 引用类型
-```js
-console.log(a);// 报错
-console.log(typeof(a)); // undefined
-console.log(typeof(typeof(a))); // string
-```
-typeof(typeof(...))一定是string
+c = 0 / 0; // NaN -> not a Number 非数  NaN是数字类型
+c = 'a' / 'b'; // NaN
+c = 1 / NaN; // NaN
 
-## 类型转换
-### 显示类型转换
-- 1. Number
-```js
-var a = '123';
-console.log(Number('123'));// 123
-console.log(Number(true));// 1
-console.log(Number(false));// 0
-console.log(Number(null));// 0
-console.log(Number(undefined));// NaN
-console.log(Number('a'));// NaN
-console.log(Number('1a'));// NaN
-console.log(Number(3.14));// 3.14
+c = 1 / 0 // Infinity 正无穷 数字类型
 ```
-- 2. parseInt 一定是和数字相关
+4. `%` 取模 取余
 ```js
-var a = '123';
-console.log(parseInt('123'));// 123
-console.log(parseInt(true));// NaN
-console.log(parseInt(false));// NaN
-console.log(parseInt(null));// NaN
-console.log(parseInt(undefined));// NaN
-console.log(parseInt(3.14)); // 3
-console.log(parseInt('abc123')); // NaN
-console.log(parseInt('123abc')); // 123
-console.log(parseInt('3.99')); // 3 不会四舍五入
+console.log( 4 % 6); // 4
+console.log( 0 % 6); // 0
 ```
-parseInt(a, radix) radix基数
-- parsFloat
+### 2. 交换值
 ```js
-console.log(parseFloat('3.1465').toFixed(2)); // 3.15 四舍五入
-```
-- String/toString
-```js
-console.log(String(123)); // '123'
-```
-### 隐式类型转换
-```js
-var a = '123'; // Number(a)
-a++;
-console.log(a); // 124
-/*************************/
-var a = 'a' + 1; // String(1)
-console.log(a);// a1
-/*************************/
-var a = '1' * 2; // * / - % str->number
-console.log(a); // 2
-/*************************/
-var a = '1' > 2; // number > < >= <=
-console.log(a); // false
-var b = 'a' > 'b'; // ASCII码
-console.log(b); // false
-/*************************/
-var a1 = 2 > 1 > 3; // 2 > 1 => true => 1, 1 > 3 => false
-var a2 = 2 > 1 == 1; // 2 > 1=> true => 1, 1 == 1 => true
-console.log(a1, a2);// false, true
-/*************************/
-var a1 = undefined > 0; //
-var a2 = null > 0;
-console.log(a1, a2); // false, false
-/*************************/
-console.log(undefined == null); // true
-console.log(undefined === null); // false
-/*************************/
-```
-isNaN方法
-```js
-console.log(isNaN(NaN));// true
-console.log(isNaN(123)));// false
-console.log(isNaN('a')));// true
-console.log(isNaN(null)));// true
-console.log(isNaN(undefined)); // true
-```
- Number(值) -> NaN -> bool
+var a = 1,
+    b = 2;
+// a b的值交换
 
-## 练习
-1. 斐波那契数列
-```js
-var n = parseInt(window.prompt('请输入第几位'));
-    if(n <=0){
-        console.log('输入错误');
-    }else{
-        var n1 = 1, 
-        n2 = 2,
-        n3;
-        if(n <= 2){
-            console.log(1)
-        }else{
-            for(var i = 2; i < n; i++){
-                n3 = n1 + n2;
-                n1 = n2;
-                n2 = n3;
-            }
-            console.log(n3);
-        }
-    }
+// 方法一
+var c = a;
+    a = b;
+    b = c;
+
+// 方法二
+a = a + b; // a = 3
+b = a - b; // 3 - 2 = 1
+a = a - b; // 3 - 1 = 2
 ```
+### 3. `++`、`--`
+```js
+// var a = 1; a = a + 1 => a++
+var a = 1;
+console.log(a++); // 1
+// a++ 先参与计算，再自身加1
+// ++a 先自身加1，再参与运算
+
+var a = 5
+    b;
+
+b = a++ + 1 
+console.log(b, a) // 6 6
+
+b = ++a + 1 
+console.log(b, a) // 7 6 
+
+b = a-- + --a // b = --a + a--
+console.log(b, a) // 8 3
+
+b = --a + --a  // 4 + 3
+console.log(b, a) // 7 3
+
+b = --a + a++  // 4 + 4
+console.log(b, a) // 8 5 
+```
+### 4. 比较运算符
+<、>、>=、<=、 ==、 ===、 !=、 !==
+
+1. `number`遇到`string`, `string -> number`
+```javascript
+var bool = 1 > '2';
+console.log(bool); // false
+```
+2. `string` 遇到`string`
+字符串相对应的`ASCII`码（字符相对应的十进制代码），多个字符的，从左向右一次对比，直到比较出`ASCII`码的大小为止
+```javascript
+var bool = '4.5' > '11'; // true
+```
+2. 相等是不看数据类型，全等是需要看数据类型是否相等
+```javascript
+var bool = 1 == '1' ; // true
+var bool = 1 === '1'; // false
+```
+3. `NaN`与包括自己在内任何东西都不相等
+```javascript
+var bool = NaN == NaN ; // false
+```
+  
+### 5. 逻辑运算符
+与`&&`、或`||`、非`!`   
+六个假值：`undefined`, `null`, `NaN`, `0`, `""`, `false`
+
+```js
+console.log(1 && 2) // 2
+console.log(1 && 2 && undifined && 10) // undefined
+console.log(1 || 2) // 1
+console.log(0 || null || 2 || 0) // 2
+```
+- `&&`
+遇到真就往后走，遇到假或走到最后就返回当前的值
+- `||`
+遇到假就往后走，遇到真或者走到最后就返回当前的值
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

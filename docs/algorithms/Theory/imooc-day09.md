@@ -68,7 +68,6 @@ JS 执行时代码中的变量
 堆，虽然逻辑上是二叉树，但实际上它使用数组来存储的。
 
 <img :src="$withBase('/algorithms/Theory/堆.webp')" alt="堆" />
-![](./img/堆.webp)
 
 ```js
 // 上图是一个堆（从小到大），可以用数组表示
