@@ -24,7 +24,7 @@ title: 括号匹配
 
 ## 逻辑结构和物理结构
 
-栈和数组有什么区别？—— 没有可比性，两者不一个级别。就像：房子和石头有什么区别？
+栈和数组有什么区别？—— 没有可比性，两者不是一个级别。就像：房子和石头有什么区别？
 
 栈是一种逻辑结构，一种理论模型，它可以脱离编程语言单独讲。<br>
 数组是一种物理结构，代码的实现，不同的语言，数组语法是不一样的。
@@ -52,7 +52,7 @@ title: 括号匹配
 
 
 ## 源码
-match-brackets.ts
+### match-brackets.ts
 ```typescript
 /**
  * @description 括号匹配
@@ -111,7 +111,7 @@ const str = '{a(b[c]d)e}f';
 console.info(matchBracket(str));
 ```
 
-match-brackets.test.ts
+### match-brackets.test.ts
 ```typescript
 /**
  * @description 括号匹配
@@ -145,6 +145,6 @@ describe('括号匹配', ()=>{
     })
 })
 ```
-运行命令：npx jest src/01-algorithm/match-bracket.test.ts    
+运行命令：`npx jest src/01-algorithm/match-bracket.test.ts `   
 结果：
  <img :src="$withBase('/algorithms/Theory/match-bracket.png')" alt="match-bracket" />

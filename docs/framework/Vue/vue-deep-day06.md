@@ -1,136 +1,142 @@
 ---
-autoGroup-2: Vue
+autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: methods
+title: 【MVVM专题】认识和实现MVVM轮子（1）
 ---
 
-## methods
-向组件实例添加方法
-```javascript
-var app = Vue.createApp({
-    data() {
-        return {
-            title: 'This is my title'
-        }
-    },
-    template: `
-        <h1>{{ title }}</h1>
-        <h2>{{ yourTitle() }}</h2>
-        <button @click="changeTitle('This is your title')">CHNAGE TITLE</button>
-    `,
-    methods: {
-        /**
-         * 1. Vue创建实例时，会自动为methods绑定当前实例this
-         *    保证在事件监听时，回调始终指向当前组件实例。
-         *    方法要避免使用箭头函数，箭头函数会阻止Vue正确绑定组件实例this
-         */
+## 准备工作与目录结构
+1. 安装vite：yarn add vite   
+2. 修改package.json 
+```json
+"scripts": {
+    "dev": "vite"
+},
+```
+3. 创建index.html与文件夹src
 
-        /**
-         * @click="changeTitle('This is your title')"
-         * 
-         * 函数名 + () 不是执行符号，传入实参的容器
-         * 
-         * onclick = "() => changeTitle('This is your title')"
-         * 
-         * onclick = { () => changeTitle('This is your title') }
-         * onclick = { changeTitle.bind(this, 'This is your title') }
-         * 
-         */
-        changeTitle(title) {
-            this.title = title
-        },
-        /**
-         * 模板直接调用的方法尽量避免副作用操作
-         * 更改数据、异步操作等
-         * 
-         */
 
-        yourTitle() {
-            return 'This is your title'
-        }
-    }
-})
-
-const vm = app.mount('#app');
-
-// 实例中直接挂载methods中的每一个方法
-console.log(vm);
+文件目录结构
+```powershell
+│   index.html
+│   package.json
+│   yarn.lock
+│
+├───MVVM
+│   │   index.js
+│   │   render.js                 useDOM
+│   │
+│   ├───compiler                  编译模板template
+│   │       event.js              处理事件
+│   │       state.js              处理template中的{{}}
+│   │
+│   ├───reactive                  响应式数据
+│   │       index.js              数据代理
+│   │       mutableHandler.js     Proxy代理处理函数
+│   │
+│   └───shared
+│           utils.js              工具函数
+│
+└───src
+        App.js
 ```
 
-## 实例方法挂载实现
+## MVC缺点
+驱动被MVC分离成三部分，跟我们普通的 M V的逻辑混合在一起了。   
+MVVM: 实现驱动VM -> 叫ViewModel。帮我们干什么呢？<br> M层 -> Model  数据保存和处理的层，里面保存了data还有协议处理的问题，也就是逻辑，事件处理函数。<br>V层 -> 视图。<br>也就是VM想做的事情就是，Vue想改变数据，通过VM，M要驱动视图的更新也要经过VM。<br>Model -> Data Bindings（数据绑定） -> View <br>View -> DOM Listeners -> Model
+
+## 主函数
+### useDOM函数
+创建一个应用。App()返回HTML完整的模板，放到app里面去。
 ```javascript
-var Vue = (function() {
-
-    function Vue(options) {
-        this.$data = options.data();
-        this._methods = options.methods;
-
-
-        this._init(this);
-    }
-
-    Vue.prototype._init = function(vm) {
-        initData(vm);
-        initMethods(vm);
-    }
-
-    function initData(vm) {
-        for (var key in vm.$data) {
-            (function(k) {
-                Object.defineProperty(vm, k, {
-                    get: function() {
-                        return vm.$data[k];
-                    },
-                    set: function(newValue) {
-                        vm.$data[k] = newValue
-                    }
-                })
-            })(key)
-        }
-    }
-
-    function initMethods(vm) {
-        for (var key in vm._methods) {
-            vm[key] = vm._methods[key]
-        }
-    }
-
-    return Vue;
-})();
-
-var vm = new Vue({
-    data() {
-        return {
-            a: 1,
-            b: 2
-        }
-    },
-    methods: {
-        increaseA(num) {
-            this.a += num;
-        },
-        increaseB(num) {
-            this.b += num;
-        },
-        getTotal() {
-            console.log(this.a + this.b);
-        }
-    }
-})
-
-console.log(vm); // $data和所有的方法都放在实例上
-
-vm.increaseA(1);
-vm.increaseA(1);
-vm.increaseA(1);
-vm.increaseA(1);
-// a 5
-
-vm.increaseB(2);
-vm.increaseB(2);
-vm.increaseB(2);
-vm.increaseB(2);
-// b 10
-
-vm.getTotal(); // 15
+useDOM(
+    App(), // template, state, methods 返回完整的模板
+    document.querySelector("#app") // 挂载到app
+);
 ```
+
+### App函数
+返回一个对像
+```javascript
+{ 
+    template, 
+    methods, 
+    state
+}
+```
+
+## 响应式数据
+useReactive创建响应式数据。
+```javascript
+const state = useReactive({
+    count: 0,
+    name: "XiaYe",
+});
+```
+数据代理，对useReactive中传入的对象进行代理，目标：
+- 第一点用state能直接访问到count。
+- 第二点就是在我更新的时候，我希望视图帮我更新。
+
+
+### reactive/index.js
+```javascript
+import { mutableHandler } from "./mutableHandler.js";
+
+export function useReactive(target) {
+  return createReactObject(target, mutableHandler);
+}
+
+/**
+ * 数据代理
+ * @param target
+ * @param baseHandler Proxy里面需要的get set 需要单独定义
+ * @returns {*}
+ */
+function createReactObject(target, baseHandler) {
+  // 判断target是不是对象，不是一个对象，return它本身
+  if (!isObject(target)) {
+    return target;
+  }
+
+  return new Proxy(target, baseHandler);
+}
+```
+
+### reactive/mutableHandler.js
+```javascript
+/**
+ * createGetter() 和 createSetter()执行后返回函数
+ */
+const get = createGetter(),
+  set = createSetter();
+
+function createGetter() {
+  return function get(target, key, receiver) {
+    // ...
+  };
+}
+
+function createSetter() {
+  return function set(target, key, value, receiver) {
+    // ...
+  };
+}
+
+/**
+ * get set是两个函数
+ */
+const mutableHandler = {
+  get,
+  set,
+};
+
+export { mutableHandler };
+```
+为什么把Proxy分开写？<br>
+因为mutableHandler里面扩展的业务非常多的，单独的写一个文件好扩展。get，set为什么返回一个函数？因为在createGetter return之前可能要做很多事情，里面还传递很多参数，还需要一些函数。
+
+## 模板编译
+compiler
+- event.js
+- state.js
+
+

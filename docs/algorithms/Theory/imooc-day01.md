@@ -4,11 +4,9 @@ sidebarDepth: 3
 title: 前端面试技能拼图1：数据结构和算法（上）
 ---
 
-
 ## 考察重点
-- 算法复杂度：空间，事件
+- 算法复杂度：空间，时间
 - 算法思维：贪心、二分、动态规划
-- 常见数据结构：
 
 ## 注意事项
 - 本章有点难度（大厂面试标准），要耐心学习
@@ -24,13 +22,85 @@ title: 前端面试技能拼图1：数据结构和算法（上）
 题目2：快速排序
 - 用JavaScript实现快速排序，并说明时间复杂度
 
-题目3：拍段字符串是否是括号匹配
+题目3：判断字符串是否是括号匹配
 - 一个字符串s可能包含{}()[]三种括号
 - 判断s是否是括号匹配的
 - 如(a{b}c)匹配，而{a(b或{a(b}c)就不匹配
 
 题目4：反转单向链表
 - 输入一个单向链表，输出它的反转（头变尾，尾变头）
+
+## 常见数据结构
+
+前端开发中常见的数据结构
+
+### 栈 Stack
+
+栈 Stack 是一种“先进后出”的数据结构。
+
+<img :src="$withBase('/algorithms/Theory/栈.png')" alt="栈" />
+
+```js
+// 数组实现 栈
+const stack = []
+stack.push(100) // 压栈
+stack.pop() // 出栈
+```
+
+### 队列 Queue
+
+队列 Queue 是一种“先进先出”的数据结构。
+
+<img :src="$withBase('/algorithms/Theory/队列.png')" alt="队列" />
+
+```js
+// 数组实现 队列
+const queue = []
+queue.push(100) // 入队
+queue.shift() // 出队
+```
+
+### 链表 Linked list
+
+链表不是连续的数据结构，而是由一系列的节点组成，节点之间通过指针连接。
+<img :src="$withBase('/algorithms/Theory/链表.png')" alt="链表" />
+
+```ts
+// 链表节点的数据结构
+interface IListNode {
+    data: any
+    next: IListNode | null
+}
+```
+
+### 树 Tree
+
+树，是一种有序的层级结构。每个节点下面可以有若干个子节点。例如常见的 DOM 树。
+<img :src="$withBase('/algorithms/Theory/dom-tree.png')" alt="dom-tree" />
+
+```ts
+// 树节点的数据结构
+interface ITreeNode {
+    data: any
+    children: ITreeNode[] | null
+}
+```
+
+### 二叉树 Binary Tree
+
+二叉树，首先它是一棵树，其次它的每个节点，最多有两个子节点，分别为 `left` 和 `right`
+
+<img :src="$withBase('/algorithms/Theory/二叉搜索树.png')" alt="二叉搜索树" />
+
+```ts
+// 二叉树节点的数据结构
+interface IBinaryTreeNode {
+    data: any
+    left: IBinaryTreeNode | null
+    right: IBinaryTreeNode | null
+}
+```
+
 
 ## 算法复杂度
 什么是复杂度?
@@ -46,14 +116,34 @@ title: 前端面试技能拼图1：数据结构和算法（上）
 - `O(n)` `O(2 * n)` 其实都是 `O(n)`
 
 常见的时间复杂度
-- `O(1)` 无循环
-- `O(n)` 单次循环
-- `O(logn)` 二分法
+- `O(1)` 无循环。
+- `O(logn)` 二分法。
+- `O(n)`单次循环。
 - `O(n*logn)` 单次循环 & 二分法
 - `O(n^2)` 嵌套循环
 
 <img :src="$withBase('/algorithms/Theory/时间复杂度.png')" alt="时间复杂度" />
 
+### O(1)
+
+代码就是平铺直叙的执行，没有任何循环。
+
+### O(logn)
+
+有循环，但其中使用了二分法，例如：二分查找算法<br>
+二分法是非常重要的算法思维，它可以极大的减少复杂度，而且计算量越大、减少的越明显。可以看看本文上面的图。
+
+### O(n)
+
+普通的循环。
+
+### O(n*logn)
+
+嵌套循环，一层是普通循环，一层有二分算法。例如：快速排序算法。
+
+### O(n^2)
+
+两个普通循环的嵌套，例如常见的冒泡排序。
 
 ```javascript
 function fn(obj = {}) {

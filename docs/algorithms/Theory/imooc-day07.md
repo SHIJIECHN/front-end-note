@@ -119,7 +119,7 @@ export function findTwoNumbers2(arr: number[], n: number): number[]{
             // 相等
             res.push(n1);
             res.push(n2);
-            break;
+            break; // 终止循环，一定要写
         }
     }
 
