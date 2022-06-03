@@ -1,7 +1,7 @@
 ---
 autoGroup-1: ECMAScript
 sidebarDepth: 3
-title: 语法、规范、错误、运算符
+title: 2.语法、规范、错误、运算符
 ---
 
 ## 语法、规范
@@ -49,7 +49,7 @@ Uncaught ReferenceError: a is not defined
 
 ## 运算符
 ### 1. 运算符：+ - * / %
-1. ()括号运算符 > 普通运算 > 赋值
+1). ()括号运算符 > 普通运算 > 赋值
 ```js
 // 数字运算符
 var a = 1,
@@ -63,8 +63,7 @@ var c = (a + b) * d
 */
 
 ```
-2. `+` 加
-`+`分为两种：数学运算、字符串拼接。    
+2). `+` 加分为两种：数学运算、字符串拼接。    
 数学运算:
 ```javascript
 var a = 1;
@@ -82,7 +81,7 @@ c = 'str' + NaN; // strNaN
 c = 'str' + 1 + 1;  // str11
 c = 1 + 1 + 'str' + ( 1 + 1 ); // 2str2 自左向右
 ```
-3. `/` 除法
+3). `/` 除法
 ```js
 var a = 1,
     b = 2,
@@ -94,7 +93,7 @@ c = 1 / NaN; // NaN
 
 c = 1 / 0 // Infinity 正无穷 数字类型
 ```
-4. `%` 取模 取余
+4). `%` 取模 取余
 ```js
 console.log( 4 % 6); // 4
 console.log( 0 % 6); // 0
@@ -144,22 +143,22 @@ console.log(b, a) // 8 5
 ### 4. 比较运算符
 <、>、>=、<=、 ==、 ===、 !=、 !==
 
-1. `number`遇到`string`, `string -> number`
+1). `number`遇到`string`, `string -> number`
 ```javascript
 var bool = 1 > '2';
 console.log(bool); // false
 ```
-2. `string` 遇到`string`
-字符串相对应的`ASCII`码（字符相对应的十进制代码），多个字符的，从左向右一次对比，直到比较出`ASCII`码的大小为止
+2). `string` 遇到`string`
+字符串相对应的`ASCII`码（字符相对应的十进制代码），多个字符的，从左向右依次对比，直到比较出`ASCII`码的大小为止
 ```javascript
 var bool = '4.5' > '11'; // true
 ```
-2. 相等是不看数据类型，全等是需要看数据类型是否相等
+3). 相等是不看数据类型，全等是需要看数据类型是否相等
 ```javascript
 var bool = 1 == '1' ; // true
 var bool = 1 === '1'; // false
 ```
-3. `NaN`与包括自己在内任何东西都不相等
+4). `NaN`与包括自己在内任何东西都不相等
 ```javascript
 var bool = NaN == NaN ; // false
 ```

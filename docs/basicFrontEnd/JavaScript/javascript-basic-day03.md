@@ -1,14 +1,14 @@
 ---
 autoGroup-1: ECMAScript
 sidebarDepth: 3
-title: 循环、引用值初识、显示及隐式类型转换
+title: 3.循环、引用值初识、显示及隐式类型转换
 ---
 
 ## 循环
 在JavaScript中有两种常用的循环：for循环与while循环。下文分别讨论这两个循环.
 ### 1. for循环
 ```js
-for(var i = 0; i < 100; i++){
+for(var i = 0; i < 10; i++){
     console.log(i)
 } 
 
@@ -19,7 +19,7 @@ for(var i = 0; i < 100; i++){
         console.log(i)
     }
 3、i++
-4、if(i < 10){  不满足条件 停止循环
+4、当i=10，if(i < 10){  不满足条件 停止循环
         console.log(i)
     }
 */
@@ -210,7 +210,7 @@ console.log(person);
 ```
 
 ### 3. typeof
-number string boolean function undefined    
+number string boolean undefined object function    
 ```js
 console.log(typeof(123)); // number
 console.log(typeof(true)); // boolean
@@ -269,7 +269,9 @@ console.log(parseInt(11, 2)); // 3
 ```js
 // toFiexd()：转小数保留两位，四舍五入
 console.log(parseFloat('3.1465').toFixed(2)); // 3.15 四舍五入
-
+```
+### 4. String/toString
+```js
 // String()：把对象的值转为字符串
 console.log(String(123)); // '123'
 
@@ -290,15 +292,11 @@ console.log(parseInt(100, 2).toString(16));// 4
 console.log(Boolean(1)); // true
 console.log(Boolean(null)); // false
 ```
-- String/toString
-```js
-
-```
-### 4. 隐式类型转换
+### 5. 隐式类型转换
 1. 转成string：+ （字符串拼接）
 2. 转成number：++/--(自增自减运算符) + - * / %(算术运算符) > < >= <= == != !=== (关系运算符) 字符串类型都会转换为number
 3. 转成boolean：！（逻辑非运算符）
-4. undefined， null即不大于0，也不小于，也不等于0
+4. undefined， null：既不大于0，也不小于，也不等于0
 ```js
 var a = '123'; // Number(a)
 a++;
@@ -320,7 +318,7 @@ var a1 = 2 > 1 > 3; // 2 > 1 => true => 1, 1 > 3 => false
 var a2 = 2 > 1 == 1; // 2 > 1=> true => 1, 1 == 1 => true
 console.log(a1, a2);// false, true
 
-var a1 = undefined > 0; //
+var a1 = undefined > 0; 
 var a2 = null > 0;
 console.log(a1, a2); // false, false
 
@@ -330,7 +328,7 @@ console.log(undefined === null); // false
 var num = '123'
 console.log(+num); // 123 正负号 转Number类型
 ```
-### 5. isNaN方法
+### 6. isNaN方法
 ```js
 console.log(isNaN(NaN));// true
 console.log(isNaN(123)));// false
@@ -340,9 +338,9 @@ console.log(isNaN(undefined)); // true
 ```
  Number(值) -> NaN -> bool
 
-### 6. 复杂数据类型的隐式转换
-先使用valueOf方法获取其原始值，如果原始值不是number类型，则使用toString方法转成string，再将string转成number计算。
-数组：将数组转成string，在和右边的string比较
+### 7. 复杂数据类型的隐式转换
+先使用valueOf方法获取其原始值，如果原始值不是number类型，则使用toString方法转成string，再将string转成number计算。  
+数组：将数组转成string，再和右边的string比较
 ```javascript
 console.log([] == 0); // true  
 // [].valueOf().toString() -> '' ==> Number('') -> 0
