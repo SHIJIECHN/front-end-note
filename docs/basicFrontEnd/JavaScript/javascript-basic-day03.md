@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
 title: 3.循环、引用值初识、显示及隐式类型转换
 ---

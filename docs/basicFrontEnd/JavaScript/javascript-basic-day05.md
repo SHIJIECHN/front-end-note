@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
 title: 5. 参数默认值、递归、预编译、暗示全局变量
 ---

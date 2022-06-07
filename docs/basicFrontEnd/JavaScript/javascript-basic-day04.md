@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
 title: 4. 函数基础与种类、形实参及映射、变量类型
 ---

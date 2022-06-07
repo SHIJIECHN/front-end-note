@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
 title: 2.语法、规范、错误、运算符
 ---

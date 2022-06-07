@@ -1,7 +1,7 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
-title: 发展史、ECMA、编程语言、变量、JS值
+title: 1.发展史、ECMA、编程语言、变量、JS值
 ---
 ## 目标
 - 掌握变量的声明和使用方法
