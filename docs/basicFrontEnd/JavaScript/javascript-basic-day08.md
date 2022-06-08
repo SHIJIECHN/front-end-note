@@ -274,6 +274,10 @@ function Compute(){
         console.log(res);
     }
 }
+
+var compute = new Compute();
+compute.plus(1,2,4);
+compute.times(2,3,4);
 ```
 
 2. 写一个构造车的函数，可设置车的品牌，颜色，排量。再写一个构造消费者的函数，设置用户的名字，年龄，收入，通过选车的方法实例化该用户喜欢的车，在设置车的属性。
@@ -305,5 +309,5 @@ var Tom = new User({
     }
 })
 
-Tom.choose()
+Tom.choose();
 ```
