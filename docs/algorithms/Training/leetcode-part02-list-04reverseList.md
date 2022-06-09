@@ -1,5 +1,5 @@
 ---
-autoGroup-1: Leetcode
+autoGroup-2: 链表
 sidebarDepth: 3
 title: 翻转链表
 ---

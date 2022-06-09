@@ -1,5 +1,5 @@
 ---
-autoGroup-1: Leetcode
+autoGroup-1: 数组
 sidebarDepth: 3
 title: 二分查找
 ---
