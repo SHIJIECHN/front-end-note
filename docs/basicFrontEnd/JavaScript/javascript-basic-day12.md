@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
 title: 12. 继承深入、call_apply、圣杯模式、模块化
 ---
