@@ -34,23 +34,28 @@ console.log(minSubArrayLen(7, [2, 3, 1, 2, 4, 3]))
 [力扣题目链接](https://leetcode-cn.com/problems/fruit-into-baskets/)
 ```js
 var totalFruit = function(fruits) {
+  // 创建map字典，键为数组当前元素，值为该元素索引
     const map = new Map();
-    let max = 1; // 水果个数
+    let max = 1; // 最大数量的水果个数
     let j = 0;
     for (let i = 0; i < fruits.length; i++) {
-        map.set(fruits[i], i); // fruits[i]是i位置上的水果类型
+        map.set(fruits[i], i); // 把当前水果放入map中
+        // 判断是超过两项
         if (map.size > 2) {
+          // 删除哪一项，应该删除最前面的那项，即值最小的，先创建一个最小索引值的变量
             let minIndex = fruits.length - 1;
-            // 找到较小的index
+            // 循环遍历map，各项的值和minIndex比较，取最小的去更新minIndex
             for (const [fruit, index] of map) {
                 if (index < minIndex) {
                     minIndex = index;
                 }
             }
+            // 删除map中键为fruits[minIndex]的项，也就是最前面一项
             map.delete(fruits[minIndex]);
+            // 同时需要把j移到minIndex + 1位置，用于后续计算水果数量
             j = minIndex + 1;
         }
-
+        // 计算更新max
         max = Math.max(max, i - j + 1);
     }
 
@@ -68,8 +73,8 @@ var minWindow = function(s, t){
 
   let map = new Map(); // 用来存储t中字符，以及缺失度
   let len = s.length;
-  let minLength = len + 1; // 长度最小是，初始值为s长度加1，尽量打，然后有符合的就会变更
-  let start = len + 1; // 最符合的子串的七点，开始大于s的长度，如果没有符合的，就截取到空字符串
+  let minLength = len + 1; // 长度最小是，初始值为s长度加1，尽量大，然后有符合的就会变更
+  let start = len + 1; // 最符合的子串的起点，开始大于s的长度，如果没有符合的，就截取到空字符串
   let missType = 0; // 缺失的种类
 
   for(let i = 0; i < t.length; i++){
