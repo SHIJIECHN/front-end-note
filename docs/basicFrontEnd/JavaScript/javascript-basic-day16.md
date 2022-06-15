@@ -366,7 +366,8 @@ function myTypeof(val) {
 console.log(myTypeof([]))
 ```
 
-### 3. 返回字符串中，出现第一次的字符
+### 3. 返回字出现第一次的字符
+一串随机的字符串中,找出出现次数为1次的第一个字符
 ```js
 var str = 'trueadjljdodjajbdasdskcdkkvjvkjk';
 
