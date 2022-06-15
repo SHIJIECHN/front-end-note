@@ -1,7 +1,7 @@
 ---
 autoGroup-4: Vue-Router
 sidebarDepth: 3
-title: VueRouter对象的初始化、嵌套路由
+title: 1. VueRouter对象的初始化、嵌套路由
 ---
 
 ## VueRouter对象的属性和方法

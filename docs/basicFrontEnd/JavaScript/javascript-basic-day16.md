@@ -4,7 +4,8 @@ sidebarDepth: 3
 title: 16. 数组方法、类数组
 ---
 
-## 数组方法(新数组)
+## 数组方法
+String, slice, join, split方法不会修改原数组，而是浅拷贝一份新的数组作为返回值。
 ### 1. concat
 拼接（合并）数组
 ```js
@@ -15,37 +16,80 @@ console.log(arr3); // ['a', 'b', 'c', 'd']
 ```
 
 ### 2. toString
-数组转换成字符串
+数组转换成字符串。Array对象覆盖Object的toString方法。对于数组对象，toString方法连接数组并返回一个字符串，其中包含用逗号分割的每份数组元素。
 ```js
 var arr = ['a', 'b', 'c', 'd'];
 console.log(arr.toString()); // a,b,c,d
+
+// 将数组扁平化
+console.log(Array.prototype.toString.call([[1,2], [3,[4]]])); // 1,2,3,4
+
+// join参数是分隔符：
+// 带参数的话，只能将数组扁平化一层
+console.log([1,[2,[3,4,5]]].join('-')); // 1-2,3,4,5
+
+// 不带参数的话，直接数据扁平化，默认分割
+console.log([1,[2,[3,4,5]]].join()); // 1,2,3,4,5
 ```
 
 ### 3. slice
-截取数组：[start, end)
+截取数组：[start, end)。返回一个浅拷贝了元素组中的元素的一个新数组。
 ```js
 var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
+// 省略end，截取数组元素从start开始至数组的结尾
 var arr1 = arr.slice(1); // 从下标为1的位置截取，并包含
 console.log(arr1); //['b', 'c', 'd', 'e', 'f']
 
 var arr2 = arr.slice(1, 3);
 console.log(arr2); // ['b', 'c']
 
+// start为负值的情况
 var arr3 = arr.slice(-3, 5);
 console.log(arr3); // ['d', 'e']
+
+// start和end都是负值的情况
+var arr1 = ['a', 'b', 'c', 'd', 'e', 'f'];
+var arr3 = arr1.slice(-3, -1); // ['d', 'e']
+
+// 在参数都是负数的时候，start的索引值不能比end的索引值大，否咋返回截取的数组为[]
+var arr1 = ['a', 'b', 'c', 'd', 'e', 'f'];
+var arr3 = arr1.slice(-3, -5); // []
+
+// slice的负值索引原理：负数索引值 + 数组长度
+Array.prototype.mySlice = function(index){
+    index += index >= 0 ? 0 : this.length;
+}
+
+// 类数组转换为数组对象
+function list(){
+    return Array.prototype.slice.call(arguments);
+}
+var arr = list(1,2,3); // [1,2,3]
+
+function list(){
+    return [].slice.call(arguments);
+}
+var arr = list(1,2,3); // [1,2,3]
 ```
 
-### 4. join和split
-1. join就是把数组中的所有元素放入一个字符串中，参数就是元素的分隔符。
-2. split分隔字符串。split(a,b) a是分隔符，b是分隔的位数
+### 4. join
+1. join就是把数组中的所有元素放入一个字符串中，参数就是元素的分隔符。如果一个元素是undefined或null，它被转换为空字符串。
+2. 参数：如果忽略，则用逗号分隔；如果是空字符串("")，则所有元素中间没有任何字符
+
 ```js
 var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
-var str1 = arr.join(); // 不传参数等同于toString()方法
-console.log(str1); // a,b,c,d,e,f
+var str1 = arr.join(); // a,b,c,d,e,f 不传参数等同于toString()
+var str2 = arr.join('-');//a-b-c-d-e-f
+var str3 = arr.join(""); // abcdef
 
-var str2 = arr.join('-');
-console.log(str2); //a-b-c-d-e-f
+var arr2 = ['a', undefined, 'b', null];
+var str4 = arr2.join(''); // ab
+```
 
+### 5. split
+split分隔字符串。split(a,b) a是分隔符，b是分隔的位数即新数组返回的长度。
+```javascript
+var str2 = 'a-b-c-d-e-f';
 var arr1 = str2.split('-');
 console.log(arr1); // ['a', 'b', 'c', 'd', 'e', 'f']
 
@@ -54,11 +98,27 @@ console.log(arr2); // ['a', 'b', 'c']
 ```
 
 ## 类数组
+类数组又叫做类数组对象，不仅具有数组的性质，还具有对象的性质。理论上是对象，有length属性，拥有属性从0开始连续的属性集合，类似数组的对象。
+
+### 1. arguments
 ```js
 function test() {
     console.log(arguments);
 }
 test(1, 2, 3, 4, 5, 6)
+/**
+实际参数列表也是类数组对象
+Arguments: [
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 6,
+    length: 6,
+    __proto__: Object.prototype
+]
+*/
 
 var arr = [1,2,3,4,5,6];
 console.log(arr); 
@@ -67,8 +127,9 @@ console.log(arr);
 - 类数组其实是对象，只是有length属性。
 - 类数组的__proto__是Object.prototype，数组的__proto__是Array.prototype。
 
-模拟类数组
+### 2. 将对象转为类数组对象
 ```js
+// 按照数组的方式进行构造数组对象
 var obj = {
     '0': 1,
     '1': 2,
@@ -78,10 +139,12 @@ var obj = {
     '5': 6,
     'length': 6
 }
-console.log(obj); // {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, length: 6}
+console.log(obj); // {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, length: 6} 很显然不像数组的形式
 ```
 此时obj最外层是{}，而想变成[]，只需要给对象添加splice属性。
 ```js
+// obj从Array.prototype上继承Array.prototype.splice方法，
+// 将对象变成数组的形式
 var obj = {
     '0': 1,
     '1': 2,
@@ -92,20 +155,41 @@ var obj = {
     'length': 6,
     'splice': Array.prototype.splice
 }
-console.log(obj); // [1, 2, 3, 4, 5, 6, splice: ƒ]
+console.log(obj); // [1, 2, 3, 4, 5, 6, splice: ƒ] 
+// 既然成为类数组对象了，那么有数组的方法吗？
+console.log(obj.push(6)); // obj.push not is function 报错
 ```
-现在可以通过继承数组的方法，使用数组方法。
+通过继承数组的方法，使用数组方法。
 ```js
+var obj = {
+	'0':1,
+  '1':2,
+  '2':3,
+  '3':4,
+  '4':5,
+  length:5,
+  'splice':Array.prototype.splice,
+  'push':Array.prototype.push
+}
+obj.push(6);
+console.log(obj); // Object [1, 2, 3, 4, 5, 6, splice: ƒ, push: ƒ]
+
+// 通过prototype添加属性，有length属性的对象都会变成类数组对象的形式
+Object.prototype.splice = Array.prototype.splice;
 Object.prototype.push = Array.prototype.push;
+var obj = {
+    length: 2
+}
+cosnole.log(obj); // Object [empty x 2] 具有稀松数组的特性
 ```
-push方法的实现
+Array.prototype.push()方法在类数组对象的实现
 ```js
 Array.prototype.push = function(elem){
     this[this.length] = elem;
     this.length++
 }
 ```
-例一
+#### 例一
 ```js
 var obj = {
     '2': 3,
@@ -129,11 +213,24 @@ console.log(obj);
 分析：
 执行`push`后，即
 ```js
-obj[2] = 1;
-obj[3] = 2;
+obj[2] = 1; obj.length++
+obj[3] = 2; obj.length++
 ```
-此时的index 2和3分别变成了1、2，length变成4，而index 0和1 还是空的。   
-例二
+此时的index 2和3分别变成了1、2，length变成4，而index 0和1 还是空的。  
+```javascript
+var obj = {
+  	'0':empty,
+    '1':empty,
+    '2':1,
+    '3':2,
+    length:4,
+    'splice':Array.protoype.splice,
+    'push':Array.prototype.push
+}
+```
+
+#### 例二
+类数组对象既有数组的特性又有对象特性。
 ```js
 var person = {
     '0': '张小一',
@@ -159,7 +256,8 @@ for (var key in person) {
     }
 }
 ```
-类数组一定是有数组形式下标对应的属性值，而且必须有length属性。   
+类数组一定是有数组形式下标对应的属性值，而且必须有length属性。  
+
 类数组转换成数组：
 ```js
 Array.prototype.slice.call(arguments)
@@ -172,14 +270,25 @@ var arr = [0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 'a', 'a'];
 Array.prototype.unique = function() {
     var temp = {},
         newArr = [];
+    for (var i = 0; i < this.length; i++) {
+        
+        if (!temp[this[i]]) {
+            temp[this[i]] = this[i];
+            newArr.push(this[i]);
+        }
+    }
+    return newArr;
+}
+console.log(arr.unique());
+
+// 无法过滤0
+/******************************************/
+var arr = [1, 1, 2, 3, 2, 3, '1', undefined, 'undefined', undefined];
+Array.prototype.unique = function() {
+    var temp = {},
+        newArr = [];
 
     for (var i = 0; i < this.length; i++) {
-        // 无法过滤0
-        // if (!temp[this[i]]) {
-        //     temp[this[i]] = this[i];
-        //     newArr.push(this[i]);
-        // }
-
         if (!temp.hasOwnProperty(this[i])) {
             temp[this[i]] = this[i];
             newArr.push(this[i]);
@@ -188,6 +297,24 @@ Array.prototype.unique = function() {
     return newArr;
 }
 console.log(arr.unique());
+
+// 上述只能解决数字类型的数值,对于其他类型的数据并不能解决
+/*******************************************/
+var arr = [1, 3, 2, 3, undefined, 'undefined', undefined, NaN, NaN, null, null, 'null'];
+Array.prototype.unique = function(){
+    for(var i = 0; i < this.length - 1; i++){
+        for(var j = i; j < this.length; j++){
+            if(this[i] === this[j]){
+                this.splice(i, 1);
+            }else if(this[i]+ '' === 'NaN' && this[j]+'' === 'NaN'){
+                this.splice(i, 1);
+            }
+        }
+    }
+    return this;
+}
+arr.unqiue();
+console.log(arr); // [1, 2, 3, 'undefined', undefined, NaN, null, 'null']
 ```
 字符串去重
 ```js
@@ -210,7 +337,7 @@ console.log(str.unique())
 ```
 
 ### 2. 封装typeof方法
-   返回值：undefined, boolean, number, string, null, function, array, object, object-number, object-boolean, object-string
+返回值：undefined, boolean, number, string, null, function, array, object, object-number, object-boolean, object-string
 ```js
 /**
  * typeof 返回 number string boolean object function undefined -> String
@@ -238,6 +365,7 @@ function myTypeof(val) {
 }
 console.log(myTypeof([]))
 ```
+
 ### 3. 返回字符串中，出现第一次的字符
 ```js
 var str = 'trueadjljdodjajbdasdskcdkkvjvkjk';
@@ -263,6 +391,38 @@ function test(str) {
 console.log(test(str));
 ```
 
+### 4. 类数组转为数组的方法
+for循环 splice concat slice方法实现
+```javascript
+// for循环实现类数组转为数组
+function fn() {
+  var newArr = [];
+  for(var i = 0; i < arguments.length; i++) {
+  	newArr.push(arguments[i]);
+  }
+  return newArr;
+}
+var newArr = fn(1, 2, 3, 4);
+console.log(newArr); // [1, 2, 3, 4]
+
+// splice实现类数组转为数组
+function fn() {
+	return Array.prototype.splice.call(arguments,0,arguments.length);
+}
+console.log(fn(1, 2, 3, 4)); // [1, 2, 3, 4]
+
+// slice实现类数组转为数组
+function fn() {
+	return Array.prototype.slice.call(arguments); // [1, 2, 3, 4]
+}
+console.log(fn(1, 2, 3, 4));
+
+// concat实现类数组转为数组
+function fn() {
+	return Array.prototype.concat.apply([], arguments);
+}
+console.log(fn(1, 2, 3, 4)); // [1, 2, 3, 4]
+```
 
 
 
