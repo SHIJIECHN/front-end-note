@@ -253,7 +253,7 @@ function test(){
 }
 test();
 ```
-### 5. 例五
+### 5. 例五：原型方法
 ```js
 var bar = {
     a: '1'
