@@ -1,7 +1,7 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
-title: 15. 深拷贝实例、数组基础、数组方法、数组排序
+title: 15. 数组基础、数组方法、数组排序
 ---
 ## 数组基础
 ### 1. 声明数组的三种方式
@@ -128,22 +128,22 @@ arr.splice(开始项的下标，剪切长度，剪切以后最后一位开始添
 ```js
 // 两个参数： 删除数组
 var arr1 = ['a', 'b', 'c'];
-arr1.splice(1, 2);
+arr1.splice(1, 2); // 下标为1开始剪切，剪切2位
 console.log(arr1); // a
 
 // 第三个参数
 var arr2 = ['a', 'b', 'c', 'd']
-arr2.splice(1, 2, 1, 2, 3);
+arr2.splice(1, 2, 1, 2, 3); // 下标为1开始剪切，剪切2位，然后再拼接1,2,3
 console.log(arr2); // ['a', 1, 2, 3, 'd']
 
 // 添加元素
 var arr3 = ['a', 'b', 'c', 'e'];
-arr3.splice(3, 0, 'd')
+arr3.splice(3, 0, 'd'); // 下标为3的位置，增加一个 d
 console.log(arr3); // ['a', 'b', 'c', 'd', 'e']
 
 // 下标为负数
 var arr4 = ['a', 'b', 'c', 'e'];
-arr4.splice(-1, 0, 'd')
+arr4.splice(-1, 0, 'd'); // 在下标为-1的位置增加 d
 console.log(arr4); // ['a', 'b', 'c', 'd', 'e']
 ```
 `splice`下标正值和负值底层原理
@@ -159,7 +159,7 @@ console.log(arr[splice(arr, -1)]); // c
 ## 数组排序
 ### 1. `sort`
 `sort()`方法：返回排序以后的数组。按照`ASCII`码表来排序的。   
-自定义`sort`排序规则：
+自定义`sort`排序规则（冒泡排列）：
 1. 参数`a`, `b`
 2. 返回值:
    1. 负值 -> `a`排在前面
@@ -201,6 +201,8 @@ console.log(arr2); // [5, 7, 27, 49]
 ### 2. 随机排序
 `Math.random()`：返回`0`到`1`的随机数。不包含`0`和`1`。返回的值大于`0.5`和小于`0.5`的概率是相同的
 ```js
+cosnole.log(Math.random()); // 0.201000891928
+
 sort(function(a, b){
     var rand = Math.random();
     if (rand - 0.5 > 0) {
@@ -214,7 +216,7 @@ sort(function(a, b){
     return Math.random() - 0.5;
 })
 ```
-数组随机排序
+#### 数组随机排序
 ```js
 var arr = [1, 2, 3, 4, 5, 6];
 arr.sort(function(a, b) {
@@ -227,7 +229,7 @@ arr.sort(function(a, b) {
 })
 console.log(arr)
 ```
-根据某个属性排序
+#### 数组对象根据某个属性排序
 ```js
 var arr = [{
         son: 'Jenny',
@@ -256,167 +258,8 @@ arr.sort(function(a, b) {
 console.log(arr)
 ```
 
-## 数组方法(新数组)
-### 1. concat
-拼接数组
-```js
-var arr1 = ['a', 'b', 'c'];
-var arr2 = ['d'];
-var arr3 = arr1.concat(arr2);
-console.log(arr3); // ['a', 'b', 'c', 'd']
-```
-
-### 2. toString
-数组转换成字符串
-```js
-var arr = ['a', 'b', 'c', 'd'];
-console.log(arr.toString()); // a,b,c,d
-```
-
-### 3. slice
-截取数组：[start, end)
-```js
-var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
-var arr1 = arr.slice(1); // 从下标为1的位置截取，并包含
-console.log(arr1); //['b', 'c', 'd', 'e', 'f']
-
-var arr2 = arr.slice(1, 3);
-console.log(arr2); // ['b', 'c']
-
-var arr3 = arr.slice(-3, 5);
-console.log(arr3); // ['d', 'e']
-```
-
-### 4. join和split
-```js
-var arr = ['a', 'b', 'c', 'd', 'e', 'f'];
-var str1 = arr.join(); // 不传参数等同于toString()方法
-console.log(str1); // a,b,c,d,e,f
-
-var str2 = arr.join('-');
-console.log(str2); //a-b-c-d-e-f
-
-var arr1 = str2.split('-');
-console.log(arr1); // ['a', 'b', 'c', 'd', 'e', 'f']
-
-var arr2 = str2.split('-', 3);
-console.log(arr2); // ['a', 'b', 'c']
-```
-
-## 类数组
-```js
-function test() {
-    console.log(arguments);
-}
-test(1, 2, 3, 4, 5, 6)
-
-var arr = [1,2,3,4,5,6];
-console.log(arr); 
-```
-- 类数组没有数组方法，没有继承`Array.prototype`，但是有length属性。   
-- 类数组其实是对象，只是有length属性。
-- 类数组的__proto__是Object.prototype，数组的__proto__是Array.prototype。
-
-模拟类数组
-```js
-var obj = {
-    '0': 1,
-    '1': 2,
-    '2': 3,
-    '3': 4,
-    '4': 5,
-    '5': 6,
-    'length': 6
-}
-console.log(obj); // {0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, length: 6}
-```
-此时obj最外层是{}，而想变成[]，只需要给对象添加splice属性。
-```js
-var obj = {
-    '0': 1,
-    '1': 2,
-    '2': 3,
-    '3': 4,
-    '4': 5,
-    '5': 6,
-    'length': 6,
-    'splice': Array.prototype.splice
-}
-console.log(obj); // [1, 2, 3, 4, 5, 6, splice: ƒ]
-```
-现在可以通过继承数组的方法，使用数组方法。
-```js
-Object.prototype.push = Array.prototype.push;
-```
-push方法的实现
-```js
-Array.prototype.push = function(elem){
-    this[this.length] = elem;
-    this.length++
-}
-```
-例一
-```js
-var obj = {
-    '2': 3,
-    '3': 4,
-    'length': 2,
-    'splice': Array.prototype.splice,
-    'push': Array.prototype.push
-}
-
-obj.push(1);
-obj.push(2);
-console.log(obj);
-/**
- * obj = {
- *  2: 1,
- *  3: 2,
- *  length: 4
- * }
- */
-```
-分析：
-执行`push`后，即
-```js
-obj[2] = 1;
-obj[3] = 2;
-```
-此时的index 2和3分别变成了1、2，length变成4，而index 0和1 还是空的。   
-例二
-```js
-var person = {
-    '0': '张小一',
-    '1': '张小二',
-    '2': '张小三',
-    'name': '张三',
-    'age': 32,
-    'weight': 140,
-    'height': 180,
-    'length': 3
-}
-
-Object.prototype.splice = Array.prototype.splice;
-Object.prototype.push = Array.prototype.push;
-
-console.log(person[1]);
-console.log(person.weight);
-console.log(person.length);
-
-for (var key in person) {
-    if (person.hasOwnProperty(key)) {
-        console.log(key);
-    }
-}
-```
-类数组一定是有数组形式下标对应的属性值，而且必须有length属性。   
-类数组转换成数组：
-```js
-Array.prototype.slice.call(arguments)
-```
-
 ## 练习
-1. 用`splice`方法重写数组原型上的`unshift`方法`myUnshift`
+### 1. 用`splice`方法重写数组原型上的`unshift`方法`myUnshift`
 ```js
 // 方法一
 var arr = ['d', 'e', 'f'];
@@ -442,7 +285,7 @@ var newArr = arr.myUnshift('a', 'b', 'c');
 console.log(newArr); // ['a', 'b', 'c', 'd', 'e', 'f']
 ```
 
-2. 请按照字节数排序下列数组。  
+### 2. 请按照字节数排序下列数组。  
    arr = ['我爱你', 'OK', 'Hello', '你说WHAT', '可以']。
 ```js
 /**
@@ -466,102 +309,6 @@ arr.sort(function(a, b) {
 console.log(arr)
 ```
 
-3. 在数组原型上写去重方法unique
-```js
-var arr = [0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 'a', 'a'];
-Array.prototype.unique = function() {
-    var temp = {},
-        newArr = [];
-
-    for (var i = 0; i < this.length; i++) {
-        // 无法过滤0
-        // if (!temp[this[i]]) {
-        //     temp[this[i]] = this[i];
-        //     newArr.push(this[i]);
-        // }
-
-        if (!temp.hasOwnProperty(this[i])) {
-            temp[this[i]] = this[i];
-            newArr.push(this[i]);
-        }
-    }
-    return newArr;
-}
-console.log(arr.unique());
-```
-字符串去重
-```js
-var str = '111222000aabb';
-
-String.prototype.unique = function() {
-    var temp = {},
-        newStr = '';
-
-    for (var i = 0; i < this.length; i++) {
-        if (!temp.hasOwnProperty(this[i])) {
-            temp[this[i]] = this[i];
-            newStr += this[i];
-        }
-    }
-    return newStr
-}
-
-console.log(str.unique())
-```
-
-4. 封装typeof方法
-   返回值：undefined, boolean, number, string, null, function, array, object, object-number, object-boolean, object-string
-```js
-/**
- * typeof 返回 number string boolean object function undefined -> String
- * Object.prototype.toString.call(val);
- */
-function myTypeof(val) {
-    var type = typeof(val);
-    var toStr = Object.prototype.toString;
-    var res = {
-        '[object Array]': 'array',
-        '[object Object]': 'object',
-        '[object Number]': 'number',
-        '[object String]': 'string',
-        '[object Boolean]': 'boolean'
-    };
-
-    if (val === null) {
-        return 'null';
-    } else if (type === 'object') {
-        var ret = toStr.call(val);
-        return res[ret];
-    } else {
-        return type;
-    }
-}
-console.log(myTypeof([]))
-```
-5. 返回字符串中，出现第一次的字符
-```js
-var str = 'trueadjljdodjajbdasdskcdkkvjvkjk';
-
-function test(str) {
-    var temp = {};
-    for (var i = 0; i < str.length; i++) {
-        if (temp.hasOwnProperty(str[i])) {
-            temp[str[i]]++;
-        } else {
-            temp[str[i]] = 1;
-        }
-    }
-
-    for (var key in temp) {
-        if (temp[key] === 1) {
-            return key;
-        }
-    }
-    return temp;
-}
-
-console.log(test(str));
-```
 
 ## 题目
 1. 闭包
