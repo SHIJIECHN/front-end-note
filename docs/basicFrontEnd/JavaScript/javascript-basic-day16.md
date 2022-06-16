@@ -211,10 +211,10 @@ console.log(obj);
  */
 ```
 分析：
-执行`push`后，即
+执行`push`后，每次push都是从数组的第this.length开始插入，然后数组的长度length++，即
 ```js
-obj[2] = 1; obj.length++
-obj[3] = 2; obj.length++
+obj.push(1)--> obj[length] = 1--> obj[2] = 1; obj.length++
+obj.push(2)--> obj[length] = 2--> obj[3] = 2; obj.length++
 ```
 此时的index 2和3分别变成了1、2，length变成4，而index 0和1 还是空的。  
 ```javascript
@@ -229,7 +229,7 @@ var obj = {
 }
 ```
 
-#### 例二
+#### 例二： 类数组使用for in循环
 类数组对象既有数组的特性又有对象特性。
 ```js
 var person = {

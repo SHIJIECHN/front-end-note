@@ -1,354 +1,180 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
-title: Proxy
+title: 18. 错误信息、try_catch、严格模式
 ---
 
-## 用法
-对象
-```javascript
-/**
- * Proxy ES6的构造函数
- * let obj = new Proxy(target, handler);
- * target 目标对象，你要进行处理的对象
- * handler 容器，无数可以处理对象属性的方法
- * let target = {
- *      a: 1,
- *      b: 2
- *   }
- * 
- * Proxy不会管增不增加属性，而是对现有的属性进行处理。
- * 
- * 自定义对象属性的获取、赋值、枚举函数调用等功能
- */
+## 错误信息
+JS错误信息类型
+1. `SyntaxError` 语法错误
+   1. 变量名不规范
+    ```js
+    var 1 = 1; // Uncaught SyntaxError: Unexpected number
+    var 1ab = 1; // Uncaught SyntaxError: Invalid or unexpected token
+    ```
+   2. 关键字不可赋值
+   ```js
+   new = 5; // Uncaught SyntaxError: Unexpected token '='
+   function = 1; // Uncaught SyntaxError: Unexpected token '='
+   ```
+   3. 基本的语法错误
+   ```js
+   var a = 5: // Uncaught SyntaxError: Unexpected token ':'
+   function 1test(){} // Uncaught SyntaxError: Invalid or unexpected token
+   ```
+   4. 给无法被赋值的对象赋值的时候
+   ```js
+   var a = 1 = 2; // Uncaught SyntaxError: Invalid left-hand side in assignment
+   ``` 
 
-let target = {
-    a: 1,
-    b: 2
+2. `ReferenceError` 引用错误
+   1. 变量或者函数未被声明
+   ```js
+   test(); // Uncaught ReferenceError: test1 is not defined
+   ```
+   2. 给无法被赋值的对象赋值的时候
+   ```js
+   console.log(1) = 1; // Uncaught ReferenceError: Invalid left-hand side in assignment
+   ```
+
+3. `RangeError` 范围错误
+   1. 数组长度赋值为负数
+   ```js
+   var arr = [1,2,3];
+   arr.length = -1;
+   console.log(arr); // Uncaught RangeError: Invalid array length
+   ```
+   2. 对象方法参数超出可行范围
+   ```js
+   var num = new Number(66.66);
+   console.log(num.toFixed(-1)); // Uncaught RangeError: toFixed() digits argument must be between 0 and 100
+   ```
+
+4. `TypeError` 类型错误
+   1. 调用不存在的方法
+   ```js
+   123(); // Uncaught TypeError: 123 is not a function
+
+   var obj = {};
+   obj.say(); // Uncaught TypeError: obj.say is not a function
+   ```
+   2. 实例化原始值
+   ```js
+   var a = new 'string'; // Uncaught TypeError: "string" is not a constructor
+   ```
+
+5. `URIError` `URI`错误
+   ```js
+   var url = 'http://www.baidu.com?name=张三';
+   var newUrl = enCodeURI(url);
+   console.log(newUrl);
+   var newNewUrl = deCodeURI(newUrl);
+   console.log(newNewUrl);
+
+   var str = deCodeURI('%fdsdf%'); // Uncaught URIError: URI malformed
+   ```
+
+6. `EvalError` `eval`函数执行错误
+
+人为抛出错误
+```js
+var error = new Error('代码错误');
+console.log(error);
+```
+
+## try catch finally throw
+```js
+try{
+    console.log('正常执行1');
+    console.log(a); // 执行报错，后面都不会再执行
+    console.log(b); // 不执行
+    console.log('正常执行2');
+}catch(e){
+    console.log(e.name +':'+ e.message);
+}finally{
+     console.log('正常执行3');
 }
-
-let proxy = new Proxy(target, {
-    get(target, prop) {
-        return 'This is property value ' + target[prop];
-    },
-    set(target, prop, value) {
-        target[prop] = value;
-        console.log(target[prop]);
-    }
-});
-
-console.log(proxy.a); // This is property value 1
-console.log(target.a); // 1
-
-proxy.b = 3; // 3
+ console.log('正常执行4');
 ```
-数组
-```javascript
-let arr = [
-    { name: '小明', age: 18 },
-    { name: '小王', age: 12 },
-    { name: '小李', age: 24 },
-    { name: '小红', age: 27 },
-]
-
-let person = new Proxy(arr, {
-    get(arr, prop) {
-        return arr[prop];
-    },
-    set(arr, prop, value) {
-        arr[prop] = value;
+例一
+```js
+var jsonStr = '';
+try{
+    if(jsonStr == ''){
+        throw 'JSON字符串为空';
     }
-})
-
-console.log(person[0]);
-
-person[1] = { name: '小张', age: 33 };
-console.log(person, arr);
-```
-函数
-```javascript
-let fn = function() {
-    console.log('I am a function.');
+    console.log('我要执行啦！！');
+    var json = JSON.parse(jsonStr);
+    console.log(json);
+}catch(e){
+    console.log(e);
+    var errorTip = {
+        name: '数据传输失败',
+        errorCode: '10010'
+    }
+    console.log(errorTip);
 }
-
-fn.a = 123;
-
-let newFn = new Proxy(fn, {
-    get(fn, prop) {
-        return fn[prop] + ' This is a Proxy return'
-    }
-})
-
-console.log(newFn.a); // 123 This is a Proxy retur
 ```
 
-## 对象操作的14中方法
-```javascript
+## `ES5`严格模式
+`ECMAScript`：`JavaScript`方法规范
+- 1997年 1.0
+- 1998年 2.0
+- 1999年 3.0 JS通行标准
+- 2007年 4.0草案 仅`Mozilla`支持
+- 2008年 4.0中止  容易改善3.1->`ECMAScript5`  Harmony
+- 2009年 5.0发布，Harmony-> 1/2 JS.NEXT 1/2 JS.next.next
+- 2011年 5.1 ISO国际标准
+- 2013年 ES6 = JS.NEXT  JS.next.next 7  ES6草案发布
+- 2015年 ES6正式发布 ECMAScript2015
+
+`ES5`中分为正常模式和严格模式。`IE9`及以下`IE`不支持严格模式。在3.0的基础上加上了严格模式。严格模式关键字`use strict`。
+
+严格模式的作用
+```js
+'use strict'
+var a = 1;
+var pbj = {
+    a: 2
+}
+function test(){
+    var a = 3;
+    with(window){
+        console.log(a); // 报错
+    }
+}
+test();
+```
+`with`可以改变作用域链，严格模式下不可用。`caller`, `callee`也不能使用。  
+严格模式下
+- 函数的参数不能重复
+```js
+'use strict';
+function test(a, a){
+    console.log(a);
+}
+test();
+// Uncaught SyntaxError: Duplicate parameter name not allowed in this context
+```
+- 对象的属性名不能重复，但是不报错
+```js
+'use strict';
 var obj = {
     a: 1,
-    b: 2
+    a: 2
 }
+console.log(obj.a); // 2 
 ```
-任何语法与对象相关的内建函数方案都是根据以下14中内部方法构建出来的。
-1. 获取原型 [[GetPrototypeOf]]
-```javascript
-var proto = Object.getPrototypeOf(obj);
-console.log(proto);
-console.log(obj.__proto__);
-console.log(Object.prototype);
-```
-2. 设置原型 [[SetPrototypeOf]]
-```javascript
-Object.setPrototypeOf(obj, { c: 3, d: 4 });
-console.log(obj);
-```
-3. 获取对象的可扩展性 [[IsExtensible]]
-```javascript
-var extensible = Object.isExtensible(obj);
-console.log(extensible); // true
-
-Object.freeze(obj);
-var extensible2 = Object.isExtensible(obj);
-console.log(extensible2); // false
-
-// freeze
-Object.freeze(obj); // 冻结对象
-obj.c = 3; // 不可修改的
-console.log(obj);
-
-delete obj.a; // 不可删除
-console.log(obj);
-
-obj.b = 3; // 不可写
-console.log(obj);
-
-// 可枚举
-for (var key in obj) {
-    console.log(key);
-}
-
-// seal
-Object.seal(obj); // 封闭对象
-obj.c = 3; // 不可修改的
-console.log(obj);
-
-delete obj.a; // 不可删除
-console.log(obj);
-
-obj.b = 3; // 可写
-console.log(obj);
-
-// 可枚举
-for (var key in obj) {
-    console.log(key);
-}
-```
-4. 获取自有属性[[GetOwnProperty]]
-```javascript
-Object.setPrototypeOf(obj, { c: 3, d: 4 });
-console.log(Object.getOwnPropertyNames(obj)); // ['a','b']
-```
-5. 禁止扩展对象[[PreventExtensions]]
-```javascript
-Object.preventExtensions(obj);
-obj.c = 3; // 禁止增加属性
-console.log(obj); // {a: 1, b: 2}
-delete obj.a; // 可删除属性
-console.log(obj); // {b:2}
-```
-6. 拦截对象操作 `[[DefineOwnProperty]]`
-```javascript
-Object.defineProperty()
-```
-7. 判断是否是自身属性`[[HasProperty]]`
-```javascript
-console.log(obj.hasOwnProperty('a')); // true
-```
-8. `[[GET]]` 
-```javascript
-console.log('c' in obj); // false
-console.log(obj.a);
-```
-9. [[SET]]
-```javascript
-obj.a = 3;
-obj['b'] = 4;
-console.log(obj); // {a: 3, b: 4}
-```
-10. [[Delete]]
-```javascript
-delete obj.a;
-console.log(obj); // {b: 2}
-```
-11. [[Enumberate]]
-```javascript
-for (var k in obj) {
-    console.log(k);
-}
-```
-12. 获取键集合 [[OwnPropertyKeys]]
-```javascript
-console.log(Object.keys(obj)); // ['a', 'b']
-```
-13. 函数调用
-```javascript
-function test(){}
-test();
-
-test.call();
-test.apply();
-```
-14. new
-```javascript
-function Test(){}
-new Test()
-```
-## 重写Proxy: set和get
-```javascript
-let target = {
-    a: 1,
-    b: 2
-}
-
-let proxy = new Proxy(target, {
-    get(target, prop) {
-        return target[prop];
-    },
-    set(target, prop, value) {
-        target[prop] = value;
-    }
-})
-
-console.log(proxy.a);
-proxy.b = 4;
-console.log(proxy.b);
-```
-实现
-```javascript
-function MyProxy(target, handler) {
-    let _target = deepClone(target);
-    Object.keys(_target).forEach(key => {
-        Object.defineProperty(_target, key, {
-            get() {
-                return handler.get && handler.get(target, key);
-            },
-            set(newValue) {
-                handler.set && handler.set(target, key, newValue);
-            }
-        })
-    })
-
-    return _target;
-
-
-    // 深拷贝
-    function deepClone(org, tar) {
-        var tar = tar || {},
-            toStr = Object.prototype.toString,
-            arrType = '[object Array]';
-        for (var key in org) {
-            if (org.hasOwnProperty(key)) {
-                if (typeof(org[key]) === 'object' && org[key] !== null) {
-                    tar[key] = toStr.call(org[key]) === arrType ? [] : {};
-                    deepClone(org[key], tar[key]);
-                } else {
-                    tar[key] = org[key]
-                }
-            }
-        }
-        return tar;
-    }
-}
-
-let target = {
-    a: 1,
-    b: 2
-}
-
-let proxy = new MyProxy(target, {
-    get(target, prop) {
-        return "GET: " + prop + '=' + target[prop];
-    },
-    set(target, prop, value) {
-        target[prop] = value;
-        console.log('SET: ' + prop + "=" + value);
-    }
-})
-
-console.log(proxy.a);
-proxy.b = 3;
+- `eval`
+```js
+'use strict';
+eval('var a = 1; console.log(a);');
+console.log(a);
 ```
 
-## Proxy属性
-```javascript
-let target = {
-    a: 1,
-    b: 2
-}
+## 变量生命周期
 
-let proxy = new Proxy(target, {
-    get(target, prop) {
-        return target[prop];
-    },
-    set(target, prop, value) {
-        target[prop] = value;
-    },
-    has(target, prop) {
-        console.log(target[prop]);
-    },
-    deleteProperty(target, prop) {
-        delete target[prop];
-    }
-});
-
-console.log('a' in proxy); // false
-delete proxy.b;
-console.log(proxy);
-
-/**
- * Proxy 内部方法 -> target的方法
- */
-```
-通过Proxy对象来代理target，然后通过handler重写Proxy对象的操作方式来间接的操作target，这种方式我们叫做代理操作。Proxy的方法在handler里面是可以重写的，当重写的时候，所有target的操作都会通过Proxy进入到相对应的handler里面进行操作。    
-defineProperty与Proxy: defineProperty是给对象增加属性用，在修改数组的长度，用索引去设置元素的值，数组的push，pop等方法是无法触发defineProperty的setter方法。而Proxy可以触发setter。   
-Vue2.x的时候是采用defineProperty实现的，Vue里面设置的对数组方法都是Vue自己重新写的，而不是原生的push，pop等方法。所以就导致大量的代码，但是Proxy没有这个问题。   
-
-为什么Vue2.x并没有使用Proxy呢？  
-因为Proxy是ES6的构造函数，考虑到兼容性问题，就没有使用Proxy。   
-
-Proxy不是数据劫持，仅仅是代理了数据进行操作，而数据劫持是在进行访问源对象的时候，就要进行拦截，对源对象进行操作的时候就进行拦截，如访问target，defineProperty直接对target进行处理了以后，只要访问target.a，就要经过get方法。而Proxy不是拦截，它是代理target去处理问题，直接操作target，不起作用，必须操作proxy。使用Proxy就不是操作源对象，相当于Vue中的data在defineProperty的时候是直接操作data，所以需要写成函数的形式data(){return {}}，一是为了防止引用值对象的重写，二是defineProperty是直接操作return里面的对象的，直接对return中的对象进行包装的。而Proxy就不存在这些问题，data: {}。
-
-## Reflect反射
-ES6定义的内置对象，就是方法集合的容器。ES6全局内置对象，直接保存静态方法，不需要实例化
-```javascript
-let target = {
-    a: 1,
-    b: 2
-}
-
-let proxy = new Proxy(target, {
-    get(target, prop) {
-        // return target[prop];
-        return Reflect.get(target, prop); // 方法式操作对象
-    },
-    set(target, prop, value) {
-        // target[prop] = value;
-        Reflect.set(target, prop, value);
-
-        /********************************/
-        // 还可以通过这种方式获取结果
-        const isOk = Reflect.set(target, prop, value);
-
-        if (isOk) {
-            console.log('SET successfully');
-        }
-    }
-});
-
-console.log(proxy.a);
-proxy.b = 4;
-console.log(proxy);
-```
-
-好处：统一管理方法；合理的返回值；   
-
+## 垃圾回收机制
+1. 找出不再使用的变量
+2. 释放其占用内存
+3. 固定的时间间隔进行
