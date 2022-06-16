@@ -1,7 +1,7 @@
 ---
 autoGroup-4: Vue-Router
 sidebarDepth: 3
-title: 4. 路由导航
+title: 4. VueRouter介绍、两种模式、编程式导航
 ---
 
 ## Vue路由
@@ -168,6 +168,7 @@ tag 属性指定router-link最终渲染成怎样的html标签
 ```
 this.$touter.push('/')就是实现了router-link的功能。实际上router-link就是通过这种方式实现的路由跳转。
 
+后续补充：
 7. 路由参数
 8.  嵌套路由
 9.  命名路由
