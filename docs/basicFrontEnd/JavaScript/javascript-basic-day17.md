@@ -207,9 +207,7 @@ console.log(getType(function() {})) // function
 console.log(getType(new Error())) // error
 console.log(getType(new Map())) // map
 console.log(getType(new Set())) // Set
-
 ```
-
 
 ## 扩展
 
