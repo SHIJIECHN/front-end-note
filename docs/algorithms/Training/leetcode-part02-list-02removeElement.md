@@ -7,6 +7,7 @@ title: 移除链表元素
 ## 移除链表元素
 [力扣题目链接](https://leetcode-cn.com/problems/remove-linked-list-elements/)
 
+### 1. JavaScript版
 ```js
 import { array2list, list2array } from "./list.js";
 
@@ -104,3 +105,56 @@ export function list2array(head) {
 }
 ```
 
+### 2. Typscript版
+```ts
+class ListNode {
+  val: number
+  next: ListNode | null
+  constructor(val?: number, next?: ListNode | null) {
+    this.val = (val === undefined ? 0 : val)
+    this.next = (next === undefined ? null : next)
+  }
+}
+
+function createLinkList(arr: number[]) : ListNode{
+  const length = arr.length;
+  if (length == 0) throw new Error('arr is empty');
+
+  // 数组的最后一个元素，从后往前
+  let curNode = new ListNode(arr[length - 1]);
+
+  if (length === 1) return curNode;
+
+  // 从倒数第二个元素开始，向前遍历数组
+  for (let i = length - 2; i >= 0; i--){
+    curNode = new ListNode(arr[i], curNode);
+  }
+  // 返回头结点
+  return curNode; 
+}
+
+const arr = [7,7,7,7];
+
+const head = createLinkList(arr);
+const val = 7;
+console.info(removeElements(head, val));
+
+function removeElements(head: ListNode | null, val: number): ListNode | null {
+  let prevNode: ListNode = new ListNode(0, head), // 虚拟头结点
+    curNode: ListNode | null = head;
+  
+  // 让头结点到虚拟节点上去
+  head = prevNode;
+
+  while (curNode) {
+    if (curNode.val == val) {
+      prevNode.next = curNode.next;
+    } else {
+      prevNode = curNode;
+    }
+    curNode = curNode.next;
+  }
+
+  return head.next;
+};
+```

@@ -17,6 +17,23 @@ title: 5. 反转单向链表
 - 单向链表 `{ value, next }`
 - 双向链表 `{ value, prev, next }`
 
+链表的定义
+```ts
+interface IListNode {
+  value : number,
+  next?: IListNode
+}
+
+class ListNode {
+  val: number
+  next: ListNode | null
+  constructor(val?: number, next?: ListNode | null) {
+    this.val = (val === undefined ? 0 : val)
+    this.next = (next === undefined ? null : next)
+  }
+}
+```
+
 两者对比
 相同点：都是有序结构。
 - 链表：查询慢O(n)，新增和删除较快O(1)
@@ -61,7 +78,7 @@ React Fiber 就把 vdom 树转换为一个链表，这样才有可能随时中�
 链表实现队列会更快。队列是一种先进先出的结构，如果使用数组实现，每次进，就push一个元素，但是每次出队列的时候，shift操作，后面的元素都要移动。而链表不一样，只需要改变指向就可以了。<br>
 
 ### 思路
-链表实现队列：单向链表就可以实现，但要同时需要记录head和tail。要从tail入队，从head出队，否则出队时tail不好定位，length要实时记录，不可比案例链表获取
+链表实现队列：单向链表就可以实现，但要同时需要记录head和tail。要从tail入队，从head出队，否则出队时tail不好定位，length要实时记录，不可遍历链表获取。
 
 ### 答案
 参考 queue-with-list.ts 和 queue-with-list.test.ts
