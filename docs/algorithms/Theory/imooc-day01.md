@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 前端面试技能拼图1：数据结构和算法（上）
+title: 1. 常见数据结构、时间复杂度
 ---
 
 ## 考察重点

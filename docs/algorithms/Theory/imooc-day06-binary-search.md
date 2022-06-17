@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 二分查找
+title: 6. 二分查找
 ---
 
 ## 题目

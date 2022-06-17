@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 求二叉搜索树的第 K 小的值
+title: 8. 求二叉搜索树的第 K 小的值
 ---
 ## 题目
 

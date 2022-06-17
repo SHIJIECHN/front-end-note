@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 括号匹配
+title: 3. 括号匹配
 ---
 
 ## 题目

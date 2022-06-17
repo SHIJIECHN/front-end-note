@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 1-10000 之间的对称数（回文）
+title: 14. 1-10000 之间的对称数（回文）
 ---
 
 ## 题目

@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 为何二叉树重要
+title: 9. 为何二叉树重要
 ---
 
 ## 题目

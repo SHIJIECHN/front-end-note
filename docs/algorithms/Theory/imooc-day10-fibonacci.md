@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 斐波那契数列
+title: 10. 斐波那契数列
 ---
 
 ## 题目

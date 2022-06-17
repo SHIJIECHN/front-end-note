@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 快速排序
+title: 13. 快速排序
 ---
 
 ## 题目

@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 两数之和
+title: 7. 两数之和
 ---
 
 ## 题目

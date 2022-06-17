@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 数字千分位
+title: 16. 数字千分位
 ---
 
 ## 题目

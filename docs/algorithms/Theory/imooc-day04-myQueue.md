@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 两个栈实现一个队列
+title: 4. 两个栈实现一个队列
 ---
 
 ## 题目

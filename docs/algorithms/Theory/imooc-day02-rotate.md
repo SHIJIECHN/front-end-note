@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 数组旋转
+title: 2. 数组旋转
 ---
 
 ## 题目

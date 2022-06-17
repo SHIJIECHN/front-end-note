@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 小数相加
+title: 18. 小数相加
 ---
 
 ## 题目

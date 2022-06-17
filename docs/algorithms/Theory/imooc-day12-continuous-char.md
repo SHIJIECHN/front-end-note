@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 连续最多的字符
+title: 12. 连续最多的字符
 ---
 
 ## 题目

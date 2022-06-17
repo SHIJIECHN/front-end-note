@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 切换字母大小写
+title: 17. 切换字母大小写
 ---
 
 ## 题目

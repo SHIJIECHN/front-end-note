@@ -1,7 +1,7 @@
 ---
 autoGroup-1: 算法
 sidebarDepth: 3
-title: 移动 0
+title: 11. 移动 0
 ---
 
 ## 题目
