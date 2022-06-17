@@ -15,6 +15,7 @@ module.exports = [
       { text: "Vue", link: "/framework/Vue/", },
       { text: "React", link: "/framework/React/", },
       { text: "TypeScript", link: "/framework/TypeScript/", },
+      { text: "Vue-Router", link: "/framework/Vue-Router/", },
     ],
   },
   {
