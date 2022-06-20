@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Vue-Router
+autoGroup-1: Vue-Router
 sidebarDepth: 3
 title: 1. VueRouter对象的初始化、嵌套路由
 ---

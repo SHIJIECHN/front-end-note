@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Vue-Router
+autoGroup-1: Vue-Router
 sidebarDepth: 3
 title: 4. VueRouter介绍、两种模式、编程式导航
 ---

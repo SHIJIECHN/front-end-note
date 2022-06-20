@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Vue-Router
+autoGroup-1: Vue-Router
 sidebarDepth: 3
 title: 2. 创建路由映射表
 ---
