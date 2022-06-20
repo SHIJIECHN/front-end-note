@@ -1,7 +1,7 @@
 ---
 autoGroup-1: JavaScript基础篇
 sidebarDepth: 3
-title: 18. 错误信息、try_catch、严格模式
+title: 19. 变量生命周期、垃圾回收原理
 ---
 
 
