@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: 应用实例、组件实例与根组件实例
+title: 4. 应用实例、组件实例与根组件实例
 ---
 
 

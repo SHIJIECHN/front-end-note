@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: 认识Vue以及组件化构建
+title: 3. 认识Vue以及组件化构建
 ---
 
 ## 组件化

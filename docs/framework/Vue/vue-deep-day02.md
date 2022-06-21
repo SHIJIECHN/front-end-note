@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: 认识Vue以及它的基本用法
+title: 2. 认识Vue以及它的基本用法
 ---
 
 ## Vue的核心

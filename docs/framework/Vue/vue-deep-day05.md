@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: 【MVVM专题】认识以及实现MVC
+title: 5. 【MVVM专题】认识以及实现MVC
 ---
 
 ## MVC

@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Vue深度学习系列
 sidebarDepth: 3
-title: 【MVVM专题】认识和实现MVVM轮子
+title: 6. 【MVVM专题】认识和实现MVVM轮子
 ---
 
 ## 准备工作与目录结构
