@@ -312,6 +312,7 @@ btn.addEventListener('click', () => {
 
 
 总结：
-1. 虚拟DOM的好处：通过patch函数比较vnode的变化，计算出最少的DOM操作，再更新视图（操作DOM）。
-2. h函数三个参数：标签，属性，子节点。
-3. patch首次渲染第一个参数是container，视图更新时第一个参数是就的vnode
+1. 虚拟DOM的好处：通过patch函数比较vnode的变化，计算出最少的DOM操作，再更新视图（操作DOM）————diff算法。
+2. h函数创建vnode，三个参数：标签，属性，子节点。
+3. vnode：组成虚拟DOM的节点
+4. patch首次渲染第一个参数是container，第二个参数是vnode。视图更新时第一个参数是就的老的vnode，第二个参数是新的vnode。
