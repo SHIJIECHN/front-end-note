@@ -1,7 +1,7 @@
 ---
-autoGroup-2: Vue
+autoGroup-3: 源码专题
 sidebarDepth: 3
-title: 虚拟DOM
+title: 2. 虚拟DOM
 ---
 
 ## 为什么要有虚拟DOM
@@ -66,7 +66,7 @@ Vue/React是通过修改数据，数据变化，视图更新（DOM操作）。�
 }
 ```
 总结：
-每一个对象都有属性
+h函数可以接收三个参数
    1. tag：标签名
    2. props：属性值
    3. children子元素
@@ -119,33 +119,41 @@ const container = document.getElementById('container');
  * vnode实际上是一个html结构
  */
 const vnode = h(
-    "div#container.two.classes", {
+    "div#container.two.classes", 
+    {
         on: {
             click: () => {
 
             }
         }
-    }, [
+    }, 
+    [
         h("span", { style: { fontWeight: "bold" } }, "This is bold"),
         " and this is just normal text",
         h("a", { props: { href: "/foo" } }, "I'll take you places!"),
-    ]);
+    ]
+);
 
 console.log(vnode);
 /**
-    children: (3) [{…}, {…}, {…}]
-    data: {on: {…}}
-    elm: undefined
-    key: undefined
-    sel: "div#container.two.classes"
-    text: undefined
+    children: (3) [{…}, {…}, {…}] // 虚拟节点的子节点
+    data: {on: {…}} // 虚拟节点的相关数据属性
+    elm: undefined // 虚拟节点所对应的真实节点，文本节点除外
+    key: undefined // 虚拟节点构成数组时的唯一标识
+    sel: "div#container.two.classes" // 虚拟节点的唯一标识
+    text: undefined // 虚拟节点所对应的真实节点，限于文本节点和注释节点
  */
 
 // 将html渲染到页面上，使用patch函数。首次渲染
+// 第一个参数是真实DOM节点
 patch(container, vnode)
 ```
 结果：
 <img :src="$withBase('/framework/Vue/vdom.png')" alt="vdom" />
+
+总结：
+1. 首先使用init()创建patch函数
+2. 然后使用h()创建VNode（虚拟DOM）
 
 ### 3. 自定义html结构
 #### index.html
@@ -170,6 +178,7 @@ const snabbdom = window.snabbdom;
 const h = snabbdom.h;
 
 const patch = snabbdom.init([
+    // 注册模块。snabbdom核心库并不能处理元素的属性、样式、事件等，需要使用模块
     snabbdom_class,
     snabbdom_props,
     snabbdom_eventlisteners
@@ -203,7 +212,7 @@ btn.addEventListener('click', () => {
         ]
     )
 
-    // 视图更新
+    // 对比差异，视图更新
     patch(vnode, newVnode);
 
     // 下一次，新的newVnode就变为老的，再创建新的vnode再去更新vnode
@@ -211,7 +220,8 @@ btn.addEventListener('click', () => {
 })
 ```
 
-### 4. 根据数据结构实现页面
+### 4. 重写render
+点击按钮，数据发生改变，更新视图。控制台查看页面变化，只有发生改变的节点发生改变，其他节点没有变化。
 #### index.html
 ```html
 <!DOCTYPE html>
@@ -304,8 +314,10 @@ function render(data) {
 render(data);
 
 btn.addEventListener('click', () => {
+    // 更新数据
     data[1].age = 21;
     data[2].city = 'Shenzhen';
+    // 重新渲染
     render(data)
 })
 ```
@@ -313,6 +325,9 @@ btn.addEventListener('click', () => {
 
 总结：
 1. 虚拟DOM的好处：通过patch函数比较vnode的变化，计算出最少的DOM操作，再更新视图（操作DOM）————diff算法。
-2. h函数创建vnode，三个参数：标签，属性，子节点。
-3. vnode：组成虚拟DOM的节点
-4. patch首次渲染第一个参数是container，第二个参数是vnode。视图更新时第一个参数是就的老的vnode，第二个参数是新的vnode。
+2. Snabbdom的核心只导出了三个函数：
+   1. init() 是一个高阶函数，返回patch
+   2. h()返回虚拟节点VNode，Vue的render中使用了这个函数
+3. h函数创建vnode，三个参数：标签，属性，子节点。h渲染函数实际上只用于创建vnode，并没有将vnode绘制到文档中。
+4. vnode：组成虚拟DOM的节点
+5. patch首次渲染第一个参数是container，第二个参数是vnode。视图更新时第一个参数是就的老的vnode，第二个参数是新的vnode。

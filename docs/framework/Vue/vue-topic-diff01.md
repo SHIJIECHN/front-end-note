@@ -1,7 +1,7 @@
 ---
-autoGroup-2: Vue
+autoGroup-3: 源码专题
 sidebarDepth: 3
-title: Diff算法
+title:  1. Diff算法（一）
 ---
 
 ## Diff
@@ -17,7 +17,7 @@ diff算法优化规则：
 
 
 ## init
-主要是通过patch函数实现，init函数执行就会生成patch函数。当patch传入两个vnode的时候，就会做比较，比较就会用到diff算法。
+init的作用就是创建一个patch函数。当patch传入两个vnode的时候，就会做比较，比较就会用到diff算法。
 ```javascript
 function init(){
     return function patch(){
@@ -28,17 +28,58 @@ init();
 // init()的返回值就是function patch
 ```
 ### 1. patch
+作用：比对新旧两个vnode的差异，把新节点中变化的内容渲染到真实DOM，最后返回新节点作为下一次处理的旧节点。   
+
+```javascript
+function patch(oldVnode: VNode | Element, vnode: VNode): VNode {
+  let i: number, elm: Node, parent: Node;
+  const insertedVnodeQueue: VNodeQueue = [];
+  // dom-pre 钩子
+  for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]();
+
+  // oldVnode 作为原生 dom，通过 emptyNodeAt 转换成 vnode
+  if (!isVnode(oldVnode)) {
+    oldVnode = emptyNodeAt(oldVnode);
+  }
+
+  // 节点相同，使用 patchVnode 更新
+  if (sameVnode(oldVnode, vnode)) {
+    patchVnode(oldVnode, vnode, insertedVnodeQueue);
+  // 节点不同，创建新的 dom 节点并插入文档，移除 oldVnode
+  } else {
+    elm = oldVnode.elm as Node;
+    parent = api.parentNode(elm);
+
+    createElm(vnode, insertedVnodeQueue);
+
+    if (parent !== null) {
+      api.insertBefore(parent, vnode.elm as Node, api.nextSibling(elm));
+      removeVnodes(parent, [oldVnode], 0, 0);
+    }
+  }
+
+  // 在 vnode 插入文档后，调用 vnode 树中每个节点的 insert 方法
+  for (i = 0; i < insertedVnodeQueue.length; ++i) {
+    (((insertedVnodeQueue[i].data as VNodeData).hook as Hooks).insert as any)(insertedVnodeQueue[i]);
+  }
+
+  // dom-post 钩子 
+  for (i = 0; i < cbs.post.length; ++i) cbs.post[i]();
+  return vnode;
+};
+```
+oldVnode: 接收一个真实DOM（首次渲染）或一个vnode
 
 #### isVnode
 ```javascript
 function isVnode(vnode: any): vnode is VNode {
   // vnode.sel有值就返回true，没有值就返回false
-  // sel 就是标签，如div#contaier
+  // sel 就是标签，如div#container
   // sel 是vnode结构存在的属性，真实的DOM是不存在的
   return vnode.sel !== undefined;
 }
 
-// container 时会进入
+// 首次渲染，oldVnode不是虚拟节点，ontainer 时会进入
 if (!isVnode(oldVnode)) {
     // 将真实DOM转成了虚拟DOM，oldVnode变成了虚拟DOM
     oldVnode = emptyNodeAt(oldVnode);
@@ -70,12 +111,8 @@ export function vnode(
   elm: Element | Text | undefined
 ): VNode {
   const key = data === undefined ? undefined : data.key;
+  //   vnode 属性
   return { sel, data, children, text, elm, key };
-}
-
-// vnode 简化
-function vnode(sel, data, children, text, elm){
-    return {sel, data, children, text, elm, key}
 }
 ```
 总结：emptyNodeAt：将container真实DOM元素转成vnode，同时vnode：{elm：container}，elm属性保存了container真实DOM元素。
@@ -114,7 +151,7 @@ function sameVnode(vnode1: VNode, vnode2: VNode): boolean {
 ```
 总结：
 1. 当新的vnode和oldvnode不是同一个元素，就是将vnode节点变成真实的DOM并插入到old元素的父级元素下，并移除old元素节点。
-2. insertBefore：可以前面插入元素，也可以后面插入元素
+2. insertBefore：可以前面插入元素，也可以后面插入元素。此处是进行后面插入，没有移除old元素前，界面上会存在两个节点。
 3. 如果是相同元素就进入patchVnode函数中
 
 #### createElm
@@ -126,6 +163,7 @@ function creatElm(vnode, insertedVnodeQueue){
     return vnode.elm 
 }
 ```
+总结：createElm创建真实DOM节点cnode.elm。
 
 #### patchVnode
 ```javascript
@@ -185,8 +223,8 @@ function patchVnode(
 ```
 总结：
 1. vnode有text，无children；有children，无text。
-2. 当新vnode有text的时候，如果老的vnode有children，则直接移除老vnode 的children，并将新的text插入。
-3. 新vnode无text。
+2. vnode 不是文本节点，更新子节点或插入子节点或移除 oldVnode 的子节点或文本。
+3. vnode 是文本节点，移除 oldVnode 的子节点，并设置 vnode 节点的文本内容
 
 ####  updateChildren
 ```javascript
@@ -225,13 +263,13 @@ function patchVnode(
         newEndVnode = newCh[--newEndIdx];
 
       // 比较开头和结尾节点，如果相同就向下移动。
-      // 头跟头比较，相同
+      // 头跟头比较，相同，使用patchVnode更新该节点
       } else if (sameVnode(oldStartVnode, newStartVnode)) {
         patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue);
         oldStartVnode = oldCh[++oldStartIdx];
         newStartVnode = newCh[++newStartIdx];
     
-      // 老的尾根新的头比较，相同
+      // 老的尾根新的头比较，相同，使用patchVnode更新该节点
       } else if (sameVnode(oldEndVnode, newEndVnode)) {
         patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue);
         oldEndVnode = oldCh[--oldEndIdx];
@@ -257,12 +295,14 @@ function patchVnode(
         oldEndVnode = oldCh[--oldEndIdx];
         newStartVnode = newCh[++newStartIdx];
 
-
+      // 根据 vnode.children 中顺序子节点是否在 oldVnode.children，采用不同的策略：更新或创建
       } else {
         if (oldKeyToIdx === undefined) {
+          // oldKeyToIdx 是原始子节点的 key 键及其 index 序号的映射
           oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
         }
         idxInOld = oldKeyToIdx[newStartVnode.key as string];
+        // 处理新添加的节点
         if (isUndef(idxInOld)) {
           // New element
           api.insertBefore(
@@ -272,6 +312,7 @@ function patchVnode(
           );
         } else {
           elmToMove = oldCh[idxInOld];
+          // 节点变更，根据新的 newStartVnode 创建 dom 节点
           if (elmToMove.sel !== newStartVnode.sel) {
             api.insertBefore(
               parentElm,
@@ -289,6 +330,7 @@ function patchVnode(
     }
     if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
       if (oldStartIdx > oldEndIdx) {
+        // oldVnode.children 双索引冲突，vnode.children 双索引区间为待新增节点
         before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
         addVnodes(
           parentElm,
@@ -298,6 +340,7 @@ function patchVnode(
           newEndIdx,
           insertedVnodeQueue
         );
+      // vnode.children 双索引冲突，oldVnode.children 双索引区间为待移除节点
       } else {
         removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
       }
