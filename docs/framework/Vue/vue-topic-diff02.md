@@ -140,5 +140,40 @@ else {
 再来看我们的实例，第一次循环后，找到了旧节点的末尾和新节点的开头(都是 D)相同，于是直接复用 D 节点作为 diff 后创建的第一个真实节点。同时旧节点的 endIndex 移动到了 C，新节点的 startIndex 移动到了 C。
 <img :src="$withBase('/framework/Vue/diff04.png')" alt="diff" />
 
-### 3. 第三步
+紧接着开始第二次循环，第二次循环后，同样是旧节点的末尾和新节点的开头(都是 C)相同，同理，diff 后创建了 C 的真实节点插入到第一次创建的 D 节点后面。同时旧节点的 endIndex 移动到了 B，新节点的 startIndex 移动到了 E。
+<img :src="$withBase('/framework/Vue/diff05.png')" alt="diff" />
 
+接下来第三次循环中，发现 patchVnode 的 4 种情形都不符合，于是在旧节点队列中查找当前的新节点 E，结果发现没有找到，这时候只能直接创建新的真实节点 E，插入到第二次创建的 C 节点之后。同时新节点的 startIndex 移动到了 A。旧节点的 startIndex 和 endIndex 都保持不动。
+<img :src="$withBase('/framework/Vue/diff06.png')" alt="diff" />
+
+第四次循环中，发现了新旧节点的开头(都是 A)相同，于是 diff 后创建了 A 的真实节点，插入到前一次创建的 E 节点后面。同时旧节点的 startIndex 移动到了 B，新节点的 startIndex 移动到了 B。
+<img :src="$withBase('/framework/Vue/diff07.png')" alt="diff" />
+
+第五次循环中，情形同第四次循环一样，因此 diff 后创建了 B 真实节点 插入到前一次创建的 A 节点后面。同时旧节点的 startIndex 移动到了 C，新节点的 startIndex 移动到了 F。
+<img :src="$withBase('/framework/Vue/diff08.png')" alt="diff" />
+
+这时候发现新节点的 startIndex 已经大于 endIndex 了。不再满足循环的条件了。因此结束循环，接下来走后面的逻辑。
+
+### 3. 第三步
+当 while 循环结束后，根据新老节点的数目不同，做相应的节点添加或者删除。若新节点数目大于老节点则需要把多出来的节点创建出来加入到真实 dom 中，反之若老节点数目大于新节点则需要把多出来的老节点从真实 dom 中删除。至此整个 diff 过程就已经全部完成了。
+```javascript
+if (oldStartIdx > oldEndIdx) {
+      /*
+        全部比较完成以后，发现oldStartIdx > oldEndIdx的话，
+        说明老节点已经遍历完了，新节点比老节点多， 所以这时候多
+        出来的新节点需要一个一个创建出来加入到真实Dom中
+    */
+      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      //创建 newStartIdx - newEndIdx 之间的所有节点
+      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue) 
+    } else if (newStartIdx > newEndIdx) {
+      /*
+        如果全部比较完成以后发现newStartIdx > newEndIdx，则说明新节点
+        已经遍历完了，老节点多于新节点，这个时候需要将多余的老节点从真实Dom中移除
+    */
+      //移除 oldStartIdx - oldEndIdx 之间的所有节点
+      removeVnodes(oldCh, oldStartIdx, oldEndIdx) 
+    }
+```
+再回过头看我们的实例，新节点的数目大于旧节点，需要创建 newStartIdx 和 newEndIdx 之间的所有节点。在我们的实例中就是节点 F，因此直接创建 F 节点对应的真实节点放到 B 节点后面即可。
+<img :src="$withBase('/framework/Vue/diff09.png')" alt="diff" />
