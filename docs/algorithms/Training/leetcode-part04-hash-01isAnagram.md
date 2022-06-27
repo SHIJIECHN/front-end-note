@@ -1,7 +1,7 @@
 ---
 autoGroup-4: 哈希表
 sidebarDepth: 3
-title: 链表相交
+title: 有效的字母异位词
 ---
 
 
@@ -113,4 +113,44 @@ function groupAnagrams(strs: string[]): string[][] {
   // 扩展运算符和for...of循环获取values的结果是一样的
   return [...map.values()];
 };
+```
+
+## 找到字符串中所有字母异位词
+[力扣题目链接](https://leetcode.cn/problems/find-all-anagrams-in-a-string/)
+```typescript
+var findAnagrams = function (s:string, p:string) :number[]{
+  const pLen = p.length
+  const res: number[] = [] // 返回值
+  const map = new Map() // 存储 p 的字符
+  for (let item of p) {
+    map.set(item, map.get(item) ? map.get(item) + 1 : 1)
+  }
+  // 存储窗口里的字符情况
+  const window = new Map()
+  let valid = 0 // 有效字符个数
+
+  for (let i = 0; i < s.length; i++) {
+    const right = s[i]
+    // 向右扩展
+    window.set(right, window.get(right) ? window.get(right) + 1 : 1)
+    // 扩展的节点值是否满足有效字符
+    if (window.get(right) === map.get(right)) {
+      valid++
+    }
+    if (i >= pLen) {
+      // 移动窗口 -- 超出之后，收缩回来， 这是 pLen 长度的固定窗口
+      const left = s[i - pLen]
+      // 原本是匹配的，现在移出去了，肯定就不匹配了
+      if (window.get(left) === map.get(left)) {
+        valid--
+      }
+      window.set(left, window.get(left) - 1)
+    }
+    // 如果有效字符数量和存储 p 的map 的数量一致，则当前窗口的首字符保存起来
+    if (valid === map.size) {
+      res.push(i - pLen + 1)
+    }
+  }
+  return res
+}
 ```
