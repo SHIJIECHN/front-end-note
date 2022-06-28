@@ -56,6 +56,7 @@ function isAnagram(s: string, t: string): boolean {
 [力扣题目链接](https://leetcode.cn/problems/ransom-note/)
 
 ```js
+// 使用 map
 function canConstruct(ransomNote: string, magazine: string): boolean {
   const len1 = ransomNote.length;
   const len2 = magazine.length;
@@ -86,6 +87,26 @@ function canConstruct(ransomNote: string, magazine: string): boolean {
 
   return false;
 };
+
+// 使用数组
+function canConstruct(ransomNote: string, magazine: string): boolean {
+  let heplerArr: number[] = new Array(26).fill(0);
+  let base = 'a'.charCodeAt(0);
+
+  // 统计 magazine 的字符
+  for (let i = 0, length = magazine.length; i < length; i++){
+    heplerArr[magazine[i].charCodeAt(0) - base]++;
+  }
+
+  for (let i = 0, length = ransomNote.length; i < length; i++){
+    let index = ransomNote[i].charCodeAt(0) - base;
+    heplerArr[index]--
+    if (heplerArr[index] < 0) {
+      return false;
+    }
+  }
+  return true;
+}
 ```
 
 ## 字母异位词分组
