@@ -1,270 +1,122 @@
 ---
 autoGroup-1: 网络基础
 sidebarDepth: 3
-title: JSONP跨域
+title: 6. http版本、关闭TCP、四次挥手、同源策略
 ---
 
-## JSONP
-JSONP（JSON with Padding）: 跨域获取JSON数据的一种非官方的使用模式  
+## http版本
+### 1. HTTP/0.9
+1. 仅支持GET请求方法
+2. 仅能请求访问HTML格式的资源
 
-1. JSON和JSONP不是一个类型
-2. JSON树数据交换格式，JSONP是一种跨域获取JSON数据的交互技术
-3. JSONP获取的资源并不是直接是JSON数据，而是带有JSON数据参数的函数执行     
+### 2. HTTP/1.0
+1. 增加POST和HEAD请求方式
+2. 支持多种数据格式的请求访问
+3. 支持cache缓存功能
+4. 新增状态码，多字符集，内容编码
+5. 早起HTTP/1.0不支持keep-alive（长连接），只支持串行连接（短连接）
+6. 后期HTTP/1.0增加Connection：keep-alive字段（非标准字段），开始支持长连接
 
-客户端期望返回：{"name": "Jacky", "age":18}   
-JSONP实际返回：callback({"name": "Jacky", "age":18})    
+### 3. HTTP/1.1
+1. 增加持久连接
+2. 增加管道机制（支持多个请求同时发送）
+3. 增加PUT、PATCH、OPTION、DELETE等请求方式
+4. 增加Host字段（指定服务器域名）
+5. 增加100状态码，支持只发送头信息
+6. 增加身份认证机制
+7. 支持传送内容的一部分和文件断点续传
+8. 增加24个错误状态码
 
-1. 案例一
-```html
-<!--http://test2.jsplusplus.com/index.html-->
-<body>
-    <script src="/textjavascript">
-        function test(str) {
-            console.log(str);
-        }
-    </script>
-    <!--引用不同源的资源-->
-    <script src="http://test.jsplusplus.com/jsonp/jsonp.js"></script> 
-</body>
-```
-请求数据
-```js
-// http://test.jsplusplus.com/jsonp/jsonp.js
-var $ = (function() {
-    // 封装的ajax
-})();
+### 4. HTTP/2.0
+1. 增加双工模式（客户端同时发送多个请求，服务器同时处理多个请求）
+2. 服务器推送（服务器会把客户端需要的资源一起推送给客户端，适合加载静态资源）
+3. 头信息压缩机制（每次请求都会带上所有的信息发送给服务端）（HTTP协议不带状态）
+4. 二进制协议（头信息与数据提使用二进制进行传输）
+5. 多工（先发送已经处理好的部分，再响应其他请求，最后解决没有处理好的部分）
 
-$.ajax({
-    url: 'http://test.jsplusplus.com/server/getCourses.php',
-    type: 'POST',
-    data: {
-        status: 1
-    },
-    success: function(data) {
-        test(data); // 在这里调用test函数
-    }
-})
-```
 
-2. 案例二：     
-script标签不管文件是什么，只会把返回的内容当做脚本来执行。如果返回的内容执行有错误，也只会按照正常执行的错误输出。
-```html
-<body>
-    <!--http://test2.jsplusplus.com/index.html-->
-    <script src="/textjavascript">
-        function test(str) {
-            console.log(str);
-        }
-    </script>
-    <!--当有多个数据时，就需要多个script标签-->
-    <script src="http://test.jsplusplus.com/jsonp/jsonp.php?cb=test"></script>
-</body>
-```
-后端jsonp.php文件
-```php
-// [http://](http://test.jsplusplus.com/jsonp/jsonp.php)
-<?php
-    $cb = $_GET['cb'];
-    echo $cb.'("JS++")';
-```
-可以在控制台中输出：JS++。
+## 关闭TCP的四次挥手
 
-3. 案例三
-```html
-<!--http://test2.jsplusplus.com/index.html-->
-<body>
-    <button id="btn">获取资源</button>
-    <script src="/textjavascript">
-        var oBtn = document.getElementById('btn');
+### 1. 关闭TCP连接的状态
+`FIN`：`finish` 关闭连接  
 
-        oBtn.onclick = function(){
-            oScript = document.createElement('script');
-            oScript.src = 'http://test.jsplusplus.com/jsonp/jsonp.php?cb=test';
-            document.body.appendChild(oScript);
-            document.body.removeChild(oScript); // 不需要延迟删除，因为appendChild只是让脚本执行，在src的时候已经响应了
-        }
+状态：
+- `FIN-WAIT-1` 等待远程`TCP`的连接中断请求，或先前的连接中断请求的确认
+- `FIN-WAIT-2` 从远程`TCP`等待连接中断请求
+- `CLOSE-WAIT` 等待从本地用户发来的连接中断请求
+- `LAST-ACK` 等待原来发向远程`TCP`的连接中断请求的确认
+- `TIME-WAIT` 等待足够的时间以确保远程`TCP`接受到连接中断请求的确认
+- `CLOSE` 没有任何连接状态
 
-        function test(data) {
-            console.log(data);
-        }
-    </script>
-</body>
-```
-后端jsonp.php文件
-```php
-// [http://](http://test.jsplusplus.com/jsonp/jsonp.php)
-<?php
-    $cb = $_GET['cb'];
-    echo $cb.'("JS++")';
-```
-可以在控制台中输出：JS++。
+### 2. 四次挥手流程图解
+ <img :src="$withBase('/basicComputer/Network/four-way-handshake.png')" alt="four-way-handshake"> 
 
-JSONP跨域百度搜索关键字
+### 3. 关闭TCP连接的口述
+1. 客户端和服务器通过三次握手之后建立TCP通信通道后。
+2. 客户端和服务器处理Established连接建立状态，客户端向服务器端发送请求断开连接数据包FIN=1，序列号seq=u，客户端进入FIN-WAIT-I（等待中断1状态）。
+3. 服务器端接收到FIN=1数据包和seq=u序列后，通过确认后向客户端发送确认包ACK=1，并且一同发送确认序列号seq=v，确认信息包（FIN=1）ack=u+1，服务器进入Close-wait状态（等待中断请求），客户端进入FIN-WAIT-2状态（等待中断2状态），只会响应服务器请求，并不再发送请求状态。
+4. 服务器确认需要传输的数据是否完成，如果没有完成则继续向客户端发送数据；如果数据已经发送完成，则向客户端发送FIN=1的数据包、ACK=1确认包、seq=w序列号、ack=u+1信息确认包（FIN=1）服务器进入等待确认LAST-ACK状态。
+5. 客户端确认收到FIN=1的数据包、ACK=1确认包、seq=w序列号、ack=u+1信息确认包（FIN=1）后，向服务器发送ACK=1、seq=u+1、ack=w+1后，客户端进入TIME-WAIT（等待远程接收状态等待2MSL）。
+6. 服务器端收到并且确认客户端发送的ACK=1、seq=u+1、ack=w+1后，将服务器关闭。
+7. 如果由于网络的原因，服务器并没有接收到客户端发送的ACK=1、seq=u+1、ack=w+1，则服务器会重新执行第4步。
+8. 客户端关闭。
 
-4. 案例四     
-jQuery是如何使用JSONP实现跨域的？
-```html
-<!--http://test2.jsplusplus.com/index.html-->
-<body>
-    <button id="btn">获取资源</button>
-    <script src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js"></script>
-    <script src="/textjavascript">
-        var oBtn = document.getElementById('btn');
+### 4. 四次挥手
 
-        oBtn.onclick = function() {
-            $.ajax({
-                url: 'http://test.jsplusplus.com/jsonp/jsonp.php',
-                type: 'GET', // jsonp不支持post请求
-                dataType: 'JSONP',
-                jsonp: 'cb',
-                jsonpCallback: 'test', // 不写，则会设置默认值
-                success: function(data) {
-                    console.log(data);
-                }
-            })
-        }
+1.  客户端发送连接关闭报文（此时已停止发送数据）（第一次挥手）
+   - 报文头部：`FIN=1`（序列号`seq=u`）
+   - 此刻：客户端进入终止等待`1`状态（`FIN-WAIT-1`）
+2. 服务器接到连接关闭报文，并发送确认报文（第二次挥手）
+   - 报文首部：`ACK=1 ack=u+1`（确认`FIN`）（序列号`seq=v`）
+   - 此刻：服务端进入关闭等待状态（`CLOSE-WAIT`）
+   - 说明：连接半关闭状态，客户端没有数据要发送，但服务器如果还要发送数据，客户端依然需要接受。
+3. 客户端收到服务器的确认请求后，客户端进入终止等待`2`状态（`FIN-WAIT-2`）
+   - 服务器在这期间还要确认客户端所需要的数据是否真的发送完毕了，如果还没发送完，则继续发送数据
+4. 服务器确认数据已发送完毕后，向客户端发送连接关闭报文（第三个挥手），服务器进入最后确认状态（`LAST-ACK`）
+    - 报文首部：`FIN=1 ACK=1 ack=u+1`（确认上一次数据包）序列号`seq=w`
+5. 客户端收到服务器的连接关闭报文后，发出接受确认报文（第四次挥手），客户端进入时间等待状态（`TIME-WAIT`）
+    - 报文首部：`ACK=1 ack=w+1`(确认上一次数据包) 序列号`seq=u+1`
+6. 服务器收到客户端的确认，立即进入`TCP`关闭状态（`CLOSE`），`TCP`连接结束
+   - `TCP`关闭，服务端要比客户端早一些
 
-        function text(data) {
-            console.log(data);
-        }
-    </script>
-</body>
+`TIME-WAIT`时长：`MSL Maximum Segment Lifetime` 最大报文生存时间。`MSL`的值根据不同情况而不同，一般是`30`秒 `1`分钟 `2`分钟。  
+目的：保证客户端发送的最后一个报文能够发到服务器，一旦报文丢失，服务器会认为自己最后一次发送的`FIN+ACK`包，客户端没有收到，此时，服务器会重新发送一次`FIN+ACK`包，而客户端可以在`2MSL`的`TIME-WAIT`时间内收到重新传输的`FIN+ACK`包，接着重新进行第四次挥手，并重启`2MSL`计时器。
+
+
+为什么是四次挥手？   
+原因：第一次挥手的时候发送了`FIN`包，服务器接收到以后，表示客户端不再发送数据了，但还能接收数据。这时服务器先向客户端先发送确认包，并且确认自己是否还有数据没有发送给客户端，这个确认的阶段就是`CLOSE-WAIT`，所以在终止等待`2`（`CLOSE_WAIT`）的开始和结束需要各发一个包，状态开始时向客户端发送的包是确认收到来自客户端的`FIN`包，状态结束时向客户端发送的是确认数据已经完整发送，所以四次挥手。
+
+
+`TCP`连接建立后，客户端突然出现故障？   
+`TCP`保活计时器：客户端如果出现故障，服务器每收到一次客户端的请求后都会重新复位保活计时器，时间通常是`2`小时，若`2`小时还没有收到客户端的数据，服务器就会发送一个探测报文段，以后每隔`75`分钟发送一次。若一连发送`10`个探测报文仍无反应，服务器就认为客户端出了故障，此时将关闭连接。
+
+## 同源策略
+### 1. 同源策略的定义
+同源策略`Same-Origin-Policy(SOP)`   
+`web`浏览器只允许在两个页面有相同的源时，第一个页面访问第二个页面里的数据。 
+
+```makefile
+报错：
+Access to XMLHTTPRequest at 'http://study.jsplusplus.com/server.php' from origin 'http://test.jsplusplus.com' has been blocked by CORS policy: NO 'Access-Control-Allow-Origin' header is present on the requested resource
+· Access to XMLHttpRequest at: 请求跨域
+· 地址: http://study.jsplusplus.com/server.php
+· from orgin 'http://test/jsplusplus.com'
+· 请求来自源 http://test.jsplusplus.com
+· has been blocked by CORS policy
+被跨域资源共享策略（Cross-origin resource sharing）阻止
+· No 'Access-Control-Allow-Origin' header is present on the requested resource
+在请求的资源中没有发现'允许跨域'头信息
 ```
 
-封装Ajax增加JSONP功能：
-```js
-var xhr = (function() {
+### 2. 同源的情况
+1. 源（域名）：协议+域名+端口   
+2. 同源：相同的协议&&相同的域名&&相同的端口    
+同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读写对方的资源。只有同一个源的脚本赋予`dom`、读写`cookies`、`session`、`ajax`等操作的权限。   
 
-    function _doAjax(opt) {
-        var o = window.XMLHttpRequest ?
-            new XMLHttpRequest() :
-            new ActiveXObject('Microsoft.XMLHTTP');
-        var t = null; // 设置超时
+不受同源策略限制的项：
+1. 页面的超链接
+2. 重定向页面
+3. 表单的提交
+4. 资源引入`script src`/`link href`/`img src`/`iframe src`
 
-        if (!o) {
-            throw new Error('您的浏览器不支持异步发起HTTP请求')
-        }
-
-        var opt = opt || {},
-            type = (opt.type || 'GET').toUpperCase(),
-            async = '' + opt.async === 'false' ? false : true,
-            dataType = opt.dataType || 'JSON',
-            jsonp = opt.jsonp || 'cb',
-            jsonpCallback = opt.jsonpCallback || 'jQuery' + randomNum() + '_' + new Date().getTime(),
-            url = opt.url,
-            data = opt.data || null,
-            timeout = opt.timeout || 30000,
-            error = opt.error || function() {},
-            success = opt.success || function() {},
-            complete = opt.complete || function() {}
-
-        if (!url) {
-            throw new Error('您没有填写url')
-        }
-
-        if (dataType.toUpperCase() === 'JSONP' && type !== 'GET') {
-            throw new Error('如果dataType为JSONP，请您将type设置为GET');
-        }
-
-        if (dataType.toUpperCase() === 'JSONP') {
-            var oScript = document.createElement('script');
-            // 有问号？，说明url后有其他参数，则使用&，将jsonp拼接到url后。
-            oScript.src = url.indexOf('?') === -1 ?
-                url + '?' + jsonp + '=' + jsonpCallback :
-                url + '&' + jsonp + '=' + jsonpCallback;
-
-            document.body.appendChild(oScript);
-            document.body.removeChild(oScript);
-
-            //****************重点********************
-            window[jsonpCallback] = function(data) {
-                success(data);
-            }
-            return;
-        }
-
-        o.onreadystatechange = function() {
-            if (o.readyState === 4) {
-                if ((o.status >= 200 && o.status < 300) || o.status === 304) {
-                    switch (dataType.toUpperCase()) {
-                        case 'JSON':
-                            success(JSON.parse(o.responseText));
-                            break;
-                        case 'TEXT':
-                            success(o.responseText);
-                            break;
-                        case 'XML':
-                            success(o.responseXML);
-                            break;
-                        default:
-                            success(JSON.parse(o.responseText));
-                    }
-                } else {
-                    error();
-                }
-                complete();
-                clearTimeout(t);
-                t = null;
-                o = null;
-            }
-        }
-
-        o.open(type, url, async);
-        type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        o.send(type === 'GET' ? null : formatDatas(data));
-        t = setTimeout(function() {
-            o.abort();
-            clearTimeout(t);
-            t = null;
-            o = null;
-            complete();
-            throw new Error('请求超时')
-        }, timeout);
-    }
-
-    function formatDatas(obj) {
-        var str = '';
-        for (var key in obj) {
-            str += key + '=' + obj[key] + '&';
-        }
-        return str.replace(/&$/, '');
-    }
-
-    // 随机数生成
-    function randomNum() {
-        var num = '';
-        for (var i = 0; i < 20; i++) {
-            num += Math.floor(Math.random() * 10)
-        }
-        return num;
-    }
-
-    return {
-        ajax: function(opt) {
-            _doAjax(opt);
-        },
-        post: function(url, data, dataType, successCB, errorCB, completeCB) {
-            _doAjax({
-                type: 'POST',
-                url: url,
-                data: data,
-                dataType: dataType,
-                success: csuccessCB,
-                error: errorCB,
-                complete: completeCB
-            });
-        },
-
-        get: function(url, dataType, successCB, errorCB, completeCB) {
-            _doAjax({
-                type: 'GET',
-                url: url,
-                dataType: dataType,
-                success: csuccessCB,
-                error: errorCB,
-                complete: completeCB
-            })
-        }
-    }
-}())
-```
+只要有`JS`引擎的浏览器都使用同源策略。

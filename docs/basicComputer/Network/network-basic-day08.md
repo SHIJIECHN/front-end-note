@@ -1,226 +1,253 @@
 ---
 autoGroup-1: 网络基础
 sidebarDepth: 3
-title: 大文件上传
+title: 8. 同步与异步请求、混编模式、AJAX、原生AJAX封装
 ---
 
-## form表单文件上传
-直接上传，为什么上传不上去呢？
-```html
-<form action="server/upload.php" method="post">
-    <input type="text" name="filename" /><br />
-    <input type="file" name="file" /> <br />
-    <input type="submit" value="上传" />
-</form>
+## 同步与异步请求和混编模式
+### 1. AJAX的前奏
+1. 浏览器与服务器之间的通信基础是`HTTP`协议。
+2. 用户通过网址或者表单向服务器提交请求,服务器向浏览器发送相应的响应。
+
+### 2. 混编模式
+在没有AJAX出现之前,通常的编程都是前端(HTML)代码和后端(PHP)代码写在同一个文件中,前端的代码负责页面的结构,而后端的代码用于获取数据处理业务逻辑。以前的这种编写代码的方式就叫做混编模式。
+
+缺点：
+1. 难以维护
+2. 同步请求数据
+
+### 3. 同步与异步请求
+1. 同步请求:例如,通过混编模式下php代码直接向服务器发送请求,当获取数据完成之后,重新更新和渲染页面的全部内容。
+2. 异步请求:例如,通过AJAX向服务器发送请求,拿到数据,整理数据,局部的渲染页面部分内容。
+
+
+异步请求解决了什么问题呢?
+在不重新加载整个页面的前提下,能获取到新的网页所需要的数据,并且局部的更新页面的部分内容。
+
+## AJAX
+### 1. 定义
+`AJAX`：`Asynchronous JavaScript and XML` 异步的`JavaScript`和`XML`。
+
+AJAX是什么? JavaScript脚本发起HTTP请求
+
+JavaScript异步通信: 请求服务器返回XML文档,前端从XML文档中获取数据,再在不刷新整个页面的基础上,渲染到页面相应的位置。
+
+### 2. 原生AJAX
+1. 原生AJAX的创建：原生`XMLHttpRequest`对象与`ActiveX`对象   
+2. 作用：
+   1. `JS`脚本`HTTP`请求的发起必须通过`XMLHttpRequest`对象
+   2. 也是通过`AJAX`进行浏览器与服务器通信的接口
+   3. 不局限于`XML`，可以发送任何格式的数据。
+3. XMLHttpRequest本身是一个js引擎内置的构造函数，
+所有`XMLHttpRequest`对象都需要被实例化：`var xhr = new XMLHttpRequest()`;
+
+4. 兼容性：`IE5/IE6`使用`ActiveX`对象   
+`var xhr = new ActiveXObject('Microsoft.XMLHTTP');`
+
+```js
+if(window.XMLHttpRequest) {
+	xhr = new XMLHttpRequest();
+} else {
+	xhr = new ActiveXObject('Microsoft.XMLHTTP');
+}
 ```
-直接提交时，是提交的文件名字符串，文件并没有上传。   
-文件和数据的区别：数据->字符串，文件->文件  
-```html
-<form action="server/upload.php" method="post" enctype="application/x-www-form-urlencoded"></form>
-```
-application/x-www-form-urlencoded POST 数据键值对化。username=123&password=123456     
+### 3. 原生AJAX的实现方法、事件和属性
+#### 原生AJAX的方法
+1. `open`方法（发送设置）   
+参数列表：    
+   - `method`：请求方式
+   - `url`：请求发送的地址
+   - `async`：`true`异步 `false`同步   
+2. `send`方法（发送请求）
+参数：发送`POST`请求体数据用，`GET`不填写
 
-form表单属性：encType，采用什么编码格式来进行数据编码。form表单POST形式默认的enctype="application/x-www-form-urlencoded"
+#### 原生AJAX的事件
+`onreadystatechange`事件：挂载到`XMLHttpRequest`对象上的事件   
+状态码：
+1. `readyState`状态：通过`XMLHttpRequest`对象发送`HTTP`请求的各个阶段状态码（`0-4`）   
+2. `status`状态：服务器响应的状态码（`200 OK`、`404`未找到页面）   
+
+当`readyState`变化时，将触发`onreadystatechange`事件执行其回调函数  
+   - `0`：请求未初始化
+   - `1`：服务器连接已建立
+   - `2`：请求已接收
+   - `3`：请求处理中
+   - `4`：请求已完成，且响应已就绪
+
+注意：`readyState`仅仅是针对请求的状态码，获取资源是否成功取决于`statue`的状态
 
 
-## 二进制方式文件上传
-```html
-    <form action="server/upload.php" method="post" enctype="multipart/form-data">
-        <input type="text" name="filename" /><br />
-        <input type="file" name="file" /> <br />
-        <input type="submit" value="上传" />
-    </form>
-```
-enctype="multipart/form-data" 将上传的文件类型转成二进制的形式，进行上传。     
-同步上传：点击上传后，跳转到后端的页面，执行后端代码。    
-多文件上传
-```html
-<form action="server/upload.php" method="post" enctype="multipart/form-data">
-    <input type="text" name="filename" /><br />
-    <input type="file" name="file" multiple/> <br />
-    <input type="submit" value="上传" />
-</form>
-```
-或者
-```html
-<form action="server/upload.php" method="post" enctype="multipart/form-data">
-    <input type="text" name="filename" /><br />
-    <input type="file" name="file[]"/> <br />
-    <input type="file" name="file[]"/> <br />
-    <input type="file" name="file[]"/> <br />
-    <input type="file" name="file[]"/> <br />
-    <input type="submit" value="上传" />
-</form>
-```
+#### 原生AJAX属性
+1. `responseText`：返回JSON数据的JSON字符串    
+2. `responseXML`：获取XML数据
 
-## FormData()
-表单数据构造函数。
-```html
-<body>
-    <input type="text" id="username" value="张三" />
-    <input type="text" id="password" value="123456" />
-    <input type="submit" id="submitBtn" value="提交">
 
-    <script>
-        var oUsername = document.getElementById('username'),
-            oPassword = document.getElementById('password'),
-            oSubmitBtn = document.getElementById('submitBtn'),
-            fd = new FormData();
+#### 原生AJAX基础实现
+```js
+var xhr;
 
-        oSubmitBtn.onclick = function() {
-            // append 增加一行表单数据
-            fd.append('Username', oUsername.value);
-            fd.append('Password', oPassword.value);
+// 创建xhr
+if (window.XMLHttpRequest) {
+    xhr = new XMLHttpRequest();
+} else {
+    xhr = new ActiveXObject('Microsoft.XMLHTTP');
+}
 
-            console.log(fd); // 对象，FormData实例化对象
+console.log(xhr.readyState); // 0 1 在发送请求前，可以检测到0和1状态
 
-            // get 获取数据
-            console.log('username: ' + fd.get('Username')); // 张三
-            console.log('password: ' + fd.get('Password')); // 123456
+// 发送HTTP请求
+xhr.open('GET', 'url');
+xhr.send();
 
-            // set 设置
-            fd.set('Username', '李四');
-            console.log('username: ' + fd.get('Username')); // 李四
-
-            // has 判断是否存在某个字段
-            console.log(fd.has('Password')); // true
-
-            // delete 删除字段
-            fd.delete('Password');
-            console.log('password: ' + fd.get('Password')); // null
-        }
-    </script>
-</body>
+console.log(xhr.readyState);// 2 3 4
+// 接收请求
+xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.statue === 200) {
+        // 接收响应
+        console.log(JSON.parse(xhr.responseText));
+    }
+}
 ```
 
-## 案例：大文件上传
-```html
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>upload file</title>
-    <style>
-        ul {
-            padding: 0;
-            margin: 0;
-            list-style: none;
-            margin-top: 100px;
+POST方式
+```js
+// 发送HTTP请求
+xhr.open('POST', 'url');
+// 使用POST必须要加
+xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xhr.send('status=1'); // 参数
+```
+`PSOT`请求方式下，`send`方法参数中的格式：`a=1&b=2&c=3 ` 
+`xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');`   
+`PSOT`请求方式必须设置这个请求头信息，目的是将请求体中的数据转换为键值对，这样后端接收到`a=1&b=2&c=3`这样的数据才知道，这是一个`POST`方式传来的数据。
+
+
+## AJAX封装
+```js
+var $ = (function() {
+    var o = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject('Microsoft.XMLHTTP');
+    var t = null; // 设置超时
+
+    // 如果浏览器不支持AJAX请求
+    if (!o) {
+        throw new Error('您的浏览器不支持异步发起HTTP请求')
+    }
+
+    function _doAjax(opt) {
+        var opt = opt || {},
+            // 请求方法，繁殖用户传入小写，强制转为大写
+            type = (opt.type || 'GET').toUpperCase(),
+            // 同步 or 异步
+            async = ''+ opt.async === 'false'? false : true,
+            // 请求地址
+            url = opt.url,
+            // 请求参数
+            data = opt.data || null,
+            // 超时设置
+            timeout = opt.timeout || 30000,
+            // 失败后的回调
+            error = opt.error || function() {},
+            // 成功后的回调
+            success = opt.success || function() {},
+            // 无论失败还是成功都会执行的complete函数
+            complete = opt.complete || function() {}
+
+        // 未传入url
+        if (!url) {
+            throw new Error('您没有填写url')
         }
         
-        .progress-bar {
-            width: 300px;
-            height: 40px;
-            border: 1px solid #666;
-            text-align: center;
-        }
-        
-        .progress {
-            width: 0;
-            height: 100%;
-            background-color: green;
-        }
-        
-        .error-info {
-            line-height: 40px;
-            font-size: 14px;
-            color: #333;
-        }
-        
-        .error-tip {
-            color: red;
-            display: block;
-        }
-    </style>
-</head>
-
-<body>
-    <input type="file" id="file" multiple />
-
-    <ul class="progress-wrap">
-        <!-- <li class="progress-bar">
-            <div class="progress"></div>
-            <span class="error-info">文件类型错误</span>
-        </li> -->
-    </ul>
-
-    <script>
-        // 选中文件后，点击打开直接上传，不需要再点击上传按钮
-        var oFile = document.getElementById('file'),
-            oErrorTip = document.getElementsByClassName('error-tip')[0],
-            oProgressWrap = document.getElementsByClassName('progress-wrap')[0],
-            fd = new FormData();
-
-        oFile.onchange = function() {
-            console.log(oFile.files); // 选中的文件信息
-
-            var files = oFile.files,
-                fileLen = files.length;
-
-            if (fileLen <= 0) {
-                console.log('您还没有选择图片');
-                return;
+        // AJAX绑定事件监听处理函数
+        o.onreadystatechange = function() {
+            if (o.readyState === 4) {
+                if((o.status >= 200 && o.status < 300) || o.status === 304){
+                    // 请求成功回调
+                    success(JSON.parse(o.responseText));
+                }else{
+                    // 请求失败回调
+                    error();
+                }   
             }
-
-            if (fileLen > 5) {
-                console.log('最多可同时上传6张图片');
-                return;
-            }
-
-            // oProgressWrap.innerHTML = '';
-            var fileName = '',
-                fileSize = 0,
-                maxSize = 1048576, // 按字节来算：1M
-                fd = null,
-                errorInfo = '';
-
-            for (var i = 0; i < fileLen; i++) {
-                fileName = files[i].name;
-                fileSize = files[i].size;
-
-                // 判断是否是图片
-                if (!/\.(gif|gpeg|png)$/.test(fileName)) {
-                    errorInfo = '【' + fileName + '】,文件不是图片类型'
-                }
-
-                if (fileSize > maxSize) {
-                    errorInfo = '【' + fileName + '】,超过可上传大小'
-                }
-
-                var oProgressBar = document.createElement('li');
-                oProgressBar.className = 'progress-bar';
-
-                oProgressWrap.appendChild(oProgressBar);
-
-                if (errorInfo !== '') {
-                    oProgressBar.innerHTML = '<span class="error-info">' + errorInfo + '</span>'
-                } else {
-                    oProgressBar.innerHTML = '<div class="progress"><div>';
-                    fd = new FormData();
-                    fd.append('file', files[i]);
-
-                    var o = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-                    o.open('post', 'server/upload.php');
-
-                    (function(i) {
-                        o.upload.onprogress = function(e) {
-                            // e.loaded 已经上传完的字节数  
-                            // e.total 整个文件的字节数
-                            var e = e || window.event,
-                                percent = e.loaded / e.total * 100 + '%',
-                                thisProgressBar = oProgressWrap.getElementsByClassName('progress-bar')[i];;
-
-                            thisProgressBar.getElementsByClassName('progress')[0].style.width = percent;
-                        }
-                    })(i);
-
-                    o.send(fd);
-                }
-            }
+            // 最后执行complete
+            complete();
+            clearTimeout(t);
+            t = null;
+            o = null;
         }
-    </script>
-</body>
+
+        // 处理AJAX请求的逻辑
+        o.open(type, url, async);
+        // POST 请求设置请求头数据的格式类型
+        type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www.form-urlencoded');
+        // 处理请求数据中的data的格式
+        o.send(type === 'GET' ? null : formatDatas(data));
+        t = setTimeout(function(){
+            o.abort();
+            clearTimeout(t);
+            t = null;
+            o = null;
+            complete();
+            throw new Error('请求超时')
+        }, timeout);
+    }
+
+    function formatDatas(obj) {
+        // {'name':'Tom','sex':'male'} ---> 'name=Tom&sex=male'
+        var str = '';
+        for (var key in obj) {
+            str += key + '=' + obj[key] + '&';
+        }
+        return str.replace(/&$/, '');
+    }
+
+    return {
+        ajax: function(opt) {
+            // 处理传入的参数问题,抽离函数,能够让所有方法能够在Ajax方法外处理
+            _doAjax(opt);
+        },
+        post: function(url, data, callback) {
+            _doAjax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: callback
+            });
+        },
+        get: function(url, callback){
+            _doAjax({
+                type: 'GET',
+                url: url,
+                success: callback
+            })
+        }
+    }
+}())
+
+// ajax
+$.ajax({
+    type: 'POST',
+    url: '12',
+    data: {
+        status: 1,
+        flag: 2
+    },
+    success: function(data) {
+        console.log(data);
+    }
+})
+
+// post
+$.post('url', {
+    status: 1,
+    flag: 2
+}, function(data) {
+    console.log(data);
+})
+
+// get
+$.get('url?status=1&flag=2', function(data) {
+    console.log(data);
+})
+
 ```
 
-## 腾讯课堂案例
-大文件上传功能
