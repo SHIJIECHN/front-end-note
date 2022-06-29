@@ -14,3 +14,48 @@ title: 三数之和
 接下来如何移动left 和right呢， 如果nums[i] + nums[left] + nums[right] > 0 就说明 此时三数之和大了，因为数组是排序后了，所以right下标就应该向左移动，这样才能让三数之和小一些。
 
 如果 nums[i] + nums[left] + nums[right] < 0 说明 此时 三数之和小了，left 就向右移动，才能让三数之和大一些，直到left与right相遇为止。
+
+```ts
+function threeSum(nums: number[]): number[][] {
+  let res: number[][] = []
+
+  nums.sort((a, b) => a - b);
+
+  const length = nums.length;
+  
+  for (let i = 0; i < length; i++){
+    // 排序之后如果第一个元素已经大于零，那么无论如何组合都
+    // 不可能凑成三元组，直接返回结果就可以了
+    if (nums[i] > 0) {
+      return res;
+    }
+
+    // 去重
+    if (i > 0 && nums[i] === nums[i - 1]) {
+      continue;
+    }
+
+    let left = i + 1;
+    let right = length - 1;
+    debugger
+    while (left < right) {
+      let sum = nums[i] + nums[left] + nums[right]; 
+      
+      if (sum < 0) {
+        left++;
+      } else if (sum > 0) {
+        right--;
+      } else if(sum == 0) {
+        res.push([nums[i], nums[left], nums[right]]);
+        left++;
+        right--;
+        // 去重
+        while (nums[left] == nums[left - 1]) left++;
+        while (nums[right] == nums[right + 1]) right--;
+      }
+    }
+  }
+
+  return res;
+};
+```

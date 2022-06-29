@@ -13,9 +13,11 @@ module.exports = [
     text: "框架",
     items: [
       { text: "Vue", link: "/framework/Vue/", },
+      { text: "Vue-Router", link: "/framework/Vue-Router/", },
+      { text: "Vuex", link: "/framework/Vuex/", },
       { text: "React", link: "/framework/React/", },
       { text: "TypeScript", link: "/framework/TypeScript/", },
-      { text: "Vue-Router", link: "/framework/Vue-Router/", },
+      
     ],
   },
   {
