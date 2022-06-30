@@ -37,7 +37,7 @@ title: 跨域
         window.name = 'mainWindow';
 
         myIframe.onload = function() {
-            console.log(myIframe.contentWindow.name); // iframe的window.name
+            console.log(myIframe.contentWindow.name); // iframeWindow iframe的window.name
         }
     </script>
 </body>
@@ -50,7 +50,7 @@ title: 跨域
 
         var iframe = document.getElementById('myIframe');
         iframe.onload = function() {
-            console.log(window.parent.name); // 打印主窗口window.name
+            console.log(window.parent.name); // wmainwindow 打印主窗口window.name  
         }
     </script>
 </body>
@@ -59,7 +59,7 @@ title: 跨域
     <!--index3.html-->
     <script>
         // 获取mainWindow
-        console.log(window.parent.parent.name); 
+        console.log(window.parent.parent.name);  // mainWindow
     </script>
 </body>
 ```
