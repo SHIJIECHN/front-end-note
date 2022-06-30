@@ -1,20 +1,20 @@
 ---
 autoGroup-1: 网络基础
 sidebarDepth: 3
-title: JSONP跨域
+title: 12. JSONP跨域
 ---
 
 ## JSONP
 JSONP（JSON with Padding）: 跨域获取JSON数据的一种非官方的使用模式  
 
 1. JSON和JSONP不是一个类型
-2. JSON树数据交换格式，JSONP是一种跨域获取JSON数据的交互技术
+2. JSON是数据交换格式，JSONP是一种跨域获取JSON数据的交互技术
 3. JSONP获取的资源并不是直接是JSON数据，而是带有JSON数据参数的函数执行     
 
 客户端期望返回：{"name": "Jacky", "age":18}   
 JSONP实际返回：callback({"name": "Jacky", "age":18})    
 
-1. 案例一
+### 1. 案例一
 ```html
 <!--http://test2.jsplusplus.com/index.html-->
 <body>
@@ -46,7 +46,7 @@ $.ajax({
 })
 ```
 
-2. 案例二：     
+### 2. 案例二：     
 script标签不管文件是什么，只会把返回的内容当做脚本来执行。如果返回的内容执行有错误，也只会按照正常执行的错误输出。
 ```html
 <body>
@@ -69,7 +69,7 @@ script标签不管文件是什么，只会把返回的内容当做脚本来执�
 ```
 可以在控制台中输出：JS++。
 
-3. 案例三
+### 3. 案例三
 ```html
 <!--http://test2.jsplusplus.com/index.html-->
 <body>
@@ -84,6 +84,7 @@ script标签不管文件是什么，只会把返回的内容当做脚本来执�
             document.body.removeChild(oScript); // 不需要延迟删除，因为appendChild只是让脚本执行，在src的时候已经响应了
         }
 
+        // 回调函数
         function test(data) {
             console.log(data);
         }
@@ -99,9 +100,7 @@ script标签不管文件是什么，只会把返回的内容当做脚本来执�
 ```
 可以在控制台中输出：JS++。
 
-JSONP跨域百度搜索关键字
-
-4. 案例四     
+### 4. 案例四     
 jQuery是如何使用JSONP实现跨域的？
 ```html
 <!--http://test2.jsplusplus.com/index.html-->
@@ -124,14 +123,14 @@ jQuery是如何使用JSONP实现跨域的？
             })
         }
 
-        function text(data) {
+        function test(data) {
             console.log(data);
         }
     </script>
 </body>
 ```
 
-封装Ajax增加JSONP功能：
+## 封装Ajax增加JSONP功能：
 ```js
 var xhr = (function() {
 
@@ -267,4 +266,55 @@ var xhr = (function() {
         }
     }
 }())
+```
+
+## JSONP跨域百度搜索关键字
+绑定input事件的事件处理函数，通过JSONP跨域的方式获取返回的数据。
+
+### 1. 功能点1： 利用JSONP跨域获取数据
+利用手动或者封装的Ajax进行跨域请求数据
+```javascript
+;(function(doc){
+	var oSearchInput = doc.getElementsByClassName('J_searchInput')[0];
+	
+	var init = function(){
+		bindEvent();
+	}
+	
+	function bindEvent(){
+		// 绑定输入框的事件处理函数
+		oSearchInput.addEventListener('input', inputType, false);
+	}
+	
+	// inputType函数
+	function inputType(){
+		var val = _trimSpace(this.value),
+				len = val.length;
+		// 判断当前输入框输入字符的长度
+		if(len) {
+			// 通过JSONP跨域请求数据
+			getDatas(val, 'setDatas');
+		}
+	}
+	
+	// JSONP跨域请求数据
+	function getDatas(val, callback){
+		// 创建script标签
+		var oScript = doc.createElement('script');
+		oScript.src = 'https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=' + val + '&cb' + callback;
+		doc.body.appendChild(oScript);
+		doc.body.removeChild(oScript);
+	}
+	
+	// 去除输入框空格
+	function _trimSpace(str){
+		return str.replace(/\s+/g, '');
+	}
+	
+	// 执行JSONP跨域返回的函数
+	window.setDatas = function(data) {
+		console.log(data);
+	}
+	
+})(document);
 ```

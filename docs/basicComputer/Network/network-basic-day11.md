@@ -279,5 +279,65 @@ iframe.src = 'http://test.jsplusplus.com/index.html'
 `message`：要发送到接受方的数据   
 `targetOrigin`：接收方的源，还有必须要有监听`message`事件
 
+#### 使用
+父级(接收方)页面：index.html (http://test2.jsplusplus.com/index.html)
+```javascript
+<iframe src="http://test2.jsplusplus.com/index.html" id="iframe"></iframe>
 
-使用
+window.onmessage = function(e) {
+	var e = e || window.event;
+	console.log(e.data);
+}
+```
+子级(发送方)页面：index.html (http://test.jsplusplus.com/index.html)
+```javascript
+$.post('http://test.jsplusplus.com/index.html',{
+	status:1
+},function(data){
+	window.parent.postMessage(
+        JSON.stringify(data),
+        'http://test2.jsplusplus.com'
+    );
+})
+```
+
+### 4. hash+iframe方式
+核心思想：零url的hash值#xxx来传递数据，利用location.hash
+
+#### 使用
+父级页面：index.html (http://test2.jsplusplus.com/hash/index.html)
+```javascript
+<iframe src="http://test2.jsplusplus.com/hash/index.html" id="iframe"></iframe>
+var oBtn = document.getElementById('btn');
+oBnt.onclick = function(){
+	console.log(JSON.parse(decodeURI(location.hash.substring(1))));
+}
+```
+子级页面：index.html (http://test.jsplusplus.com/index.html)
+```javascript
+<iframe src="http://test2.jsplusplus.com/hash/index2.html"></iframe>
+var hash = location.hash.substring(1);
+switch(hash){
+	case: 'getCourses':
+	$.post('http://test.jsplusplus.com/get_courses.php',{
+		status:1
+	},function(data){
+		var str = JSON.stringify(data);
+		iframe.src = 'http://test2.jsplusplus.com/hash/index2.html#' + str;
+	})
+}
+```
+孙级页面：index.html (http://test2.jsplusplus.com/hash/index2.html)
+```javascript
+setTimeout(function(){
+	window.parent.parent.location.has = self.location.hash.substring(1);
+},300);
+```
+
+### 6. CORS跨域
+“跨域资源共享”（`Cross-origin resource sharing`）   
+1. 任意域名： `header("Access-Control-Allow-Origin: *")`;
+2. 单域名：`header("Access-Control-Allow-Origin: http://test2.jsplusplus.com")`;
+3. 多域名：
+`$allowed_origin = array('http://test2.jsplusplus.com', 'http://test3.jsplusplus.com');header("Access-Control-Allow-Origin: $allowed_origin");`
+4. 通知服务器在真正请求中采用哪种`HTTP`方法：`header("Access-Control-Request-Methods: GET, POST")`;

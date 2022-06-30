@@ -1,7 +1,7 @@
 ---
 autoGroup-3: 源码专题
 sidebarDepth: 3
-title:  nextTick原理
+title:  3. nextTick原理
 ---
 
 ## 定义
