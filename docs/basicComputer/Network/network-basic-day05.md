@@ -27,18 +27,21 @@ title: 5. 浏览器缓存、长短链接、Content-Length、referrer
 
 
 ### 4. Expires
-`Expires： Mon, 15 Aug 2016 03:56:47 GMT`(`Cache-Control`更高)    
+1. `Expires： Mon, 15 Aug 2016 03:56:47 GMT`(`Cache-Control`更高)    
 启用缓存和定义缓存的时间。告诉浏览器资源缓存过期时间，如果还没有过该时间点则不发请求。     
+2. GMT是格林威治时间，和背景时间相差8小时。
+3. 缺点：这个时间是绝对时间，也就是说如果修改了客户端的本地时间，就会导致判断缓存失效。    
 在`http1.1`开始，使用`Cache-Control:max-age=`秒替代。
 
 ### 5. 浏览器缓存的图解
 浏览器获取缓存资源流程：
  <img :src="$withBase('/basicComputer/Network/http-cache.png')" alt="http-cache"> 
 
-1. 当浏览器有缓存，查看是否过期，如果没有过期(`Cache-Control:max-age=31536000`)，直接从缓存中读取，并返回`200 OK(from disk cache)`。
+1. 当浏览器有缓存，查看是否过期，如果没有过期(`Cache-Control:max-age=31536000`)，直接从缓存中读取，并返回`200 OK(from disk cache)`。（是否命中强缓存）
 2. 如果过期了，将`Etag`和`Last-Modified`数值分别通过`If-None-Match`和`If-Modified-Since`通过请求头发送到服务器。
-3. 服务器端通过对`If-None-Match`和`If-Modified-Since`字段进行校验，如果服务器没有修正，就会返回304重定向，浏览器进行读取缓存。
+3. 服务器端通过对`If-None-Match`和`If-Modified-Since`字段进行校验，如果服务器没有修正，就会返回304重定向，并且会显示一个Not Modified的字符串，告诉浏览器进行读取本地缓存。
 4. 服务端资源如果已经修改，就重新从服务端拉取资源，并返回200。
+
 
 ## Connection: Keep-alive
 Connection:Keep-alive(存在请求头中), 只是普通的连接，跟管道化持久化连接并不是相同的东西。
@@ -88,3 +91,22 @@ Connection:Keep-alive(存在请求头中), 只是普通的连接，跟管道化�
 1. 资源防止盗链：服务器拉取资源之前判断referer是否是自己的域名或者IP,如果不是就拦截,如果是则拉取资源。通过七牛云可以设置referer的黑白域名,只能让允许的域名获取资源,但是也不是100%的能够阻止盗取行为
 
 2. 时间戳防盗链：通过时间戳和签名规则生成密钥,根据密钥和资源一起发给服务器,服务器判断密钥是否过期和密钥是否匹配,如果都通过的话返回资源。任意一项不通过,阻止获取资源。
+
+## 补充（浏览器缓存）
+### 1. 浏览器缓存分类
+1. 强缓存
+2. 协商缓存（对比缓存）
+
+浏览器在加载资源时，会先判断是否命中强缓存再验证是否命中协商缓存。
+
+### 2. 强缓存
+<img :src="$withBase('/basicComputer/Network/cache01.png')" alt="cache"> 
+流程：
+1. 查看header头中的Expire和Cacher-control来判断是否满足规则；
+2. 如果满足规则，就直接返回缓存数据；
+3. 如果不满足规则，就向服务器发送请求；
+4. 服务器返回数据；
+5. 将新数据存入缓存。
+
+### 3. 缓存位置
+浏览器的缓存存放在哪里，如何在浏览器中判断强制缓存是否生效？from disk cache和from memory cache。

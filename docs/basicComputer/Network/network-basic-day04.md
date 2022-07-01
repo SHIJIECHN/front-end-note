@@ -13,8 +13,8 @@ title: 4. HTTP状态码、Accept、Content-Type
 
 ## 常见的重要状态码
 ### 1. 304 重定向   
-1. `Etag`：服务端资源唯一标识（优先级高于`Last Modified`）（与请求头中的`If-None-Match`相同）
-2. `Last Modified`：资源在服务器最后修改的时间（精确到秒），所以需要唯一标识符。（与请求头中的`If-Modified-Match`相同）
+1. `Etag`：服务端资源唯一标识（优先级高于`Last Modified`，即同时设置ETag和`Last Modified`，会优先校验ETag）（与请求头中的`If-None-Match`相同）
+2. `Last Modified`：资源在服务器最后修改的时间（精确到秒），如果短时间内资源发生了改变，Last-Modified 并不会发生变化，所以需要唯一标识符。（与请求头中的`If-Modified-Match`相同）
 3. `If-Modified-Match`：上一次服务器端返回来的Last-modified值。
    - 是标准的HTTP请求头标签，在发送HTTP请求时，把浏览器缓存页面的最后修改时间一起发送到服务器去，服务器会把这个时间与服务器上实际文件的最后修改时间进行比较。
    - 如果时间一致，那么返回HTTP状态码304（不返回文件内容），客户端接到之后，就直接把本地缓存文件显示到浏览器上。
