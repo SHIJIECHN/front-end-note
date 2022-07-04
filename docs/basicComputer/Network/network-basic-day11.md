@@ -8,18 +8,33 @@ title: 11. 6中跨域的方式
 iframe中的src引入不同网页资源是不受同源策略的阻止，所以下面的几种iframe跨域方案都是利用这种性质实现的不同源网页跨域的问题。  
 同源策略只针对浏览器，服务器端不存在同源策略。
 
-### 1. iframe的使用与热性
+### 1. iframe的使用与特性
 
 #### 获取iframe窗口对象
 `iframe`加载了一个页面，那么`iframe`就是这个页面的窗口，想获得这个`iframe`的窗口对象`window`：`myIframe.contentWindow`
-```js
- <iframe src="index2.html" id="myIframe"></iframe>
- myIframe.contentWindow
+```html
+<!--***********************index.html*******************-->
+<body>
+    <iframe src="index2.html" id="myIframe"></iframe>
+    <script>
+        var myIframe = document.getElementById('myIframe');
+
+        myIframe.onload = function() {
+            console.log(myIframe.contentWindow.name); // iframeWindow
+        }
+    </script>
+</body>
+<!--***********************index2.html*******************-->
+<body>
+    <script>
+        window.name = 'iframeWindow'
+    </script>
+</body>
 ```
 
-#### iframe窗口存在父子关系，获取父级窗口的name属性：window.parent
+#### iframe窗口存在父子关系，子窗口获取父级窗口的window.name属性：window.parent.name
 ```js
-window.name
+window.parent.name
 ```
 
 #### 同源页面，父子窗口相互获取name属性
@@ -49,7 +64,7 @@ console.log(window.parent.parent.name); // parent.html
 ### 2. window.name属性共享性问题
 window.name是有共享性，一个窗口只有一个name属性，只要不改变不关闭页面，这个窗口就只有唯一的一个name，无论在这个窗口中如何跳转，跳转之后的窗口都可以访问到name属性；在同一个窗口多个页面是共享的，可以随意读写。
 
-#### 同源 页面，window.name共享
+#### 同源页面，window.name共享
 父级页面parent.html
 ```js
 window.name = 'parent.html'
@@ -84,7 +99,7 @@ console.log(window.name); // parent.html
 <img :src="$withBase('/basicComputer/Network/cross-domain01.png')" alt="cross-domain"> 
 
 ### 2. 设置基础域名（domain）+iframe
-核心思想：通过document.domain获取当前服务器域名，设置当前服务器域名，前提是两个网页的基础域名必须一致，再在主页面中通过iframe窗口获取子页面中的ajax，利用子页面与api同源，发起请求。    
+核心思想：通过document.domain获取当前服务器域名，设置当前服务器域名，前提是两个网页的基础域名必须一致，再在主页面中通过iframe窗口获取子页面中的ajax，利用子页面与api同源，发起请求。实际上，`iframe`窗口被引入，父级页面就可以获得`iframe`窗口对象：`contentWindow`，此时`iframe`页面也就可以使用`$.ajax`向服务器发送请求。    
 父级页面：index.html (http://test2.jsplusplus.com/index.html)
 ```html
 <body>
@@ -117,7 +132,7 @@ console.log(window.name); // parent.html
     </script>
 </body>
 ```
-**封装AJAXDomain跨域的函数**
+**封装AJAXDomain跨域函数**    
 封装的核心思想：利用上述父级页面的逻辑进行Domain函数的封装。   
 不同源客户端浏览器之间需要设置相同的基础域名，这样能够解决iframe不同源之间获取数据被同源策略阻止，而通过引入子窗口中ajax进行同域的请求数据。
 <img :src="$withBase('/basicComputer/Network/cross-domain02.png')" alt="cross-domain"> 
@@ -335,9 +350,26 @@ setTimeout(function(){
 ```
 
 ### 6. CORS跨域
-“跨域资源共享”（`Cross-origin resource sharing`）   
+“跨域资源共享”（`Cross-origin resource sharing`）：服务器设置HTTP响应头中Access-Control-Allow-Origin值，解除跨域限制。   
 1. 任意域名： `header("Access-Control-Allow-Origin: *")`;
 2. 单域名：`header("Access-Control-Allow-Origin: http://test2.jsplusplus.com")`;
 3. 多域名：
 `$allowed_origin = array('http://test2.jsplusplus.com', 'http://test3.jsplusplus.com');header("Access-Control-Allow-Origin: $allowed_origin");`
 4. 通知服务器在真正请求中采用哪种`HTTP`方法：`header("Access-Control-Request-Methods: GET, POST")`;
+
+通过这种方式解决跨域问题的话，会在发送请求时出现两种情况，分别是简单请求和复杂请求。
+
+#### 简单请求
+只要同时满足以下两大条件，就属于简单请求
+条件1：使用下列方法之一：
+- GET
+- HEAD
+- POST
+
+条件2：Content-Type 的值仅限于下列三者之一：
+- text/plain
+- multipart/form-data
+- application/x-www-form-urlencoded
+
+#### 复杂请求
+不符合以上条件的请求就肯定是复杂请求了。 复杂请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为"预检"请求,该请求是 option 方法的，通过该请求来知道服务端是否允许跨域请求。
