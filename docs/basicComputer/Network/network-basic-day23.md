@@ -19,7 +19,6 @@ webSocket 和 http 都是应用层，支持端对端的通讯。可以由服务�
 
 会先发起一个 http 请求，根服务端建立连接。连接成功之后再升级为 webSocket 协议，然后再通讯。
 
-
 <img :src="$withBase('/basicComputer/Network/ws连接.png')" alt="ws连接"> 
 
 ## webSocket 和 http 区别
@@ -71,7 +70,106 @@ io.on('connection', socket => {
 创建服务器端
 1. npm install ws nodemon   
 2. 修改package.json
+```json
+{
+    "name": "websocket-test",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon src/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "nodemon": "^2.0.18",
+        "ws": "^8.8.0"
+    }
+}
+```
+3. index.js
+```js
+const { WebSocketServer } = reqiure('ws')
 
+const wsServer = new WebSocketServer({ port: 3000 })
 
+wsServer.on('connection', curws => {
+    console.log('connected');
+
+    curws.on('message', msg => {
+        console.log('收到了信息', msg);
+
+        // 服务端客户端发送信息
+        setTimeout(() => {
+            curws.send('服务端已经收到了信息: ', msg.toString());
+        }, 2000)
+    })
+})
+```
+
+客户端代码
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>web-socket</title>
+</head>
+
+<body>
+    <p>websocket</p>
+    <button id="btn-send">发送消息</button>
+
+    <script>
+        // 创建一个websocket实例，协议是 ws
+        const ws = new WebSocket('ws://127.0.0.1:3000');
+
+        // 发送消息
+        ws.onopen = () => {
+            console.log('opened')
+            ws.send('client opended')
+        }
+
+        // 接收消息
+        ws.onmessage = event => {
+            console.log('收到了信息', event.data);
+        }
+
+        const btnSend = document.getElementById('btn-sned');
+    </script>
+</body>
+
+</html>
+```
 
 ### 聊天室功能
+服务端代码：index.js
+```javascript
+const { WebSocketServer } = require('ws')
+
+const wsServer = new WebSocketServer({ port: 3000 })
+
+const list = new Set()
+
+wsServer.on('connection', curWs => {
+    console.info('connected')
+
+    // 这里，不能一直被 add 。实际使用中，这里应该有一些清理缓存的机制，长期用不到的 ws 要被 delete
+    list.add(curWs)
+
+    curWs.on('message', msg => {
+        console.info('received message', msg.toString())
+
+        // 传递给其他客户端
+        list.forEach(ws => {
+            if (ws === curWs) return
+            ws.send(msg.toString())
+        })
+    })
+})
+```
