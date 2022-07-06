@@ -17,6 +17,7 @@ module.exports = [
       { text: "Vuex", link: "/framework/Vuex/", },
       { text: "React", link: "/framework/React/", },
       { text: "TypeScript", link: "/framework/TypeScript/", },
+      { text: "Three.js", link: "/framework/Three.js/", },
       
     ],
   },

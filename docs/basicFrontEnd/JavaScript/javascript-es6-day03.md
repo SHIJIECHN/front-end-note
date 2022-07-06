@@ -1,208 +1,214 @@
 ---
 autoGroup-2: ES6
 sidebarDepth: 3
-title: day03
+title: 3. let进阶、const、全局变量与顶层对象
 ---
 
-## 箭头函数
-普通this指向：
-1. 默认绑定规则：函数function内部this指向window
+## let进阶知识，以及块级作用域的产生
+
+### 1. ES6转为ES5时块级作用域的产生
+1. let与for的（）产生块级作用域，而for的 {} 本身也是块级作用域，所以一共产生两个块级作用域
 ```js
-function a(){
-    console.log(this); // window
+for(let i = 0; i < 10; i++) {
+	i = 'a';
+	console.log(i);
+}
+
+// 分析
+	
+{
+  let i = 0;
+  {
+    i = 'a';
+    console.log(i);
+  }
 }
 ```
-严格模式，指向undefined。
+2. let与for的（）产生块级作用域，而for的 {} 本身也是块级作用域，在for的（）块级作用域中声明变量let i，而在for的 {} 块级作用域内声明变量var i，从而形成父子块级作用域；但是var存在变量提升的问题，所以变量提升到上层块级作用域内，导致在同一个作用域内部重复声明变量，则会抛出异常 SyntaxError: Identifier 'i' has already been declared
 
-2. 隐式绑定：谁调用this指向谁。
 ```js
-var a = 1;
-function foo(){
-    console.log(this.a);
+for(let i = 0; i < 10; i++) {
+	var i = 'a';
+	console.log(i);
 }
 
-var obj = {
-    a: 2,
-    foo: foo
+// 分析
+{
+	let i = 0;
+	{
+		var i = 'a'; // var声明存在变量提升的问题
+	}
 }
 
-obj.foo(); // 2
 
-var bar = obj.foo;
-bar(); // 1
+{
+	let i = 0;
+	var i = undefined; // 同一作用域下let重复声明变量
+	{
+		i = 'a'; 
+	}
+}
 ```
 
-3. 显示绑定：call、apply、bind
-4. new 
+3. let与for的（）产生块级作用域，而for的 {} 本身也是块级作用域，在for的（）块级作用域中声明变量let i，而在for的 {} 块级作用域内声明变量 let i，虽然变量i被声明两次，但是每个i变量独立存在不同的块级作用域内部，所以不会抛出异常
 
-
-## rest运算符
-箭头函数不存在arguments。使用rest运算符替代
 ```js
-var sum = (...args) => {  // 收集
-    console.log(args); // 参数数组
+for(let i = 0; i < 10; i++) {
+	let i = 'a';
+	console.log(i);
 }
-sum(1, 2);
 
-/**************************************************/
-function foo(x, y, z) {
-    console.log(x, y, z);
+// 分析
+{
+	let i = 0;
+	{
+		let i = 'a';
+	 	console.log(i); // 'a'
+	}
 }
-foo(...[1, 2, 3]); // 展开数组
+```
+4. 经典闭包问题，首先通过for循环向数组中存入匿名函数function，此时匿名函数是个闭包函数，那么闭包的特性是什么呢？闭包函数和外界的作用域环境捆绑在一起，所以for循环的每一次都会产生一个闭包函数function，并且这个闭包函数将当前所处的块级作用域一并存入到数组中；第二次for循环执行每一个闭包函数，打印i时，闭包函数就会顺着作用域链中找到保存的块级作用域中的i变量进行打印0-9
 
-/***************************************************/
-let a = [2, 3, 4];
-let b = [1, ...a, 5]; // 展开，拼接数组
-console.log(b); // [1,2,3,4,5]
-
-/***************************************************/
-// rest收集必须是最后一个参数
-let fn = (a, b, ...c) => {
-    console.log(a, b, c); // 1,2,[3,4,5,6]
+```js
+var arr = [];
+for(let i = 0; i < 10; i++) {
+	arr[i] = function() {
+		console.log(i); // 0-9
+	}
 }
-fn(1, 2, 3, 4, 5, 6);
 
-/***************************************************/
-// 数组排序
-// ES5
-function sortNum() {
-    return Array.prototype.slice.call(arguments).sort(function(a, b) {
-        return a - b;
-    })
+for(var k = 0; k < 10; k++){
+	arr[k]();
 }
-// ES6
-const sortNum = (...args) => args.sort((a, b) => a - b)
 
-console.log(sortNum(12, 3, 45, 1, 2, 444, 12, 23, 4, 89, 3, 0));
+// 分析
 
-/***************************************************/
+{
+	let i = 0;
+	{
+		// 整个块级作用域保存在数组中
+		arr[i] = function() { // 闭包函数
+			console.log(i);
+		}
+	}
+}
 ```
 
-
-## 箭头函数this
-1. this根据d定义时外层的函数作用域来决定的
+## 块级作用域中变量声明提升，函数声明提升
+var声明的变量不受块级作用域的限制，变量声明会提升到顶层的作用域中。函数声明提升到当前块级作用域的顶端。
+1. var 的变量声明提升（块级作用域中）；由于var声明的变量不受块级作用域的限制，所以变量i会提升到最顶层的块级作用域中，导致同一作用域中重复声明同一变量i，程序抛出异常。
 ```js
-function foo() {
-    return (a) => {
-        console.log(this.a);
+{
+	let i = 2;
+	{
+		let c = 3;
+		{
+			var i = 1;
+		}
+	}
+}
+```
+2. 虽然在块级作用域内部以函数声明的方式声明函数是不推荐的，但是为了探讨这个问题，我们尝试处理一下；函数声明提升到当前块级作用域的顶端
+```js
+// 同一块级作用域重复声明变量
+{
+	let a = 1;
+	function a(){
+		
+	}
+	console.log(a); // SyntaxError: Identifier 'a' has already been declared
+}
+
+
+// 函数声明提升到当前块级作用域顶端
+{
+	let a = 1;
+	{
+		function a(){
+		
+		}
+	}
+	console.log(a); // 1
+}
+
+
+// 利用函数的表达式代替函数声明
+let a = 1;
+{
+	var test = function(){
+		console.log(10);
+	}
+}
+console.log(a);
+```
+
+## const
+const定义常量，变量是可变的量，常量就是不可变的量
+### 1. const的特性
+1. 常量被定义时必须赋值，值是不能被改变的。SyntaxError: Missing initializer in const declaration
+```js
+const a;
+console.log(a); // SyntaxError: Missing initializer in const declaration
+```
+2. 常量const存在暂时性死区的问题，能够像let一样产生块级作用域。      ReferenceError: Cannot access 'a' before initialization
+```js
+{
+	console.log(a); // ReferenceError: Cannot access 'a' before initialization 初   始化之前无法访问变量a;
+  const a = 2;
+}
+```
+3. const也不允许在同一块级作用域内重复声明。SyntaxError: Identifier 'a' has already been declared
+
+```js
+{
+	const a = 2;
+	var a = 3;
+	console.log(a); // SyntaxError: Identifier 'a' has already been declared
+}
+```
+4. const对于原始值数据类型来讲，因为原始值直接存储在栈内存当中，所以被const声明的原始值数据是不可以再次更改的；而对于引用值来讲，引用值将值存储在堆内存中，而栈内存中存储的是指向值的指针，所以被const声明的引用值，可以说保证的是指针不能改变，而并不是数据内部的结构。
+```js
+// 改变指针
+const obj = {};
+obj = [];
+console.log(obj); 
+// TypeError: Assignment to constant variable. 不能更改一个常量的值。
+
+// 改变内部数据结构
+const obj = {}
+obj.name = 'zhangsan';
+console.log(obj); // {name:'zhangsan'}
+```
+
+### 2. 冻结对象
+针对const能够改变引用值内部的数据结构问题。如果我们不想让被const声明过的引用值能够改变内部的数据结构，就可以使用冻结对象这种方式，将引用值冻结。    
+冻结对象，利用freeze方法，属于Object的静态方法。Object.freeze(obj)
+1. 普通冻结
+```js
+const obj = {}
+Object.freeze(obj);
+obj.name = 'zhangsan';
+console.log(obj); // {}
+```
+2. 递归冻结封装
+```js
+function myFreeze(obj){
+  Object.freeze(obj);
+  for(var key in obj){
+    if(typeof(obj[key]) === 'object' && obj[key] !== null){
+      Object.freeze(obj[key]);
     }
+  }
 }
-
-var obj1 = {
-    a: 2
-}
-var obj2 = {
-    a: 3
-}
-var bar = foo.call(obj1); // this根据外层函数的作用域决定的，此时foo的this已经绑定了obj1
-bar.call(obj2); // 2
-
-var baz = foo(); // this指向window
-baz.call(obj2); // undefined 
-
-/***********************************************/
-const person = {
-    eat() {
-        console.log(this);
-    },
-    drink: () => {
-        console.log(this);
-    }
-}
-
-person.eat(); // person
-person.drink(); // window
-
-/************************************************/
-function foo() {
-    return () => {
-        return () => {
-            return () => {
-                console.log('id: ', this.id);
-            }
-        }
-    }
-}
-
-var f = foo.call({id: 1});
-
-var t1 = f.call({id: 2})()(); // id: 1
-var t2 = f().call({id: 3})(); // id: 1
-var t3 = f()().call({id: 4}); // id: 1
-// this的指向只有一个，就是函数foo的this，这是因为所有的内层函数都是箭头函数，都没有自己的this，它们的this其实都是最外层foo函数的this。
-
-function foo() {
-    console.log('id: ', this.id);
-    return function() {
-        console.log('id: ', this.id);
-        return function() {
-            console.log('id: ', this.id);
-            return function() {
-                console.log('id: ', this.id);
-            }
-        }
-    }
-}
-
-
-var f = foo.call({id: 1});
-/**
-    * 运行结果：1
-    */
-var t1 = f.call({id: 2})()();
-/**
-    * 运行结果：1， 2， undefined， undefined
-    */
-var t2 = f().call({id: 3})();
-/**
-    * 运行结果：1， undefined， 3， undefined
-    * f是全局函数，this指向window
-    */
-var t3 = f()().call({id: 4});
-/**
-    * 运行结果：1， undefined， undefined，4
-    */
-
 ```
-2. 不能作为构造函数来使用
-3. 没有arguments对象，用rest（扩展运算符）替代
+## 顶层对象
+顶层对象window的属性与全局变量时一种动态的绑定关系
 ```js
-function foo() {
-    setTimeout(() => {
-        console.log(arguments);
-    })
-}
-
-foo(1, 2, 3, 4)
-// 箭头函数内部的变量arguments，其实就是函数foo的arguments变量
+a = 1;
+console.log(a); 
+console.log(window.a); 
 ```
-4. yield 命令不能生效，在generator函数中
-
-## 不适合场合
-1. 定义对象的方法，且该方法内部包括this。
-```js
-const cat = {
-    lives: 9,
-    jumps: () =>{
-        this.lives--;
-    }
-}
-```
-调用cat.jumps()时，如果是普通函数，该方法内部的this指向cat；如果写成上面的那样的夹头函数，使得this指向全局对象，因此不会得到预期结果。这是因为对象不构成单独的作用域，导致jumps箭头函数定义时的作用域就是全局作用域。
-
-2. 需要动态this的时候，也不应使用箭头函数。
-```html
-<body>
-    <button id="press">点击</button>
-    <script>
-        var button = document.getElementById('press');
-        button.addEventListener('click', () => {
-            this.clickBtn();
-        }, false);
-
-        function clickBtn(e) {
-            console.log(e);
-        }
-    </script>
-</body>
-```
+总结：
+1. function var 声明的变量允许成为全局变量，挂载到window上。
+2. let const class 是不允许成为全局变量，不会挂载到window上。
+3. 浏览器环境顶层对象是window对象，node环境顶层对象是global。
