@@ -238,7 +238,7 @@ delete obj.a;
 console.log(obj);	// {a: 2}
 ```
 
-4. 静默失败 TypeError: Cannot delete property 'a' of #<Object>
+1. 静默失败 TypeError: Cannot delete property 'a' of 
 通俗来讲，代码没执行也没报错，这个就是静默失败；但是在严格模式下会抛出异常.
 
 5. defineProperty创建属性只读不可写，可枚举，可删除；
@@ -256,7 +256,125 @@ console.log(obj);	// { a: 2}
 
 ### 3. Object.getOwnPropertyDescriptors
 Object.getOwnPropertyDescriptors()方法用来获取一个对象的所有自身属性的描述符。
-1. 基本语法
 ```js
 Object.getOwnPropertyDescriptors(obj)
+```
+返回值：所指定对象的所有自身属性的描述符，如果没有任何自身属性，则返回空字符串.
+
+### 4. Object.getOwnPropertyNames
+返回一个由指定对象的所有**自身属性**的属性名（包括不可枚举属性但不包括Symbol值作为名称的属性）组成的数组。
+```js
+var obj = { 0: "a", 1: "b", 2: "c"};
+console.log(Object.getOwnPropertyNames(obj).sort()); // ['0', '1', '2']
+```
+Object.getOwnPropertyNames()并不会获取原型链上的属性.
+
+### 5. getter、setter操作
+- getter操作：在对象自身查询当前属性，如果没有本身没有查询到，就去原型上面查询，都不存在时返回undefined。
+- setter操作：通过赋值的操作，将参数的值赋值给对象的属性。
+getter、setter操作，覆盖了原本get、set的默认操作。
+
+#### getter操作
+1. 通过getter的方式重写了默认查询obj.a属性的操作方式，它不再是原本obj.a的方式查询属性，而是通过getter的方式进行获取属性。
+```js
+var obj = {
+	log:['example', 'test'],
+	get latest() {
+		if(this.log.length  === 0) {
+			return undeifned;
+		}
+		return this.log[this.log.length - 1];
+	}  
+}
+console.log(obj.latest); 'test'
+```
+2. 通过get的方式，重写了原本的get默认操作，让属性a和属性b都能在访问的方式下还能处理其它的逻辑。
+```js
+var myObject = {
+	get a() {
+		return 2;
+	}
+}
+Object.defineProperty(myObject, 'b' , {
+	get:function() {
+		return this.a * 2;
+	},
+	enumerable: true
+});
+console.log(myObject.a); // 2
+console.log(myObject.b); // 4
+```
+
+#### setter操作
+1. 重写对象赋值的setter默认操作，利用set操作符进行操作
+```js
+//  重写对象赋值的默认操作，利用set操作符进行操作
+var language = {
+	set current(name) {
+		this.log.push(name);
+	},
+	log: []
+}
+language.current = 'EN';
+console.log(language.log); // ['EN'] 
+```
+
+2. 重写对象赋值的setter默认操作，obj.a触发getter操作，obj.a = 3赋值的行为触发setter操作
+```js
+var obj = {
+	get a() {
+		return this._a;
+	},
+	set a(val) {
+		this._a = val * 2;
+	}
+}
+obj.a = 3;
+console.log(obj.a); // 6
+```
+
+### 4. defineProperty设置属性与value冲突
+如果defineProperty设置了属性的get和set操作，此时value和writable配置项与get、set不能同时存在，否则会抛出异常  TypeError: Invalid property descriptor. Cannot both specify accessors and a value or writable attribute。   
+如果definedProperty方法设置了属性的get和set操作，此时value和writerable配置项是不让用的，是会抛出异常。
+```js
+var myObject = {
+	get a() {
+		return 2;
+	}
+}
+Object.defineProperty(myObject, 'b' , {
+	get:function() {
+		return this.a * 2;
+	},
+	enumerable: true,
+	value:3,
+	writable:true
+});
+
+console.log(myObject.a); 
+// TypeError: Invalid property descriptor. Cannot both 
+// specify accessors and a value or writable attribute, #<Object>
+```
+
+### 5. 只读属性
+如果对象属性只定义get操作或者set操作，那么该属性就是只读属性。get操作对应的是value，set操作对应的是 writable。
+```js
+var obj = {
+	get b() {
+		return 2;
+	},
+}
+obj.b = 3; // 静默失败
+console.log(obj.b); // 2 
+
+
+var obj = {}
+Object.defineProperty(obj, 'b', {
+	value:3,
+	writable:false,
+	configurable:true,
+	enumerable:true
+});
+obj.b = 4; // 静默失败,属性b只读,不可写
+console.log(obj); // 3
 ```
