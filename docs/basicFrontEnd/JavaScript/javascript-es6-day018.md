@@ -18,6 +18,7 @@ let obj2 = {
     e: 6
 }
 
+// 对象合并
 // 方式一
 Object.assign(obj1, obj2);
 console.log(obj1); // {a: 4, b: 2, c: 3, d: 5, e: 6}

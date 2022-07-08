@@ -44,7 +44,7 @@ for (let i of set.entries()) {
     // ...
 }
 
-console.log(Set.prototype[Symbol.iterator] === Set.prototype.values); // true  直接使用for...of循环，相当于访问的是values
+
 
 set.forEach(function(value, index, arr) {
     console.log(value); // a
@@ -123,7 +123,8 @@ console.log(parseInt(2, 1)); // NaN
 ```
 
 ## Map
-功能：键值一一对应。
+### 1. 存在的意义
+传统的对象属性键名为字符串，Map属性名可以是对象
 ```js
 let m = {};
 let x = {
@@ -145,7 +146,8 @@ console.log(map);
 console.log(map.get(x)); // foo
 console.log(map.get(y)); // bar
 ```
-具备iterator接口的数据结构。
+### 2. 基本用法 
+1. Map构造函数参数：必须是具备iterator接口的数据结构，并且是多元的数组结构。
 ```js
 // 数组作为参数，该数组的成员是一个个标识键值对的数组
 let m = new Map([
@@ -154,20 +156,20 @@ let m = new Map([
 ]);
 console.log(m); // {'name' => 'zhangsan', 'age' => 20}
 ```
-如果同一个键多次赋值，后面的值将覆盖前面的值
+2. 如果同一个键多次赋值，后面的值将覆盖前面的值
 ```js
 let map = new Map();
 map.set(1, 'foo');
 map.set(1, 'bar');
 console.log(map); // {1 => 'bar'}
 ```
-只有对同一个对象的引用，Map结构才视为同一个键。
+3. 只有对同一个对象的引用，Map结构才视为同一个键。
 ```js
 let map = new Map();
 map.set(['a'], 555);
 console.log(map.get(['a'])); // undefined 两个不同的数组实例
 ```
-同样的值的两个实例，在Map结构中被视为两个键
+4. 同样的值的两个实例，在Map结构中被视为两个键
 ```js
 let map = new Map();
 const k1 = ['a'];
@@ -176,6 +178,8 @@ map.set(k1, 111).set(k2, 222);
 console.log(map.get(k1)); // 111
 console.log(map.get(k2)); // 222
 ```
+
+## Map的方法
 
 ### 遍历
 ```js

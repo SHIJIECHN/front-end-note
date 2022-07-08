@@ -13,7 +13,6 @@ function Person() {
 
 let person = new Person();
 person.__proto__ = {};
-// 不使用原因：1. 内部属性；2. 访问效率慢； 3. 所有继承自该原型的对象都会影响到。
 
 // 更改原型
 Object.setPrototypeOf();

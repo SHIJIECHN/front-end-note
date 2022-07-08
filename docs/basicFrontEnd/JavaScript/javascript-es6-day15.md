@@ -1,392 +1,309 @@
 ---
 autoGroup-2: ES6
 sidebarDepth: 3
-title: 手动实现Promise
+title: 15. Map与Set
 ---
 
-## 实现Promise
-promise是new Promise()出来的对象。    
-一般函数写法
+## Set
+
+### 1. 基本用法
 ```js
-doSomething(function(value){
-    console.log('Got a value:',value);
+const set = new Set(); // 成员是唯一的“数组”
+const map = new Map(); // "对象"
+
+set.add(1);
+set.add(7);
+console.log(set); // {1, 7}
+
+// 参数是具备iterator接口的数据结构
+const s = new Set([2, 4, 4, undefined, undefined, '5', 5, NaN, NaN, {}, {}]);
+console.log(s);
+// {2, 4, undefined, '5', 5, NaN, Object, Object} 不会有重复
+
+// 稀松数组
+var s1 = new Set([1, , ,3]);
+var arr = [1, , , 3];
+console.log(s1); // [1, undefined, 3]
+console.log(arr); // [1, empty × 2, 3]
+```
+总结：
+1. Set数据中的元素都是唯一的，没有重复值。
+2. Set构造函数参数：初始化参数的时候，参数必须是实现iterator接口的数据类型，否则会抛出异常。
+3. 初始化Set实例对象时，必须通过new 构造函数的方式进行初始化，因为Set是构造函数。
+4. 遇到稀松数组，会忽略空元素，保存一个undefined值
+
+### 2. Set.prototype.add()
+增加元素。    
+- 参数：需要添加到set元素中的值，不能添加重复值
+- 返回值：返回实例化对象Set本身
+```js
+var s1 = new Set([1, 2, 3]);
+var s2 = s1.add(4);
+console.log(s1); // Set {1, 2, 3, 4}
+console.log(s1 === s2); // true
+```
+### 3. Set.prototype.has()
+判断对应的值value是否存在Set对象中。
+- 参数：需要判断的值
+- 布尔值，false表示不存在，true表示存在
+
+```js
+var s1 = new Set([1, 2, 3, 4]);
+s1.has(4); // true
+```
+
+### 4. Set.prototype.size
+返回对象的元素个数。
+```js
+var mySet = new Set();
+mySet.add(1).add(2).add(3);
+mySet.size; // 3
+```
+
+### 5. Set.prorotype.delete()
+删除指定元素。
+- 参数：需要删除的元素；
+- 返回值：成功删除返回true，否则返回false。
+
+```js
+var mySet = new Set([1, 2, 3]);
+
+console.log(mySet); // Set(3) {1, 2, 3}
+mySet.forEach(function(elem,idx){
+  console.log(elem);// 1 2 3
 })
-function doSomething(callback){
-    var value = 66;
-    callback(value);
-}
+
+mySet.delete(3);
+console.log(mySet); // Set(3) {1, 2}
 ```
-改写成下面的.then的写法
+
+#### 6. Set.prototype.clear()
+清空Set中的所有元素。返回undefined。
 ```js
-doSomething().then(function(data) {
-    console.log('Got a value:', data);
+var mySet = new Set();
+mySet.add(1);
+mySet.add("foo");
+mySet.clear();
+console.log(mySet); // Set {}
+```
+
+## Set的遍历
+###  1. keys()、values()、entries()
+keys()，values()，entires()方法执行后，返回迭代器对象
+```js
+let set = new Set(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+
+console.log(set.keys()); // SetIterator
+console.log(set.values()); // SetIterator
+console.log(set.entries()); // SetIterator
+
+// set 没有键名
+for (let i of set.keys()) {
+    console.log(i); // a,b,c,d,e,f,g 返回一个键名的迭代器
+}
+
+for (let i of set.values()) {
+    console.log(i); // a,b,c,d,e,f,g 返回一个键值的迭代器
+}
+
+for (let i of set.entries()) {
+    console.log(i); // 返回一个键值对的迭代器
+    //  ['a', 'a']
+    //  ['b', 'b']
+    // ...
+}
+
+//  直接使用for...of循环，相当于访问的是values
+console.log(Set.prototype[Symbol.iterator] === Set.prototype.values); // true
+
+```
+总结：
+1. Set中并不存在键名，所以keys()和values()是同一个方法，遍历的都是Set的成员值。
+2. entries()方法返回\[value, value]的形式
+
+### 2. forEach
+```js
+set.forEach(function(value, index, arr) {
+    console.log(value); // a
+    console.log(index); // a
+    console.log(arr); // Set(7) {'a', 'b', 'c', 'd', 'e', 'f', 'g'}
 })
-
-function doSomething() {
-    return {
-        // then接受的是一个函数参数
-        then: function(callback) {
-            var value = 66;
-            callback(value);
-        }
-    }
-}
 ```
-使用myPromise实现
-1. 第一步
+总结：由于Set中没有键名，所以响应的也没有索引值，forEach内部回调函数中的index就变成了value
+
+
+## Set应用场景
+### 1. 数组去重
 ```js
-function myPromise(fn) {
-    var callback = null;
-    this.then = function(cb) {
-        callback = cb
-    }
-
-    function resolve(value) {
-        callback(value);
-    }
-
-    fn(resolve);
-}
-
-
-function doSomething() {
-    return new myPromise(function(resolve) {
-        var value = 66;
-        resolve(value);
-    })
-}
-
-/**
- * 1. new myPromise() 相当于执行 fn(resolve)
-    fn()就是传入的函数，即
-    function(resolve) {
-        var value = 66;
-        resolve(value);
-    }
-    执行函数，相当于执行下面代码。
-   2. var value = 66;
-      resolve(66);
-
-      resolve定义为：
-      function resolve(){
-          callback(value);
-      }
-      callback(value);
-   3. callback(66);
-   实际上new myPromise(...)就是得到callback(value)
- */
-
-doSomething().then(function(data) {
-    console.log('Got a value:', data);
-});
-/**
- * 4. 执行then，接受cb，即
-        function() {
-            console.log('Got a value:', data);
-        }
-        在then函数中，将cb赋值给callback。
-    5. 此时callback从null变为函数
-    6. 在第三步是就需要callback函数了，而callback赋值是在第五步。
- */
-```
-运行结果会出现错误：Uncaught TypeError: callback is not a function
-```js
-function myPromise(fn) {
-    var callback = null;
-    this.then = function(cb) {
-        callback = cb
-    }
-
-    function resolve(value) {
-        // 新增
-        setTimeout(() => {
-            callback(value);
-        }, 1)
-    }
-
-    fn(resolve);
-}
-```
-2. 第二步
-```js
-function myPromise(fn) {
-    var state = 'pending'; // pending -> resolved
-    var value;
-    var callback = null;
-    this.then = function(onResolved) {
-        handle(onResolved);
-    }
-
-    // state状态改变；参数value->newValue
-    function resolve(newValue) {
-        value = newValue;
-        state = 'resolved';
-    }
-
-    function handle(onResolved) {
-        onResolved(value);
-    }
-
-    fn(resolve);
-}
-let promise = doSomething();
-```
-执行doSomeThing()实际上就返回一个对象，发生了两件事。
-```js
-{
-    // 1. 属性值发生改变
-    value = 66;
-    state = 'resolved';
-    // 2. 定义了then方法
-    then: function(){}
-}
-```
-执行then方法
-```js
-promise.then(function(data) {
-    console.log('Got a value:', data); // Got a value: 66
-})
-/**
- * 
-    then方法：
-    function(onResolved) {
-        handle(onResolved);
-    }
-
-    onResolved就是调用then方法传进去的函数参数，即
-    function(data) {
-        console.log('Got a value:', data);
-    }
-
-    handle是内部定义的函数：
-    function handle(onResolved) {
-        onResolved(value);
-    }
-
-    handle(onResolved)就是执行onResolved(value)；即实行函数
-    function(data) {
-        console.log('Got a value:', data);
-    }
-
-    即then最终就是执行函数：
-    function(data) {
-        console.log('Got a value:', data);
-    }
-    参数data就是value，也就是执行doSomething()是修改过的value=66
- */
-```
-完整代码
-```js
-function myPromise(fn) {
-    var state = 'pending'; // pending -> resolved
-    var value;
-    var callback = null;
-    this.then = function(onResolved) {
-        handle(onResolved);
-    }
-
-    // state状态改变；参数
-    function resolve(newValue) {
-        value = newValue;
-        state = 'resolved';
-    }
-
-    function handle(onResolved) {
-        onResolved(value);
-    }
-
-    fn(resolve);
-}
-
-
-function doSomething() {
-    return new myPromise(function(resolve) {
-        var value = 66;
-        resolve(value);
-    })
-}
-
-doSomething().then(function(data) {
-    console.log('Got a value:', data);
-});
+let arr = [1, 2, 2, 4, 4, 2, 3, 7, 9, 9];
+console.log([...new Set(arr)]); // [1, 2, 4, 3, 7, 9]
 ```
 
-## 实现链式调用
+### 2. 交集、并集、差集
 ```js
-function myPromise(fn) {
-    var state = 'pending'; // pending -> resolved
-    var value;
+let a = new Set([1, 2, 3]);
+let b = new Set([2, 3, 4]);
 
-    this.then = function(onResolved) {
-        // handle(onResolved);
-        // 传入resolve来解析
-        return new myPromise(function(resolve) {
-            handle({
-                onResolved,
-                resolve
-            })
-        })
-    }
+// 并集
+let union = new Set([...a, ...b]);
+console.log(union); // {1, 2, 3, 4}
 
-    // state状态改变；参数
-    function resolve(newValue) {
-        value = newValue;
-        state = 'resolved';
-    }
+// 交集
+let intersect = new Set([...a].filter(x => b.has(x)));
+console.log(intersect); // {2, 3}
 
-    function handle(handler) {
-        // then()没有传入参数时
-        if(!handler.onResolved){
-            handler.resolve(value);
-            return;
-        }
-        let returnValue = handler.onResolved(value)
-        handler.resolve(returnValue);
-    }
-
-    fn(resolve);
-}
-
-
-function doSomething() {
-    return new myPromise(function(resolve) {
-        var value = 66;
-        resolve(value);
-    })
-}
-
-
-doSomething().then(function(data) {
-    console.log('Got a value:', data);
-    return 88;
-}).then(function(secondResult) {
-    console.log('Got second value:', secondResult);
-});
-/**
-    then返回promise对象
-    let promise1 = doSomeThing();相当于执行下面函数
-    function doSomething() {
-        return new myPromise(function(resolve) {
-            var value = 66;
-            resolve(value);
-        })
-    }
-
-    let promise2 = promise1.then();相当于执行下面函数
-    this.then = function(onResolved) {
-        return new myPromise(function(resolve) {
-            handle({
-                onResolved,
-                resolve
-            })
-        })
-    }
-
-    promise1是一个myPromise对象，传入的参数
-    fn: function(resolve) {
-            var value = 66;
-            resolve(value);
-        }
-    
-    promise2是一个myPromise对象， 传入的参数
-    fn: function(resolve) {
-            handle({
-                onResolved,
-                resolve
-            })
-        }
-    
-
-    promise1和promise2虽然传入的参数不一样，但是都是myPromise构造函数的实例对象，因此对象的属性和方法是一模一样的。
-
-    promise1.then = function(onResolve){
-        return new myPromise(function(resolve) {
-            handle({
-                onResolved: function(secondResult){
-                    console.log('Got second value:', secondResult);
-                },
-                resolve: function(newValue) {
-                    value = newValue;
-                    state = 'resolved';
-                }
-            })
-        })
-    }
-
-    handle(handler)就是执行：
-        let returnValue = handler.onResolved(value)
-        handler.resolve(returnValue);
-
-    执行
-    handler.onResolved = function(value){
-        console.log('Got second value:', value);
-    }
-    handler.resolve = function(newValue) {
-        value = newValue;
-        state = 'resolved';
-    }
- */
+// 差集
+let different = new Set([...a].filter(x => !b.has(x)));
+console.log(different); // {1}
 ```
 
-## 返回值为myPromise的处理
+### 3. 映射出一个新的结构
 ```js
-function myPromise(fn) {
-    var state = 'pending'; // pending -> resolved
-    var value;
-    var callback = null;
-    this.then = function(onResolved) {
-        // handle(onResolved);
-        // 传入resolve来解析
-        return new myPromise(function(resolve) {
-            handle({
-                onResolved,
-                resolve
-            })
-        })
-    }
+let set = new Set([1, 2, 3, 4, 5]);
+let s = new Set([...set].map(x => x * 2))
+console.log(s); // {2, 4, 6, 8, 10}
+// 等同于
+let set1 = new Set(Array.from(set, value => value * 2));
+console.log(set1); // {2, 4, 6, 8, 10}
 
-    // state状态改变；参数
-    function resolve(newValue) {
-        if (newValue && typeof newValue.then === 'function') {
-            newValue.then(resolve);
-            return;
-        }
-        value = newValue;
-        state = 'resolved';
-    }
 
-    function handle(handler) {
-        // then()没有传入参数时
-        if (!handler.onResolved) {
-            handler.resolve(value);
-            return;
-        }
-        let returnValue = handler.onResolved(value)
-        handler.resolve(returnValue);
-    }
+// 经典面试题
+let arr = [1, 2, 3, 4, 5];
+let arr1 = arr.map(parseInt);
+// 数组map方法每遍历一次，就会执行parseInt方法
+// parseInt(elem, idx)
+// 1) parseInt(1, 0)  value：1, index：0
+// 2) parseInt(2, 1)  value: 2, index: 1
+// ...
+// parseInt('3', 2)：以2进制为基础，将二进制的数3转为十进制，
+// 但是由于字符串3用二进制表示不了（二进制1，0表示），所以返回NaN
+console.log(arr1); // [1, NaN, NaN, NaN, NaN]
 
-    fn(resolve);
+console.log(parseInt(10101010101, 2)); //parseInt 可以传入第二个参数
+console.log(parseInt(2, 1)); // NaN
+```
+
+## Map
+### 1. 存在的意义
+传统的对象属性键名为字符串，Map属性名可以是对象
+```js
+let m = {};
+let x = {
+        id: 1
+    },
+    y = {
+        id: 2
+    };
+m[x] = 'foo';
+m[y] = 'bar'; // Object.prototype.toString()
+console.log(m); // {[object Object]: 'bar'}
+console.log(m[x]); // bar
+console.log(m[y]); // bar
+
+let map = new Map();
+map.set(x, 'foo');
+map.set(y, 'bar');
+console.log(map);
+console.log(map.get(x)); // foo
+console.log(map.get(y)); // bar
+```
+### 2. 基本用法 
+1. Map构造函数参数：必须是具备iterator接口的数据结构，并且是多元的数组结构。
+```js
+// 数组作为参数，该数组的成员是一个个标识键值对的数组
+let m = new Map([
+    ['name', 'zhangsan'],
+    ['age', 20]
+]);
+console.log(m); // {'name' => 'zhangsan', 'age' => 20}
+```
+2. map.set():如果同一个键多次赋值，后面的值将覆盖前面的值
+```js
+let map = new Map();
+map.set(1, 'foo');
+map.set(1, 'bar');
+console.log(map); // {1 => 'bar'}
+```
+3. 只有对同一个对象的引用，Map结构才视为同一个键。
+```js
+let map = new Map();
+map.set(['a'], 555);
+console.log(map.get(['a'])); // undefined 两个不同的数组实例
+```
+4. 同样的值的两个实例，在Map结构中被视为两个键
+```js
+let map = new Map();
+const k1 = ['a'];
+const k2 = ['a'];
+map.set(k1, 111).set(k2, 222);
+console.log(map.get(k1)); // 111
+console.log(map.get(k2)); // 222
+```
+
+### 3. 操作Map
+```js
+let m = new Map();
+let x = {
+        id: 1
+    },
+    y = {
+        id: 2
+    };
+m.set(x, 'foo');
+m.set(y, 'bar');
+
+console.log(m.size); // 2
+console.log(m.has(x)); // true
+console.log(m.delete(x)); // true
+m.clear();
+console.log(m);
+```
+
+## Map的遍历
+### 1. keys()、values()、entries()
+```js
+let m = new Map();
+let x = {
+        id: 1
+    },
+    y = {
+        id: 2
+    };
+m.set(x, 'foo').set(y, 'bar');
+console.log(m.keys()); // MapIterator {}
+console.log(m.values()); // MapIterator {'foo', 'bar'}
+console.log(m.entries()); // MapIterator {}
+
+
+// for...of 遍历
+// 键名
+for (let key of m.keys()) {
+    console.log(key); // {id: 1}, {id: 2}
 }
 
-
-function doSomething() {
-    return new myPromise(function(resolve) {
-        var value = 66;
-        resolve(value);
-    })
+// 键值
+for (let value of m.values()) {
+    console.log(value); // foo, bar
 }
 
-function doSomethingElse(value) {
-    return new Promise(function(resolve) {
-        resolve('did something else with ', value)
-    })
+// 键值对数组
+for (let en of m.entries()) {
+    console.log(en); // { {...}, 'foo', {...}, 'bar'}
 }
 
+// 默认是entries，结构赋值的写法
+for (let [key, value] of m) {
+    console.log(key, value);
+}
 
-doSomething().then(function(data) {
-    console.log('Got a value:', data);
-    return doSomethingElse(data);
-}).then(function(secondResult) {
-    console.log('Got second value:', secondResult);
-});
+// 本质上遍历的是原型上entries的方法
+console.log(m[Symbol.iterator] === m.entries); // true
+```
+
+### 2. forEach
+```js
+new Map([['foo', 3], ['bar', {}], ['baz', undefined]]).forEach(fn);
+function fn(value, key, map){
+  console.log(`map.get('${key}') = ${value}`);
+}
 ```
