@@ -33,3 +33,32 @@ LoginServer
 3. require()
 4. exports，module.exports导出相应模块
 
+### 1. 全局对象global
+每个文件时一个模块。这个文件是js文件，一个文件就是一个函数，同时也是一个模块，拥有自己单独的作用域。可以理解为，一个文件是一个模块，同时包裹在函数的内部。
+```javascript
+var a = 100;
+console.log(global.a); // undefined
+console.log(arguments);
+
+// 相当于
+(function(xx, require, module, __filename, __dirname){
+    var a = 100;
+    console.log(global.a);
+    console.log(arguments);
+})
+```
+
+### 2. require引入模块
+核心模块与文件模块。
+```javascript
+// 核心模块
+const fs = require('fs');
+// 文件模块
+const foo = require('./foo.js');
+```
+总结：
+1. 核心模块在引入的时候自动加载，速度快
+2. 
+
+
+
