@@ -1,13 +1,26 @@
 ---
 autoGroup-3: Node基础
 sidebarDepth: 3
-title:  2. Node常用内置模块
+title:  3. Node常用内置模块
 ---
 
 ## 常用的内置模块
-- path模块
-- fs模块
-- events模块
+1. path模块
+   1. path.resolve
+   2. path.dirname, path.basename, path.extname
+   3. path.join
+2. fs模块
+   1. fs.statSync, fs.stat, fs.promises.stat
+   2. fs.open
+   3. fs.writeFile, fs.readFile
+   4. fs.readdir
+   5. fs.rename
+3. events模块
+   1. emitter.on
+   2. emitter.emit
+   3. emitter.off
+   4. emitter.eventNames, emitter.listenerCount, emitter.listeners
+   5. emitter.once, emitter.prependListener, emitter.removeAllListeners
 
 
 ## path模块

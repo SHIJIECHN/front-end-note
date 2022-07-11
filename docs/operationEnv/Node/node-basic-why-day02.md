@@ -4,6 +4,15 @@ sidebarDepth: 3
 title:  2. 全局对象和模块化开发(CommonJS)
 ---
 
+## 常用全局变量
+1. __filename
+2. __dirname
+3. setTimeout
+4. clearTimeout
+5. setInterval
+6. console
+7. process
+
 ## 全局对象
 - 全局对象可以在模块中任意使用，但是在命令行交互中是不可以使用的
 - 包括： __dirname、__filename、module、exports、require()
