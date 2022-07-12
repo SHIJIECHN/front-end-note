@@ -5,7 +5,7 @@ title:  3. nextTick原理
 ---
 
 ## 定义
-Vue再更新DOM时是异步执行的。当数据发生变化，Vue将开启一个异步更新队列，视图需要等队列中所有数据变化完成之后，再同统一更新。$nextTick方法能够知道什么时候DOM在数据改变之后，重新渲染完毕，
+Vue在更新DOM时是异步执行的。当数据发生变化，Vue将开启一个异步更新队列，视图需要等队列中所有数据变化完成之后，再同统一更新。$nextTick方法能够知道什么时候DOM在数据改变之后，重新渲染完毕，
 
 ## 引入
 ### 1. 获取元素高度
@@ -66,7 +66,7 @@ new Vue({
 <img :src="$withBase('/framework/Vue/nextTick02.png')" alt="nextTick" />
 
 ## 异步更新
-不管子组件还是父组件，都是在给data中赋值后立马去查看数据导致的。由于“查看数据”这个动作是同步操作的，而且都是在赋值之后；因此猜想：给数据赋值操作时一个异步操作，并没有马上执行。Vue、官网对数据操作是这样描述的：
+不管子组件还是父组件，都是在给data中赋值后立马去查看数据导致的。由于“查看数据”这个动作是同步操作的，而且都是在赋值之后；因此猜想：给数据赋值操作是一个异步操作，并没有马上执行。Vue、官网对数据操作是这样描述的：
 > Vue 在更新 DOM 时是异步执行的。只要侦听到数据变化，Vue 将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更。如果同一个 watcher 被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserver 和 setImmediate，如果执行环境不支持，则会采用 setTimeout(fn, 0) 代替。
 
 也就是说我们在设置this.msg = 'some thing'的时候，Vue并没有马上去更新DOM数据，而是将这个操作放进一个队列中；如果我们重复执行的话，队列还会进行去重操作；等待同一事件循环中的所有数据变化完成之后，会将队列中的事件拿出来处理。   
@@ -193,7 +193,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 ```js
 function flushCallbacks () {
   pending = false
-  // callBacks 里面的函数复制一份，同事callbacks置空
+  // callBacks 里面的函数复制一份，同时callbacks置空
   const copies = callbacks.slice(0)
   callbacks.length = 0
   // 依次执行callbacks里面的函数

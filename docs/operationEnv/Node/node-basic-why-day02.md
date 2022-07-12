@@ -148,7 +148,20 @@ console.log(bar);
 <img :src="$withBase('/operationEnv/Node/module.exports02.png')" alt="module.exports"> 
 
 #### require导入文件
-require引入一个文件（模块）中导入的对象。
+require引入一个文件（模块）中导入的对象。require(X)查找规则：
+1. 情况一：X是一个核心模块，比如path、http
+   1. 直接返回核心模块，并且停止查找
+2. 情况二：X是以 ./ 或 ../ 或 /(根目录)开头的
+   1. 第一步：将X当做一个文件在对应的目录下查找：
+   - 如果有后缀名，按照后缀名的格式查找响应的文件
+   - 如果没有后缀名，会按照如下顺序：1）直接查找文件X；2）查找X.js文件；3）查找X.json文件；4）查找X.node文件
+   2. 第二步：没有找到对应的文件，将X作为一个目录
+   - 查找目录下面的index文件：1）查找X.js文件；2）查找X.json文件；3）查找X.node文件
+   3. 如果没有找到，就报错not found
+3. 情况三：直接是一个X（没有路径），并且不是核心模块。按照下面路径查找，如果上面路径都没有找到，就报错not found。
+    
+  <img :src="$withBase('/operationEnv/Node/require.png')" alt="require"> 
+
 
 ### 4. 模块加载过程
 1. 模块在被第一次加载时，模块中的js代码会被运行一次

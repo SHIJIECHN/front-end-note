@@ -79,7 +79,7 @@ let newFn = new Proxy(fn, {
     }
 })
 
-console.log(newFn.a); // 123 This is a Proxy retur
+console.log(newFn.a); // 123 This is a Proxy return
 ```
 
 ## 对象操作的14中方法
