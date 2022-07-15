@@ -5,13 +5,13 @@ title: day02
 ---
 
 ## 宽高
-`width`, `height`, `min-width`, `min-height`, `max-width`, `max-height`
+`width`, `height`, `min-width`, `min-height`, `max-width`, `max-height`   
 `overflow`: 
 - `hidden` 隐藏溢出的部分  
 - `scroll` 滚动条，任何时候都有滚动条
 - `auto` 溢出自动生成滚动条
 
-滚动条(`17px`)占用盒子内部宽度。
+常识：浏览器滚动条(`17px`)占用盒子内部宽度。
 
 ## 字体
 浏览器默认的字体大小是`16px`。字体调整是以高度为基准，宽度自动缩放。常用`12px`, `14px`, `16px`。   
@@ -49,7 +49,7 @@ title: day02
 
 <div></div>
 ```
-此时边框的可视化宽高为`102px`，边框的宽高是设置在盒子容器之外的。   
+此时div的可视化宽高为`102px`，边框的宽高是设置在盒子容器之外的。   
 单独设置边框的属性：
 ```html
 <style>
@@ -63,7 +63,10 @@ title: day02
     }
 </style>
 ```
-复合值分解：
+
+<img :src="$withBase('/basicFrontEnd/CSS/border01.png')" alt="border"> 
+
+border 复合值分解：
 ```html
 <style>
     div {
@@ -84,7 +87,6 @@ title: day02
     div {
         width: 100px;
         height: 100px;
-        border: 1px solid #000;
         border-width: 30px;
         border-style: solid;
         border-top-color: red;
@@ -94,14 +96,16 @@ title: day02
     }
 </style>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/border02.png')" alt="border"> 
+
 查看border的分界线是斜的，border是梯形，怎么让边框变成三角形呢？  
-只需要将宽高设置为0px。
+只需要将宽高设置为0px，border-width设置值。
 ```html
 <style>
     div {
         width: 0px;
         height: 0px;
-        border: 1px solid #000;
         border-width: 100px;
         border-style: solid;
         border-top-color: red;
@@ -111,6 +115,8 @@ title: day02
     }
 </style>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/border03.png')" alt="border"> 
+
 如果想要向右的三角形呢？   
 其他三个颜色设置transparent
 ```html
@@ -118,7 +124,6 @@ title: day02
     div {
         width: 0px;
         height: 0px;
-        border: 1px solid #000;
         border-width: 100px;
         border-style: solid;
         border-top-color: transparent;
@@ -131,7 +136,6 @@ title: day02
     div {
         width: 0px;
         height: 0px;
-        border: 1px solid #000;
         border-width: 100px;
         border-style: solid;
         border-color: transparent;
@@ -139,6 +143,9 @@ title: day02
     }
 </style>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/border04.png')" alt="border"> 
+
 现在设置的`100px`是谁？是等腰三角形的高度。  
 
 ## 文本对齐
@@ -156,6 +163,7 @@ title: day02
 
 <div>你好</div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/text-align01.png')" alt="text-align"> 
 
 ## 文本行高
 默认是`22px`，一行所占用的高度。
@@ -185,6 +193,8 @@ title: day02
 
 <div>你好，班主任</div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/text-align02.png')" alt="text-align"> 
+
 ## 缩进
 `text-indent: 10px; `   
 用在`input`上
@@ -221,9 +231,10 @@ title: day02
 
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/text-indent.png')" alt="text-indent"> 
 
 ## 单位
-绝对单位：无论在任何环境，且环境变化，不会导致实际量的变化。 例如公里。 
+绝对单位：无论在任何环境，且环境变化，不会导致实际量的变化。 例如公里。    
 相对单位：环境的变化会导致实际量的变化。  
 `em`：当前元素内文本宽度的倍数。默认字体大小是`16px`，所以当前1em = 16px。则1.2em = 1.2 * 16px。如果设置当前字体大小是14px，则1em = 14px。   
 通常为了使用方便，1em = 16px，10px = 0.625em，会在`html`或`body`元素上设置`font-size：62.5%`；在需要设置字体的地方在设置`font-size: 1.6em;` 即字体就是`16px`。
@@ -291,6 +302,8 @@ title: day02
 <input type="submit" disabled="disabled" />
 ```
 
+<img :src="$withBase('/basicFrontEnd/CSS/cursor.png')" alt="cursor"> 
+
 ## 文本显示 
 单行文本截断和显示省略号的三大件
 ```html
@@ -311,6 +324,7 @@ title: day02
     <span>我想非常想成为优秀的前端工程师</span>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/ellipsis.png')" alt="ellipsis"> 
 
 ## display
 `display: inline | inline-block | block`
@@ -387,6 +401,8 @@ title: day02
 </div>
 ```
 
+<img :src="$withBase('/basicFrontEnd/CSS/hover.png')" alt="hover"> 
+
 - `:disable ` 
 按钮禁用状态
 ```html
@@ -398,10 +414,13 @@ title: day02
 
 <button disabled="disabled">按钮</button>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/disable.png')" alt="disable"> 
+
 - `checked`
 相关内容：
     - 1. 透明度`opacity`
-    - 2. \+ 兄弟选择器：同父级、相邻、再其之后
+    - 2. \+ 兄弟选择器：同父级、相邻、在其之后
 ```html
 <style>
     .checkbox {
@@ -437,6 +456,8 @@ title: day02
     <label for="checkbox"></label>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/checked.png')" alt="checked"> 
+
 :::tip
 `display:none`和`visibility:hidden`的区别：   
 `visibility:hidden`保留占据的文档空间，`display:none`不保留占据的文档空间。
@@ -462,6 +483,9 @@ title: day02
 <img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="">
 <span>123</span>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/vertical-align.png')" alt="vertical-align"> 
+
 没有文本的行内块元素对齐是在最下面的，有文本的时候对齐是最上面的。
 ```html
 <style>
@@ -477,6 +501,8 @@ title: day02
 <span class="block">123</span>
 <span>123</span>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/vertical-align02.png')" alt="vertical-align"> 
 
 容器内多行文本居中的方法：
 - 1.将容器的`display`设置为`table`
@@ -502,6 +528,9 @@ title: day02
     <span>百度一下，你就知道！百度一下，你就知道！百度一下，你就知道！</span>
 </div>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/vertical-align03.png')" alt="vertical-align"> 
+
 多张图片之间的空格处理
 ```html
 <style>

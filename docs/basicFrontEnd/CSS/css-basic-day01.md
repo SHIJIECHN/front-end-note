@@ -124,11 +124,11 @@ title: day01
 <p class="title"></p>
 ```
 
-文本提示样式类
-所有文本都是粗体
-1、success 成功的提示 green
-2、warning 警告的提示 orange
-3、danger 失败的提示 red
+文本提示样式类    
+所有文本都是粗体    
+1. success 成功的提示 green
+2. warning 警告的提示 orange
+3. danger 失败的提示 red
 ```html
 <style type="text/css">
     .tip{
@@ -167,7 +167,7 @@ title: day01
 轮廓：outline: none;
 - outline-color: green;
 - outline-style: dotted | dashed...
-- outline-width: 3px;
+- outline-width: 3px;   
 开发的过程中只用到outline: none;设置无轮廓，其他几乎不会用到，只需要了解。
 
 ## 匹配规则
