@@ -20,6 +20,7 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
     border: 10px  solid green;
     padding: 50px;
     margin: 50px;
+    background-color: lightcoral;
   }
 
   .outer-box .inner-box{
@@ -34,7 +35,9 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
 </div>
 ```
 此时盒子的可视化区域是多少？   
-200+ 50\*2 + 10\*2 = 320px;   
+200+ 50\*2 + 10\*2 = 320px;  
+
+<img :src="$withBase('/basicFrontEnd/CSS/box01.png')" alt="box"> 
 
 ### 内盒子居中
 利用内边距padding不占用盒子宽高的属性。   
@@ -44,7 +47,7 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
     width: 100px;
     height: 100px;
     border: 1px solid #000;
-    padding: 50px; /*利用内边距居中*/
+    padding: 30px; /*利用内边距居中*/
   }
 
   .box .box1{
@@ -58,14 +61,17 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
   <div class="box1"></div>
 </div>
 ```
-也外层盒子定宽高，内盒子宽高继承于外层盒子，即宽高为100%。普遍使用这种方法。
+
+<img :src="$withBase('/basicFrontEnd/CSS/box02.png')" alt="box"> 
+
+以外层盒子定宽高，内盒子宽高继承于外层盒子，即宽高为100%。普遍使用这种方法。
 ```html
 <style>
   .box{
     width: 100px;
     height: 100px;
     border: 1px solid #000;
-    padding: 50px;
+    padding: 70px;
   }
 
   .box .box1{
@@ -79,12 +85,14 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
   <div class="box1"></div>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/box03.png')" alt="box"> 
 
 ### box-sizing
 box-sizing: 
 - border-box: 以边界为基准固定盒子的尺寸。把边框和内边距收到盒子内部，也就是说在盒子内部绘制边框和内边距。     
-- centent-box：以盒子内的内容为基准固定盒子的尺寸。
+- content-box：以盒子内的内容为基准固定盒子的尺寸。    
 要求加了内边距和边框后，最外层盒子的可视化区域始终为100px x 100px。
+
 ```html
 <style>
   .box{
@@ -110,6 +118,8 @@ box-sizing:
   <div class="box1"></div>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/box04.png')" alt="box"> 
+
 以后使用，以后都不用管div的设置了。
 ```html
 <style>
@@ -170,6 +180,7 @@ box-sizing:
   <div class="box1"></div>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/box05.png')" alt="box"> 
 
 ### 盒子水平居中
 盒子相对于浏览器水平居中：   
@@ -186,7 +197,9 @@ margin: 0 auto;
 
 <div class="text"></div>
 ```
-margin塌陷问题
+<img :src="$withBase('/basicFrontEnd/CSS/box06.png')" alt="box"> 
+
+margin塌陷问题。
 
 ### 盒子默认边距
 body外边距：
@@ -223,7 +236,9 @@ position: absolute; 在现有的文档层上新开了一层，让定位元素在
 
 <div class="box1"></div>
 ```
-letf/right，top/bottom也只能跟定位元素一起使用
+letf/right，top/bottom也只能跟定位元素一起使用。 
+
+<img :src="$withBase('/basicFrontEnd/CSS/position01.png')" alt="position"> 
 
 - 相对定位
 position: relative; 也是在新的一层中，但是原来的位置是会保留的。
@@ -248,6 +263,8 @@ position: relative; 也是在新的一层中，但是原来的位置是会保留
 <div class="box1"></div>
 <div class="box2"></div>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/position02.png')" alt="position">
 
 absolute和relative一起使用
 ```html
