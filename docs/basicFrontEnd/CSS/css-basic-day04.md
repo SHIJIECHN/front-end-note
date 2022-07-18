@@ -469,7 +469,7 @@ BFC元素：
 - overflow: hidden | auto | scroll
 
 BFC可以解决的问题  
-1. margin合并问题
+### 1. margin合并问题
 ```html
 <style>
     .box {
@@ -528,7 +528,7 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
 
 <img :src="$withBase('/basicFrontEnd/CSS/BFC02.png')" alt="BFC"> 
 
-2. 浮动流造成父级元素坍塌问题
+### 2. 浮动流造成父级元素坍塌问题
 ```html
 <style>
     .box {
@@ -562,7 +562,7 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
 ```
 <img :src="$withBase('/basicFrontEnd/CSS/BFC03.png')" alt="BFC"> 
 
-3. margin-top父级元素坍塌问题
+### 3. margin-top父级元素坍塌问题
 ```html
 <style>
     .box1 {
@@ -594,7 +594,7 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
 
 <img :src="$withBase('/basicFrontEnd/CSS/BFC04.png')" alt="BFC"> 
 
-4. 浮动元素覆盖问题
+### 4. 浮动元素覆盖问题
 ```html
  <style>
     .box1 {
@@ -618,6 +618,8 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
 <div class="box1">我是float</div>
 <div class="box2">我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素我是可怜的元素</div>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/BFC05.png')" alt="BFC"> 
 
 ## 规范
 css书写顺序
