@@ -91,6 +91,7 @@ padding不是定义在原本定义的盒子的宽高内，是在原本的基础�
 box-sizing: 
 - border-box: 以边界为基准固定盒子的尺寸。把边框和内边距收到盒子内部，也就是说在盒子内部绘制边框和内边距。     
 - content-box：以盒子内的内容为基准固定盒子的尺寸。    
+- 
 要求加了内边距和边框后，最外层盒子的可视化区域始终为100px x 100px。
 
 ```html
@@ -220,7 +221,7 @@ body外边距：
 
 ## 定位
 position设置定位。   
-- 绝对定位
+### 绝对定位
 position: absolute; 在现有的文档层上新开了一层，让定位元素在新开的一层上。原来的位置不保留。与top/bottom, left/right使用。
 ```html
 <style>
@@ -240,7 +241,7 @@ letf/right，top/bottom也只能跟定位元素一起使用。
 
 <img :src="$withBase('/basicFrontEnd/CSS/position01.png')" alt="position"> 
 
-- 相对定位
+### 相对定位
 position: relative; 也是在新的一层中，但是原来的位置是会保留的。
 ```html
 <style>
@@ -266,7 +267,8 @@ position: relative; 也是在新的一层中，但是原来的位置是会保留
 
 <img :src="$withBase('/basicFrontEnd/CSS/position02.png')" alt="position">
 
-absolute和relative一起使用
+### absolute和relative一起使用
+1. .box3中的position会往上找，在父级中没有发现定位元素，则相对于整个html文档定位。
 ```html
 <style>
   .box1{
@@ -297,7 +299,10 @@ absolute和relative一起使用
   </div>
 </div>
 ```
-.box3中的position会往上找，在父级中没有发现定位元素，则相对于整个html文档定位。
+
+<img :src="$withBase('/basicFrontEnd/CSS/position03.png')" alt="position"> 
+
+2. .box3中的position会往上找，在.box2的地方发现position:relative; 此时.box3会相对于.box2定位。
 ```html
 <style>
   .box1{
@@ -331,8 +336,10 @@ absolute和relative一起使用
   </div>
 </div>
 ```
-.box3中的position会往上找，在.box2的地方发现position:relative; 此时.box3会相对于.box2定位。
 
+<img :src="$withBase('/basicFrontEnd/CSS/position04.png')" alt="position"> 
+
+3. box1会在box2的上层。因为box1是新开了一层。
 ```html
 <style>
   .box1{
@@ -353,8 +360,9 @@ absolute和relative一起使用
 <div class="box1"></div>
 <div class="box2"></div>
 ```
-box1会在box2的上层。如果想要box2排到box1的上面，只需要在box2中新增定位position: relative。
+<img :src="$withBase('/basicFrontEnd/CSS/position05.png')" alt="position"> 
 
+4. 如果想要box2排到box1的上面，只需要在box2中新增定位position: relative。box2也新开一层。
 ```html
 <style>
   .box1{
@@ -376,7 +384,10 @@ box1会在box2的上层。如果想要box2排到box1的上面，只需要在box2
 <div class="box1"></div>
 <div class="box2"></div>
 ```
-如果两个position: absolute;，想让box1排在上面，需要box1设置z-index.
+
+<img :src="$withBase('/basicFrontEnd/CSS/position06.png')" alt="position"> 
+
+5. 如果两个position: absolute;，想让box1排在上面，需要box1设置z-index.
 ```html
 <style>
   .box1{
@@ -399,7 +410,10 @@ box1会在box2的上层。如果想要box2排到box1的上面，只需要在box2
 <div class="box1"></div>
 <div class="box2"></div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/position05.png')" alt="position"> 
 
+
+### 两栏设计
 一个有用的tip：绝对定位中的两栏设计。
 ```html
 <style>
@@ -422,9 +436,12 @@ box1会在box2的上层。如果想要box2排到box1的上面，只需要在box2
 <div class="left"></div>
 <div class="right"></div>
 ```
+左侧进行绝对定位，右侧根据左侧的宽度设置margin-left值。    
 
-## 浮动
-float   
+<img :src="$withBase('/basicFrontEnd/CSS/position07.png')" alt="position"> 
+
+## 浮动（float）   
+### 1. 案例一
 ```html
 <style>
   .box1{
@@ -445,8 +462,11 @@ float
 <div class="box1"></div>
 <div class="box2"></div>
 ```
-box2无法识别浮动流，因此会占据box1的位置。   
-总结：浮动流，块级元素无法识别浮动流元素的位置。内联、内联块、浮动、溢出隐藏、纯文本都可以识别浮动元素的位置，除了块级元素。   
+box2无法识别浮动流，因此会占据box1的位置。  
+
+<img :src="$withBase('/basicFrontEnd/CSS/float01.png')" alt="float"> 
+
+### 2. 案例二
 ```html
 <style>
   .box1{
@@ -472,6 +492,11 @@ box2无法识别浮动流，因此会占据box1的位置。
 <!--内联块-->
 <img src="http://xxx.com" alt="">
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/float02.png')" alt="float"> 
+
+总结：浮动流，块级元素无法识别浮动流元素的位置。内联、内联块、浮动、溢出隐藏、纯文本都可以识别浮动元素的位置，除了块级元素。   
+
 
 ### 清除浮动
 ```html
@@ -511,6 +536,8 @@ box2无法识别浮动流，因此会占据box1的位置。
   百度一下，你就知道！
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/float03.png')" alt="float"> 
+
 块级元素box无法识别浮动流的高度，导致后面text-box显示错乱。   
 解决方法：清除浮动。注意清除浮动时，使用的一定是块级元素标签。  
 ```html
@@ -556,9 +583,12 @@ box2无法识别浮动流，因此会占据box1的位置。
   百度一下，你就知道！
 </div>
 ```
-float以后，元素就变成了内联块元素。
+<img :src="$withBase('/basicFrontEnd/CSS/float04.png')" alt="float"> 
+
+设置float以后，元素就变成了内联块元素。
 
 ### 左右浮动
+1. left和right都是块级元素，都需要加float。
 ```html
 <style>
   .header{
@@ -588,7 +618,9 @@ float以后，元素就变成了内联块元素。
   <div class="right"></div>
 </div>
 ```
-left和right都是块级元素，都需要加float
+<img :src="$withBase('/basicFrontEnd/CSS/float05.png')" alt="float"> 
+
+2. left和right是行内元素，left就可以不用加float
 ```html
 <style>
   .header{
@@ -610,12 +642,13 @@ left和right都是块级元素，都需要加float
   <span class="right">456</span>
 </div>
 ```
-left和right是行内元素，left就可以不用加float
+
+<img :src="$withBase('/basicFrontEnd/CSS/float06.png')" alt="float"> 
 
 ## 伪类
 伪类：`:before`和`:after`。   
 伪元素：`::before`和`::after`。   
-必须有content属性。
+1. 必须有content属性。
 ```html
 <style>
   p:before{
@@ -630,7 +663,9 @@ left和right是行内元素，left就可以不用加float
 
 <p>学习前端</p>
 ```
-伪元素属于内联元素。
+<img :src="$withBase('/basicFrontEnd/CSS/before.png')" alt="before"> 
+
+2. 伪元素属于内联元素。
 ```html
 <style>
   p::before{
@@ -654,7 +689,9 @@ left和right是行内元素，left就可以不用加float
 <p>学习前端</p>
 ```
 
-利用伪元素清除浮动
+<img :src="$withBase('/basicFrontEnd/CSS/before01.png')" alt="before"> 
+
+3. 利用伪元素清除浮动
 ```html
 <style>
   ul::after,
@@ -692,9 +729,11 @@ left和right是行内元素，left就可以不用加float
   <div class="box2"></div>
 </div>
 ```
-相当于在box后面再增加了一个元素，并且元素为block，在此元素上面进行clear: none，清除浮动。   
+相当于在box后面再增加了一个元素，并且元素为block，在此元素上面进行clear: none，清除浮动。 
 
-练习：使用伪类元素做轮播图点
+<img :src="$withBase('/basicFrontEnd/CSS/before02.png')" alt="before">   
+
+## 练习：使用伪类元素做轮播图点
 ```html
 <style>
   .slider{

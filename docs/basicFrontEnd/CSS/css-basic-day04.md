@@ -26,6 +26,8 @@ box-shadow: 水平位置  垂直位置 模糊距离 阴影的尺寸 阴影颜色
     }
 </style>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/box-shadow.png')" alt="box-shadow">  
+
 上方阴影遮挡
 ```html
 <style>
@@ -61,41 +63,54 @@ box-shadow: 水平位置  垂直位置 模糊距离 阴影的尺寸 阴影颜色
 <div class="box"></div>
 ```
 
-## 边框圆角
-border-radius
+<img :src="$withBase('/basicFrontEnd/CSS/box-shadow01.png')" alt="box-shadow"> 
+
+## 边框圆角（border-radius）
 ```html
 <style>
-    .box1 {
-        width: 200px;
-        height: 200px;
-        background-color: orange;
-        border-radius: 20px;
-        /*可以设置像素*/
-        border-radius: 50%;
-        /*宽高相等时设置圆*/
-        -webkit-border-radius: 50%;
-        -moz-border-radius: 50%;
-        -o-border-radius: 50%;
-    }
-    
-    .box2 {
-        width: 200px;
-        height: 100px;
-        background-color: orange;
-        border-radius: 50px;
-        /*设置半圆角 height/2 */
-    }
+.box1 {
+  width: 200px;
+  height: 200px;
+  background-color: orange;
+  border-radius: 20px;
+  /*可以设置像素*/
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  -o-border-radius: 20px;
+}
+.box2 {
+  width: 200px;
+  height: 200px;
+  background-color: orange;
+  border-radius: 50%;
+  /*宽高相等时设置圆*/
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -o-border-radius: 50%;
+}
+
+.box3 {
+  width: 200px;
+  height: 100px;
+  background-color: orange;
+  border-radius: 50px;
+  /*设置半圆角 height/2 */
+}
 </style>
 
 <div class="box1"></div>
 <div class="box2"></div>
+<div class="box3"></div>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/border-radius.png')" alt="border-radius"> 
+
 圆角容器被非圆角元素遮盖
 ```html
 <style>
     .box {
-        width: 440px;
-        height: 248px;
+        width: 468px;
+        height: 702px;
         border: 1px solid #000;
         border-radius: 20px;
         overflow: hidden;
@@ -109,15 +124,19 @@ border-radius
 </style>
 
 <div class="box">
-    <img src="https://imgcps.jd.com/img-cubic/creative_server_cia/v2/2000366/42975469816/FocusFullshop/CkRqZnMvdDEvMTkzNzI2LzEwLzEyMTUwLzQ0MTQxMy82MGU2YjUwZkVlZmVmMTg2Ni82NjY4NDYwMjFmMWMwODQyLnBuZxIJNS10eV8wXzU2MAI47ot6QhQKDuWlvei0p-Wkp3BhcnR5EAAYAUITCg_lhajmsJHmiqLotK3kuK0QAUIQCgznq4vljbPmiqLotK0QAkIKCgbnp43ojYkQB1j4waaMoAE/cr/s/q.jpg"
-        alt="">
+    <img src="https://images.pexels.com/photos/11769686/pexels-photo-11769686.jpeg?cs=srgb&dl=pexels-yuliia-tretynychenko-11769686.jpg&fm=jpg" alt="">
 </div>
-
 ```
 
+<img :src="$withBase('/basicFrontEnd/CSS/border-radius01.png')" alt="border-radius"> 
+
 ## 背景
-背景颜色：background-color   
-背景图片：background-image
+- 背景颜色：background-color   
+- 背景图片：background-image
+- 调整尺寸：background-zise   
+- 重复显示：background-repeat
+- 图片位置：background-position
+- 背景图像固定或者滚动：background-attachment
 
 ```html
 <style>
@@ -145,6 +164,8 @@ border-radius
 
 <div class="box"></div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/background.png')" alt="background"> 
+
 大背景图片，窗口拖动背景图片不变形。backgound-size
 ```html
 <style>
@@ -159,15 +180,21 @@ border-radius
         background-image: url(https://gw.alicdn.com/imgextra/i3/O1CN01iyYdem1GQd1yGgA0a_!!6000000000617-0-tps-2500-600.jpg);
         background-size: cover;
         /*不管盒子多大，始终占满整个盒子，即banner盒子的宽高始终被占满*/
-        background-position: center center;
         background-size: contain;
         /*图片始终完全显示*/
+        background-position: center center;
         background-repeat: no-repeat;
     }
 </style>
 
 <div class="banner"></div>
 ```
+1. backgound-size: cover。容器始终被图片占满。
+<img :src="$withBase('/basicFrontEnd/CSS/background-size01.png')" alt="background-size"> 
+
+2. backgound-size: contain。图片始终完全显示。
+<img :src="$withBase('/basicFrontEnd/CSS/background-size.png')" alt="background-size"> 
+
 背景图不滚动，内容可滚动
 ```html
 <style>
@@ -181,6 +208,8 @@ border-radius
     }
 </style>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/background-size02.png')" alt="background-size"> 
+
 backgound 顺序： background-color background-image background-repeat background-attachment background-position/background-size
 
 ## logo
@@ -266,8 +295,11 @@ table标签中定义border和css中定义border的区别：css中写border属性
     </tr>
 </table>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/table.png')" alt="table"> 
+
 使用ul模拟table。    
-方法一
+1. 方法一
 ```html
 <style>
     ul {
@@ -321,7 +353,10 @@ table标签中定义border和css中定义border的区别：css中写border属性
 </ul>
 
 ```
-方法二
+
+<img :src="$withBase('/basicFrontEnd/CSS/table01.png')" alt="table"> 
+
+2. 方法二
 ```html
 <style>
     ul {
@@ -364,6 +399,9 @@ table标签中定义border和css中定义border的区别：css中写border属性
     <li>9</li>
 </ul>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/table02.png')" alt="table"> 
+
 外层左右边框不显示
 ```html
 <style>
@@ -416,16 +454,19 @@ table标签中定义border和css中定义border的区别：css中写border属性
 </div>
 
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/table03.png')" alt="table"> 
+
 ## BFC特性
 BFC(block formatting contexts)块级格式化上下文。  
 控制元素布局方案：普通流、浮动流（float flow）、绝对定位（absolute position）。  
 
 BFC元素：
-- BODY
+- body
 - float: left | right
 - position: absolute | fixed
 - display: inline-block | table-cell
-- overflow: hiddle | auto | scroll
+- overflow: hidden | auto | scroll
 
 BFC可以解决的问题  
 1. margin合并问题
@@ -451,6 +492,8 @@ BFC可以解决的问题
 <div class="box box1"></div>
 <div class="box box2"></div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/BFC01.png')" alt="BFC"> 
+
 box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元素包裹
 ```html
 <style>
@@ -482,6 +525,9 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
     <div class="box box2"></div>
 </div>
 ```
+
+<img :src="$withBase('/basicFrontEnd/CSS/BFC02.png')" alt="BFC"> 
+
 2. 浮动流造成父级元素坍塌问题
 ```html
 <style>
@@ -514,6 +560,7 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
     <div class="box2"></div>
 </div>
 ```
+<img :src="$withBase('/basicFrontEnd/CSS/BFC03.png')" alt="BFC"> 
 
 3. margin-top父级元素坍塌问题
 ```html
@@ -545,6 +592,8 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
 ```
 解决：让父级元素触发BFC，塌陷就可以解决。
 
+<img :src="$withBase('/basicFrontEnd/CSS/BFC04.png')" alt="BFC"> 
+
 4. 浮动元素覆盖问题
 ```html
  <style>
@@ -554,7 +603,7 @@ box1设置了margin-buttom导致box2设置margin-top无效。可以使用BFC元�
         background-color: #000;
         float: left;
     }
-    /* box2不要再浮动盒子box1底下*/
+    /* box2不要在浮动盒子box1底下*/
     
     .box2 {
         /* float: left; */
