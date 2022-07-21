@@ -1,11 +1,12 @@
 ---
-autoGroup-3: Node基础
+autoGroup-1: Node基础
 sidebarDepth: 3
 title:  8. net模块
 ---
 
 ## net模块
-1. 应用层：http（80）、FTP（21）、SCTP（邮件的发送，25）、POP3（110）、DNS
+五层网络协议：
+1. 应用层：http（80）、FTP（21）、SCTP（邮件的发送，25）、POP3（邮件接收，110）、DNS（域名解析系统）
 2. 传输层： TCP、UDP
 3. 网络层：IP、ICMP
 4. 数据链路层：PPT、SLIP
@@ -31,8 +32,39 @@ server.on('connection', socket => {
   })
 })
 ```
+<img :src="$withBase('/operationEnv/Node/net.png')" alt="net"> 
 
 ## 简单实现一个客户端和服务器的通信
+server事件：
+1. listening：监听端口后触发的事件
+2. connection：当有客户端请求连接的时候触发。参数socket，客户端发送的是一个socket，服务端收到的也是socket。
+3. close：不常用，服务器关闭的时候触发。为什么不常用？因为我们关闭服务器的方式通常采用杀线程的方式来关闭服务。
+4. error：不常用，服务器出现错误的时候触发
+
+server方法：
+1. listen：server监听的端口
+2. close 关闭服务器的方法
+3. address：在回调中查看主机的IP
+
+Socket事件：
+1. connect：连接到服务器时触发
+2. data：当接受到数据时触发，一般是做参数
+3. end：写入数据完成以后调用
+4. timeout 超时后触发
+5. error
+6. close：socket关闭的是时候触发
+
+Socket属性：
+1. remoteAddress：远程（服务器）的地址
+2. remotePort：远程的端口
+3. localAddress：本地地址
+4. localPort：本地端口
+
+Socket方法：
+1. setTimeout：设置超时时间
+2. write：socket中写入数据
+3. end：写入结束
+
 ### 1. server.js
 ```js
 const net = require('net');

@@ -1,5 +1,5 @@
 ---
-autoGroup-3: Node基础
+autoGroup-1: Node基础
 sidebarDepth: 3
 title:  7. events模块、fs模块
 ---

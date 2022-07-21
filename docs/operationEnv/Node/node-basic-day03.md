@@ -1,5 +1,5 @@
 ---
-autoGroup-3: Node基础
+autoGroup-1: Node基础
 sidebarDepth: 3
 title:  3. commonJS、后端的分层
 ---
