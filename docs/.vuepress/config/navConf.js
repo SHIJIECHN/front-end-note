@@ -5,6 +5,7 @@ module.exports = [
       { text: "HTML", link: "/basicFrontEnd/HTML/", },
       { text: "CSS", link: "/basicFrontEnd/CSS/", },
       { text: "JavaScript", link: "/basicFrontEnd/JavaScript/", },
+      { text: "ECMAScript6", link: "/basicFrontEnd/ES6/", },
       { text: "前端性能", link: "/basicFrontEnd/Performance/", },
       { text: "前端工程化", link: "/basicFrontEnd/Engineering/", },
     ],

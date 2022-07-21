@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 7. 箭头函数的实质、箭头函数的使用场景
 ---

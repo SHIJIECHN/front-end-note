@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 9. 对象密封4种方式、assign、取值函数的拷贝
 ---

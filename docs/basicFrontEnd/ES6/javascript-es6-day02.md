@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 2. 块级作用域与嵌套、let、暂时性死区
 ---

@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 3. let进阶、const、全局变量与顶层对象
 ---

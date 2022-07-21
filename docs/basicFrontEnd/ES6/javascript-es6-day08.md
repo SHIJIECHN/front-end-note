@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 8. 函数名/对象拓展、描述符、getter/setter
 ---

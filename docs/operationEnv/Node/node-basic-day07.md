@@ -1,7 +1,7 @@
 ---
 autoGroup-3: Node基础
 sidebarDepth: 3
-title:  7. events、fs
+title:  7. events模块、fs模块
 ---
 
 ## events
@@ -252,3 +252,105 @@ console.log(res);
 ```
 
 ### 2. writeFile写入文件
+#### 1. 如果这个文件存在，所有的内容会被重新覆盖，不存在会创建一个新的文件
+```js
+const fs = require('fs');
+
+fs.writeFile('./test.js', 'this is a test', err => {
+  if(err){
+    console.log(err);
+  }else{
+    console.log('done');
+  }
+})
+```
+
+#### 2. 用buffer也可以写入文件
+```js
+const fs = require('fs');
+const content = Buffer.from('this is test111');
+
+fs.writeFile('./test.js', content, err => {
+  if(err){
+    console.log(err);
+  }else{
+    console.log('done');
+  }
+})
+```
+
+### 3. fs.stat文件的一些状态信息
+```js
+const fs = require('fs');
+
+fs.stat("./test.js", (err, data) => {
+  if(err) throw err;
+  console.log(data.atime); // 上次提交时间 2022-07-19T07:32:23.870Z
+  console.log(data.isDirectory()); // 是文件夹吗？ false
+  console.log(data.isFile()); // 是文件吗？  true
+})
+```
+
+### 4. fs.rename更改文件名称
+```js
+const fs = require('fs');
+
+fs.rename('./test.js', 'newTest', (err, data) => {
+  if(err) throw err;
+  console.log('done');
+})
+
+// test.js - > newTest
+```
+
+### 5. fs.unlink删除文件
+```js
+const fs = require('fs');
+
+fs.unlink('newTest', (err, data) => {
+  if(err) throw err;
+  console.log('done');
+})
+```
+
+### 6. fs.readdir读取文件
+```js
+const fs = require('fs');
+
+fs.readdir('./', (err, files) => {
+  if(err) throw err;
+  console.log(files);
+})
+//  [ '.vscode', 'app.js', 'index.css', 'index.html', 'list.js']
+
+```
+
+### 7. fs.mkdir新建文件夹
+```js
+const fs = require('fs');
+
+fs.mkdir('./test.js', err => {
+  if(err) throw err;
+  console.log('done');
+})
+```
+
+### 8. fs.rmdir移除文件夹
+```js
+const fs = require('fs');
+
+fs.rmdir('./test.js', err => {
+  if(err) throw err;
+  console.log('done');
+})
+```
+
+### 9. fs.watch监听文件夹
+```js
+fs.watch('./', {
+  recursive: true
+}, (eventType, fileName) => {
+  console.log(eventType, fileName);
+})
+```
+监听filename的修改，其中filename是文件或目录

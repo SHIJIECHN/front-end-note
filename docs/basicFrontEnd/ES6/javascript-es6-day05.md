@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 5. 隐式转换、函数参数解构、解构本质、()用法
 ---

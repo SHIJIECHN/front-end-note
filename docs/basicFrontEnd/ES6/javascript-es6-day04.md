@@ -1,5 +1,5 @@
 ---
-autoGroup-2: ES6
+autoGroup-1: ES6
 sidebarDepth: 3
 title: 4. 解构赋值、函数默认值、数组解构、对象解构
 ---
