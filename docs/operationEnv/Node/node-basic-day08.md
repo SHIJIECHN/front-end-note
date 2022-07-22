@@ -132,5 +132,93 @@ socket.on('close', ()=> {
 ## 连接超时设置
 ### 1. server.js
 ```js
-
+var net = require('net');
+var server = net.createServer();
+server.listen(12306, '127.0.0.1');
 ```
+### 2. client.js
+```js
+var net = require('net');
+
+var socket = net.connect(12306, '127.0.0.1');
+// 设置超时2000ms
+socket.setTimeout(2000);
+socket.on('connect', () => {
+  console.log('已经连接到服务器');
+});
+
+// 监听超时事件触发
+socket.on('timeout', ()=> {
+  console.log('超时2000ms');
+})
+```
+
+## 浏览器与服务器接收数据的区别
+启动服务器
+```js
+var net = require('net');
+
+var server = net.createServer();
+
+server.listen(12306, '127.0.0.1');
+
+server.on('listening', () => {
+  console.log('服务器已经启动了');
+})
+
+server.on('connection', socket => {
+  console.log('有新的链接');
+
+  socket.on('data', data => {
+    console.log(data.toString());
+  })
+})
+```
+### 1. 浏览器
+浏览器访问：127.0.0.1:12306    
+服务端打印的是报文：
+<img :src="$withBase('/operationEnv/Node/net01.png')" alt="net"> 
+
+### 2. Node环境
+client.js
+```js
+const net = require('net');
+
+const socket = net.connect(12306, '127.0.0.1');
+// 客户端连接成功触发的事件
+socket.on('connect', ()=> {
+  console.log('客户端已经连接到服务端了');
+})
+
+//客户端向服务端发送数据
+socket.write('hello server');
+```
+服务端打印数据：
+<img :src="$withBase('/operationEnv/Node/net02.png')" alt="net"> 
+
+### 3. 服务端返回响应报文
+```js
+var net = require('net');
+
+var server = net.createServer();
+
+server.listen(12306, '127.0.0.1');
+
+server.on('listening', () => {
+  console.log('服务器已经启动了');
+})
+
+server.on('connection', socket => {
+  console.log('有新的链接');
+
+  socket.on('data', data => {
+    socket.write('HTTP 200OK\r\nContent-Type:text/html\r\n\r\n<html><body>Hello Browser</body></html>');
+    socket.end();
+  })
+})
+```
+浏览器访问127.0.0.1:12306   
+<img :src="$withBase('/operationEnv/Node/net03.png')" alt="net">
+
+
+## demo

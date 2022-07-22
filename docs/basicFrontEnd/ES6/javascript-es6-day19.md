@@ -4,7 +4,6 @@ sidebarDepth: 3
 title: 19. Promise
 ---
 
-
 ## Promise由来
 单线程如果遇到数据量大的问题，解决的方案是异步操作，而一步操作通常是通过回调函数的方式进行解决。在JQuery中也是通过Callbacks处理异步操作，而JQuery中的Deferred()方法返回的对象就是一个异步操作的容器对象（引出Promise的），储存异步操作，所以也可以说Promise是阉割版的Deferred()。   
 
@@ -56,3 +55,227 @@ try{
 }
 ```
 3. Promise解决同步并发异步代码的问题
+同步并发异步代码：回调在同步并发异步代码的问题上传统的ES5可以用发布订阅的模式进行解决，同步并发代码用回调函数来做会出现什么问题呢？   
+下面同时执行读取文件的异步操作，如果通过回调函数的方式进行，就不能够确定到底是哪一个回调函数首先执行，因为三个回调函数都会在web APIs中挂起，当第一个文件读取完毕之后，回调函数才会被推入到任务队列中等待执行，但是我们并不能够知道哪个回调函数首先执行。
+```js
+const fs = require('fs');
+const arr = [];
+fs.readFile('./name.txt', 'utf-8', (err, data) => {
+  console.log(1);
+  if (data) {
+    arr.push(data);
+  }
+  arr.length === 3 && console.log(arr);
+})
+
+fs.readFile('./number.txt', 'utf-8', (err, data) => {
+  if (data) {
+    arr.push(data);
+  }
+  arr.length === 3 && console.log(arr);
+})
+fs.readFile('./score.txt', 'utf-8', (err, data) => {
+  if (data) {
+    arr.push(data);
+  }
+  arr.length === 3 && console.log(arr);
+})
+```
+
+## Promise语法
+### 1. Promise基础语法
+- Promise构造函数：必须通过new关键字进行调用构造函数
+- executor：执行者函数
+- resolve：promise成功状态的回调函数
+- reject：promsie失败的回调函数
+
+```js
+let promise = new Promise(excurtor);
+executor: function(resolve, reject){}
+```
+
+### 2. Promise理解
+1. Promise简单来说可以看作是一个容器，容器中保存着某个未来才会结束的异步操作的结果；
+2. 从语法上来说，Promise是一个对象，它可以获取异步操作的消息，所以promise代表异步的操作，是发生在以后的事情，而不是现在的事情。
+3. 好比我去KFC买汉堡，销售员给我一张小票，这个小票是对之后汉堡是否做好的一个承诺，这个小票中包含着汉堡是否做好的状态，而我现在可以拿着这个小票（异步操作对象），想干啥什么就去干什么（同步代码），并不会影响到我的主进程（代码的执行）。
+
+### 3. Promise对象的状态
+1. Promise对象的基础状态
+  - pending：进行中
+  - fulfilled（resolve）：已成功
+  - reject：已失败
+
+2. Promise对象的状态不受外界的影响，只有异步操作的操作结果，可以决定promise对象当前是哪一种状态，任何其他的操作都不会影响到这个状态的改变。
+3. Promise异步操作的状态不可逆性
+  > - Promise异步操作状态的不可逆性：一个状态过渡到另一个状态，一旦状态改变之后，就不能再次改变
+  > - Promise对象状态的改变只有两种可能：pending状态过渡到fulfilled状态，pending状态过渡到reject状态
+  > - 只要这两种情况发生，promise对象的状态就进入固化，不再改变；如果状态已经发生改变，再对Promise对象添加回调，是可以直接拿到这个结果的；如果是事件的话，一旦错过，就真的错过了.
+
+```js
+let promise = new Promise((resolve, reject) => {
+  // 调用成功状态回调函数
+  resolve();
+  // 尝试改变成功状态，无效
+  reject();
+})
+```
+
+4. executor执行函数中的resolve，reject回调函数的作用
+
+> 1. resolve函数：将Promise对象的状态从pending改为fulfilled状态，在异步操作时进行调用，并将异步操作的结果作为参数传递出去。
+> 2. reject函数：将Promise对象的状态从pending改为reject状态，在异步操作失败时调用，并将异步操作的结果作为参数传递出去。
+```js
+let promsie = new Promise((resolve, reject) => {
+  resolve('成功');
+})
+
+let promise = new Promise((resolve, reject) => {
+  reject('失败');
+})
+```
+
+### 4. Promise的executor执行函数
+executor函数：虽然执行函数时回调函数，但是执行函数是同步执行的代码，name同步执行的代码如何表示异步操作的呢？其实对应的操作就需要用到resolve，reject两参数；   
+> 1. resolve：让promise异步操作的状态改为成功状态，然后触发执行绑定的成功的回调函数
+> 2. reject：让promise异步操作的状态改为失败状态，然后触发执行绑定的失败的回调函数
+
+```js
+let promise = new Promise((resolve, reject) => {
+  setInterval(function(){
+    Math.random() * 100 > 60 ? resolve('Ok') : reject('No');
+  })
+})
+promise.then(data => {
+  console.log(data);
+}, err => {
+  console.log(err);
+})
+```
+
+1. 通常Promise代表异步的操作，而Promise中executor是同步执行的代码，如果我在executor中不写异步代码，namePromise还能正常执行吗？    
+
+在executor执行函数中不写异步代码也是可以正常执行的，当然executor中的同步代码会按照正常的代码执行顺序执行。
+```js
+let promise = new Promise((resolve, reject) => {
+  console.log(1);
+  console.log(2);
+})
+console.log(3);
+// 1 2 3
+```
+2. 证明executor执行函数是同步进行；而resolve，reject则是异步进行。   
+> Promise代表的是异步操作，但是excutor执行者是同步执行的，所以console.log(0)首先打印结果，然后resolve()作用改变promise的状态调用promise绑定的成功状态的回调函数，resolve()回调函数执行显然是一个异步操作，根据JS引擎执行的机制，会被推入到回调函数队列中，当同步任务完成之后，再执行；同步代码console.log(2)会在console.log(0)的同步代码执行完成后执行。 
+
+```js
+let promise = new Promise((resolve, reject)=>{
+  console.log(0);
+  resolve(1);
+})
+promise.then(data=>{
+  console.log(data);
+},err=>{
+  console.log(err);
+})
+console.log(2);
+// 0  2  1
+```
+
+### 5. Promise中的then方法
+1. Promise中的then方法基本认识
+> Promise实例对象具有then方法，也就是说在Promise.prototype定义了then()方法。它的作用就是为Promise实例操作Promise状态改变后的回调函数，then()方法的第一个参数是成功（resolve）回调函数，第二参数是失败（reject）函数.
+
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve('ok');
+})
+promise.then(data=>{
+  console.log(data);
+},err=>{
+  console.log(err);
+})
+```
+2. Promise的链式调用  
+> then方法返回一个新的Promise对象实例（和原来的Promise实例不相等）。因此可以采取链式写法，在then后面直接调用另一个then方法
+
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve('OK 1');
+})
+promise.then(data1 => {
+  console.log(data1); // OK 1
+}).then(data2 => {
+  console.log(data2); // undefined
+})
+```
+3. Promise的链式调用的then方法，方法中参数传递问题以及返回值的问题。
+> 默认情况下： Promise中then方法调用后，返回的Promise实例对象的状态由上一个Promise实例对象的状态决定，而调用成功或者失败的回调函数也是通过上一个Promise实例对象返回的状态决定；Promise实例对象状态未固化，then方法调用后默认返回一个进行中（pending）状态的Promise；Promise实例对象状态固化后，then方法每次调用后都会默认返回一个成功（resolve）状态的Promise；第一次then返回的参数作为下一次then执行的参数。
+
+- promise状态未固化的情况
+
+```js
+let promise = new Promise((resolve, reject)=>{
+	
+});
+let p1 = promise.then();
+console.log(promise);
+console.log(p1);
+```
+<img :src="$withBase('/basicFrontEnd/ES6/promise.png')" alt="promise" />
+
+
+- promise状态固化的情况
+
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve('ok'); // 成功状态
+});
+
+let p2 = promise.then(data1 => {
+  console.log('data1: ' + data1); // ok
+  // 默认返回
+  return new Promise((resolve, reject) => {
+    resolve(undefined);
+  })
+})
+
+p2.then(data2 => {
+  console.log('data2: '+ data2); // undefined
+})
+console.log(promise);
+console.log(p2);
+```
+<img :src="$withBase('/basicFrontEnd/ES6/promise01.png')" alt="promise" />
+
+为什么promise的状态打印的是fulfilled，而p2的状态打印的是pending呢？因为此时按照代码的执行，exectuor执行者函数首先同步执行，resolve('ok')改变promise的状态显然是异步代码，所以将resolve的回调函数data=>{}挂载到WebAPIS中等待执行，p2的状态需要等待promise状态固化才能够决定自己的状态，所以回调函数data2=>{}也挂载到WebAPIS中等待执行；打印promise的值，由于exectuor函数中执行resolve()函数，将promise的状态改为fulfilled状态，所以打印promise就是成功状态，而打印p2时，由于promise成功的回调函数data=>{}还在任务队列中等待执行，所以p2的状态还未改变，所以是pending状态，又因为我们上面说过，当promise实例对象状态固化后，then()方法会默认返回一个成功状态的Promise状态实例，所以当promise的resolve回调函数data=>{}执行后，此时p2实例化对象的状态才会通过new实例化，而隐式属性\[\[PromiseState]]是fufilled状态，\[\[PromiseResult]]是undefined这种情况，说明在实例化p2之前就打印p2的实例化对象.
+
+### 6. 手动改变then的返回值
+1. 手动改变then的返回值，返回原始数据类型，相当于返回成功状态的promise，并且带着原始数据类型的值执行回调函数。
+
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve('ok');
+})
+promise.then( data => {
+  console.log(data); // ok
+  return 2;
+}).then(data => {
+  console.log(data); // 2
+})
+```
+
+2. 手动改变then()方法返回值，返回Promise对象，取决于返回的Promise对象状态而去执行相应的回调函数.
+```js
+let promise = new Promise((resolve, reject) => {
+  resolve('ok');
+})
+promise.then(one => {
+  console.log('one: '+ one); // one: ok
+  return new Promise((resolve, reject) => {
+    reject('err-info');
+  })
+}).then( two => {
+  console.log(two);
+}, err => {
+  console.log('err: ' + err); // err: err-info
+})
+```
