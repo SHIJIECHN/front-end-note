@@ -222,3 +222,90 @@ server.on('connection', socket => {
 
 
 ## demo
+目录结构
+<img :src="$withBase('/operationEnv/Node/net04.png')" alt="net">
+
+### server.js
+```javascript
+const globalConf = require('./conf.js');
+const net = require('net');
+const fs = require('fs');
+
+let server = net.createServer();
+server.listen(globalConf.port, '127.0.0.1');
+
+server.on('listening', () => {
+    console.log('server is running');
+})
+
+server.on('connection', socket => {
+    socket.on('data', data => {
+        let url = data.toString().split('\r\n')[0].split(' ')[1];
+        try {
+            // 注意读取数据的方式：__dirname。需要绝对路径
+            let dataFile = fs.readFileSync(__dirname + globalConf.path + url);
+            // 响应头
+            socket.write('HTTP 200OK\r\ncontentType: text/html\r\n\r\n'); // 字符串拼接存在转码的问题
+            socket.write(dataFile); // 直接以buffer的形式传输
+        } catch (e) {
+            socket.write('HTTP 404NOtFound\r\n\r\n<html><body><h1>NOT FOUND</h1></body></html>');
+        }
+
+        socket.end();
+    })
+})
+
+// 图片加载问题
+//  no such file or directory, open 'C:\Users\小石头\Documents\Learning\A05-operationEnv\Node\net/web/favicon.ico'
+// 头部写：contentType: text/html
+```
+
+### server.conf
+```javascript
+port=12306
+path=/web
+```
+
+### conf.js
+```javascript
+const fs = require('fs');
+
+let globalConf = {}
+let conf = fs.readFileSync('./server.conf');
+
+let confs = conf.toString().split('\r\n');
+
+confs.forEach(item => {
+    var itemConf = item.split('=');
+    globalConf[itemConf[0]] = itemConf[1];
+})
+
+module.exports = globalConf;
+```
+
+### web/index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css">
+    <!--
+      h1 {
+        color: orange;
+      }
+    -->
+</head>
+
+<body>
+    <h1>Hello world</h1>
+    <img src="./demo.png" alt="">
+</body>
+
+</html>
+```
+
