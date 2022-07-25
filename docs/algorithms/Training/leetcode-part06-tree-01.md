@@ -181,4 +181,76 @@ function postorderTraversal(root: TreeNode | null): number[]{
 }
 ```
 
+## 二叉树的统一迭代法
+把访问的节点放入栈中，把要处理的节点也当入栈中但是要做标记。如何标记呢？就是要处理的节点放入栈之后，紧接着放入一个空指针作为标记。
+### 1. 前序遍历
+```ts
+function preorderTraversal(root: TreeNode | null): number[] {
+  let helperStack: (TreeNode | null)[] = [];
+  let res: number[] = [];
+  let curNode: TreeNode | null;
+  if (root === null) return res;
+  helperStack.push(root);
+  while (helperStack.length > 0) {
+      curNode = helperStack.pop()!;
+      if (curNode !== null) {
+        if (curNode.right !== null) helperStack.push(curNode.right);
+        if (curNode.left !== null) helperStack.push(curNode.left);
+        helperStack.push(curNode);
+        helperStack.push(null);
+      } else {
+          curNode = helperStack.pop()!;
+          res.push(curNode.val);
+      }
+  }
+  return res;
+}
+```
 
+### 2. 中序遍历
+```ts
+function inorderTraversal(root: TreeNode | null): number[] {
+  let helperStack: (TreeNode | null)[] = [];
+  let res: number[] = [];
+  let curNode: TreeNode | null;
+  if (root === null) return res;
+  helperStack.push(root);
+  while (helperStack.length > 0) {
+      curNode = helperStack.pop()!;
+      if (curNode !== null) {
+        if (curNode.right !== null) helperStack.push(curNode.right);
+        helperStack.push(curNode);
+        helperStack.push(null);
+        if (curNode.left !== null) helperStack.push(curNode.left);
+      } else {
+          curNode = helperStack.pop()!;
+          res.push(curNode.val);
+      }
+  }
+  return res;
+};
+```
+
+### 3. 后序遍历
+```ts
+function postorderTraversal(root: TreeNode | null): number[] {
+  let helperStack: (TreeNode | null)[] = [];
+  let res: number[] = [];
+  let curNode: TreeNode | null;
+  if (root === null) return res;
+  helperStack.push(root);
+  while (helperStack.length > 0) {
+      curNode = helperStack.pop()!;
+    if (curNode !== null) {
+      helperStack.push(curNode);
+      helperStack.push(null);
+      if (curNode.right !== null) helperStack.push(curNode.right);
+      if (curNode.left !== null) helperStack.push(curNode.left);
+      } else {
+        curNode = helperStack.pop()!;
+        res.push(curNode.val);
+      }
+  }
+  return res;
+};
+```

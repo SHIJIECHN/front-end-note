@@ -45,6 +45,32 @@ Node.js的事件循环，它会把一些操作放到其他相关的线程来处�
 
 在每次运行的事件循环之间，Node.js检查它是否在等待任何异步I/O或计时器，如果没有的话，则完全关闭。
 
+```js
+setTimeout(()=>{
+  console.log('timer')
+}, 0);
+
+setImmediate(()=>{
+  console.log('check')
+});
+```
+执行结果可能出现以下两种情况，系统执行快时setTimeout先执行，系统执行慢setImmediate先执行。
+<img :src="$withBase('/operationEnv/Node/EventLoop01.png')" alt="EventLoop"> 
+
+如果想要setTimeout始终后面循环呢？    
+```js
+setTimeout(()=>{
+  setTimeout(()=>{
+    console.log('timer')
+  }, 0);
+  
+  setImmediate(()=>{
+    console.log('check')
+  });
+})
+```
+<img :src="$withBase('/operationEnv/Node/EventLoop02.png')" alt="EventLoop"> 
+
 ## 案例一
 ```js
 // promise1.then
