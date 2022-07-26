@@ -102,3 +102,78 @@ function rightSideView(root: TreeNode | null): number[] {
   return res;
 };
 ```
+
+## 二叉树的层平均值
+[力扣题目链接](https://leetcode.cn/problems/average-of-levels-in-binary-tree/)
+给定一个非空二叉树的根节点 root , 以数组的形式返回每一层节点的平均值。与实际答案相差 10-5 以内的答案可以被接受。   
+```md
+示例 1：
+输入：root = [3,9,20,null,null,15,7]
+输出：[3.00000,14.50000,11.00000]
+解释：第 0 层的平均值为 3,第 1 层的平均值为 14.5,第 2 层的平均值为 11 。
+因此返回 [3, 14.5, 11] 。
+
+示例 2:
+输入：root = [3,9,20,15,7]
+输出：[3.00000,14.50000,11.00000]
+```
+```ts
+function averageOfLevels(root: TreeNode | null): number[] {
+  let res: number[] = []
+  if (root == null) return res;
+  const helperQueue: TreeNode[] = [];
+  let curNode: TreeNode;
+  helperQueue.push(root);
+
+  while (helperQueue.length > 0) {
+    // 同层的总和
+    let sum = 0;
+    // 同层长度
+    let len = helperQueue.length;
+    let n = len;
+
+    while (len > 0) {
+      curNode = helperQueue.shift()!;
+      sum += curNode.val;
+      if (curNode.left !== null) helperQueue.push(curNode.left);
+      if (curNode.right !== null) helperQueue.push(curNode.right);
+      len--;
+    }
+    let val: number = sum / n;
+    res.push(val);
+
+  }
+  return res;
+};
+
+```
+
+## N 叉树的层序遍历
+[力扣题目链接](https://leetcode.cn/problems/n-ary-tree-level-order-traversal/)
+
+```ts
+function levelOrder(root: Node | null): number[][] {
+  let res: number[][] = []
+  if (root == null) return res;
+
+  let helperQueue: Node[] = [];
+  let curNode: Node;
+  helperQueue.push(root);
+
+  while (helperQueue.length > 0) {
+    let len = helperQueue.length;
+    let curLevel: number[] = []
+
+    while (len > 0) {
+      curNode = helperQueue.shift()!;
+      // @ts-ignore
+      curLevel.push(curNode.val!);
+       // @ts-ignore
+      if (curNode.children.length !== 0) helperQueue.push(...curNode.children);
+      len--;
+    }
+    res.push(curLevel)
+  }
+  return res;
+};
+```
