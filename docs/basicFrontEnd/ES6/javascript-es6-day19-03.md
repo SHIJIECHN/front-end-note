@@ -37,8 +37,6 @@ npm i -g nodemon
 npm run dev
 ```
 
-
-
 ## 同步代码
 ```javascript
 let promise = new Promise((resolve, reject) => { // executor
@@ -174,14 +172,15 @@ then(onFulfilled, onRejected) {
 ```
 
 ## then方法链式调用
+链式调用的特点
+1. 通过return来传递结果
+2. 通过新的promise resolve结果
+3. 通过新的promise reject原因
+4. then走了失败的回调函数后，再走then
+5. then中使用throw new Error
+6. 用catch捕获异常
+
 ```javascript
-// 链式调用的特点
-//1. 通过return来传递结果
-//2. 通过新的promise resolve结果
-//3. 通过新的promise reject原因
-//4. then走了失败的回调函数后，再走then
-//5. then中使用throw new Error
-//6. 用catch捕获异常
 let promise = new Promise((resolve, reject) => {
     resolve('First resolve');
 })
@@ -211,7 +210,7 @@ promise.then(res => {
         console.log(res); // First resolve
     });
 
-// 3.通过新的promisereject原因
+// 3.通过新的promise reject
 promise.then(value => {
         return value; // 普通值
     })
@@ -312,17 +311,18 @@ promise.then(value => {
     .then(value => {
         console.log('Then: ', value); // Then:  Catch Error
     })
+```
+catch在Promise的源码层面上就是一个then，catch也是遵循then的运行原则    
+成功的条件：
+1. then return普通JavaScript value
+2. then return新的promise成功态的结果 value    
 
-// catch在Promise的源码层面上就是一个then，catch也是遵循then的运行原则
-// 成功的条件：
-// 1. then return普通JavaScript value
-// 2. then return新的promise成功态的结果 value
+失败的条件：
+1. then return 新的promise失败态的原因 reason
+2. then 抛出异常throw new Error
 
-// 失败的条件：
-// 1. then return 新的promise失败态的原因 reason
-// 2. then 抛出异常throw new Error
-
-// promise链式调用
+```js
+// promise要链式调用
 // then return new Promise
 
 // 下面两种情况的区别：
@@ -344,5 +344,162 @@ promise2.then(()=>{
 })
 ```
 ### 1. 回调函数返回原始值
+Promise链式调用，我们需要注意，就是当then方法中的resolve、reject函数返回值是原始值的时候，此时返回值会作为下一个then方法中resolve函数的参考值，并且执行resolve
+```js
+let promise1 = new Promise((resolve, reject)=>{
+  resolve('promise1')
+})
+
+let promise2 = promise1.then(value => {
+  return value + '-> then -> promise2'
+})
+.then(value=>{
+  console.log(value);
+})
+```
+1. then方法的链式调用，有些人可能认为是return this实现链式调用的目的，但是这种情况对于Promise链式调用来说不可取，为什么呢？因为return this，此时的this指代的是上一个Promise实例对象，而下一个then方法与上一次Promise实例对象并没有任何关系；所以then方法返回的是一个全新的Promise实例对象。
+2. then方法的链式调用关键点：then方法中resolve，reject回调函数的返回值是下一次Promise实例对象的then方法中resolve，reject的参数值；也就是说，x = onFulfilled(this.value); resolve(x)。
+```js
+then(onFulfilled, onRejected){
+    let promise2 = new Promise((resolve, reject) =>{
+      if(this.status === FULFILLED){
+          let x = onFulfilled(this.value );
+          resolve(x);
+      }
+      if(this.status === REJECTED){
+          let x = onRejected(this.reason);
+          resolve(x)
+      }
+      if(this.status === PENDING){
+        this.onFulfilledCallbacks.push(()=>{
+            let x = onFulfilled(this.value);
+            resolve(x)
+        })
+        this.onRejectedCallbacks.push(()=>{
+            let x = onRejected(this.reason)
+            resolve(x)
+        })
+      }
+    })
+    return promise2;
+  }
+```
+3. then方法中会抛出错误throw new Error，源码实现使用try...catch捕获异常。
+```js
+  then(onFulfilled, onRejected){
+    let promise2 = new Promise((resolve, reject) =>{
+      if(this.status === FULFILLED){
+        try{
+          let x = onFulfilled(this.value );
+        }catch(e){
+          reject(e)
+        } 
+      }
+      if(this.status === REJECTED){
+        try{
+          let x = onRejected(this.reason);
+        }catch(e){
+          reject(e)
+        }
+      }
+      if(this.status === PENDING){
+        this.onFulfilledCallbacks.push(()=>{
+          try{
+            let x = onFulfilled(this.value);
+          }catch(e){
+            reject(e)
+          }
+        })
+        this.onRejectedCallbacks.push(()=>{
+          try{
+          let x = onRejected(this.reason)
+          }catch(e){
+            reject(e)
+          }
+        })
+      }
+    })
+    return promise2;
+  }
+```
 
 ### 2. 回调函数返回非原始值
+Promise链式调用，我们还需要注意，then方法resolve、reject函数返回的不是原始值，而是Promise对象，此时下一个then方法会根据回调函数返回的这个Promise对象的状态进行调用响应的回调函数。
+```js
+let promise1 = new Promise((resolve, reject)=>{
+  resolve('promise1')
+})
+
+let promise2 = promise1.then(value => {
+  // 2.
+  return Promise.resolve(value + '-> then -> promise2')
+  // 3.
+  return new Promise((resolve, reject)=>{
+    resolve(value + '-> then -> promise2')
+  })
+})
+.then(value=>{
+  console.log(value);
+})
+```
+1. 返回值x此时返回的不再是原始值，而是Promise对象之类的数据类型，所以需要执行返回值Promise对象的then方法，获取then方法回调函数中的参数，将参数传递给新创建Promise实例对象then方法中的回调函数当作参数；resolvePromise(newPromise, returnPromise, resolve, reject)。
+2. 根据PromiseA+规范，then方法返回的Promise实例对象不能够与then方法中回调函数返回的Promise实例对象相同，也就是newPromise !== returnPromise
+3. 在创建resolvePromise方法时遇到两个问题
+   1. newPromise作为新创建的Promise实例对象获取不到，程序抛出问题，因为newPromise是作为新创建的实例对象，而在构造器中调用newPromise对象，此时newPromise还没创建完成，又因为newPromise被let进行声明，所以在啊let之前调用变量，出现暂时性死区的问题，解决方式：设置延时器。
+   2. 返回值是returnPromise是否也一同newPromise放入延时器中呢？如果不放入延时器中，因为executor函数时同步代码执行，所以返回值此时也是同步执行，而原生是异步执行，所以需要放入延时器。
+
+<img :src="$withBase('/basicFrontEnd/ES6/promise21.png')" alt="promise" />
+
+```js
+function resolvePromise(promise2, x, resolve, reject){
+  console.log(x); // promise1-> then -> promise2
+}
+
+then(onFulfilled, onRejected){
+    let promise2 = new MyPromise((resolve, reject) =>{
+      if(this.status === FULFILLED){
+        setTimeout(()=>{
+          try{
+            let x = onFulfilled(this.value );
+            resolvePromise(promise2, x, resolve, reject);
+          }catch(e){
+            console.log(e);
+            reject(e)
+          }
+        }, 0)
+      }
+  
+      if(this.status === REJECTED){
+        setTimeout(()=>{
+          try{
+            let x = onRejected(this.reason);
+            resolvePromise(promise2, x, resolve, reject);
+          }catch(e){
+            reject(e)
+          }
+        }, 0)
+      }
+  
+      if(this.status === PENDING){
+        this.onFulfilledCallbacks.push(()=>{
+          try{
+            let x = onFulfilled(this.value);
+            resolvePromise(promise2, x, resolve, reject);
+          }catch(e){
+            reject(e)
+          }
+        })
+  
+        this.onRejectedCallbacks.push(()=>{
+          try{
+          let x = onRejected(this.reason);
+          resolvePromise(promise2, x, resolve, reject);
+          }catch(e){
+            reject(e)
+          }
+        })
+      }
+    })
+    return promise2;
+  }
+```

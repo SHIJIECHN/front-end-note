@@ -177,3 +177,140 @@ function levelOrder(root: Node | null): number[][] {
   return res;
 };
 ```
+
+##  在每个树行中找最大值
+[力扣题目链接](https://leetcode.cn/problems/find-largest-value-in-each-tree-row/)
+
+给定一棵二叉树的根节点 root ，请找出该二叉树中每一层的最大值。
+```md
+示例1：
+输入: root = [1,3,2,5,3,null,9]
+输出: [1,3,9]
+
+示例2：
+输入: root = [1,2,3]
+输出: [1,3]
+```
+
+```ts
+function largestValues(root: TreeNode | null): number[] {
+  let res: number[] = [];
+  if (root === null) return res;
+
+  let curNode: TreeNode;
+  const helperQueue: TreeNode[] = []
+  helperQueue.push(root);
+  while (helperQueue.length > 0) {
+    let len = helperQueue.length;
+    let maxNum: number | undefined;
+    while (len > 0) {
+      curNode = helperQueue.shift()!;
+      if (maxNum !== undefined) {
+        maxNum = curNode.val > maxNum ? curNode.val : maxNum;
+      } else {
+        maxNum = curNode.val
+      }
+
+      if (curNode.left !== null) helperQueue.push(curNode.left);
+      if (curNode.right !== null) helperQueue.push(curNode.right);
+      len--;
+    }
+    // @ts-ignore
+    res.push(maxNum);
+  }
+  return res;
+}
+```
+
+## 填充每个节点的下一个右侧节点指针
+[力扣题目链接](https://leetcode.cn/problems/populating-next-right-pointers-in-each-node/)
+
+给定一个 完美二叉树 ，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：
+
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。
+
+初始状态下，所有 next 指针都被设置为 NULL。
+
+```md
+示例 1：
+输入：root = [1,2,3,4,5,6,7]
+输出：[1,#,2,3,#,4,5,6,7,#]
+解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。序列化的输出按层序遍历排列，同一层节点由 next 指针连接，'#' 标志着每一层的结束。
+
+示例 2:
+输入：root = []
+输出：[]
+```
+
+```ts
+function connect(root: Node | null): Node | null {
+  if (root === null) return root;
+  const helperQueue: Node[] = [];
+  let curNode: Node;
+  helperQueue.push(root);
+
+  while (helperQueue.length > 0) {
+    let len = helperQueue.length;
+
+    while (len > 0) {
+      curNode = helperQueue.shift()!;
+      // 本层的最后一个节点
+      if (len == 1) {
+        curNode.next = null;
+      } else {
+        curNode.next = helperQueue[0];
+      }
+      if (curNode.left !== null) helperQueue.push(curNode.left);
+      if (curNode.right !== null) helperQueue.push(curNode.right);
+      len--;
+    }
+  }
+  return root
+};
+```
+
+## 二叉树的最大深度
+[力扣题目链接](https://leetcode.cn/problems/maximum-depth-of-binary-tree/)
+
+给定一个二叉树，找出其最大深度。
+
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
+
+说明: 叶子节点是指没有子节点的节点。
+
+```md
+给定二叉树 [3,9,20,null,null,15,7]
+返回它的最大深度 3 
+```
+```ts
+function maxDepth(root: TreeNode | null): number {
+  let deep: number = 0
+  if (root === null) return deep;
+
+  const helperQueue: TreeNode[] = []
+  let curNode: TreeNode;
+
+  helperQueue.push(root);
+
+  while (helperQueue.length > 0) {
+    let len = helperQueue.length;
+    deep++;
+
+    while (len > 0) {
+      curNode = helperQueue.shift()!;
+      console.log(curNode);
+      
+      if (curNode.left !== null) helperQueue.push(curNode.left);
+      if (curNode.right !== null) helperQueue.push(curNode.right);
+      len--;
+    }
+  }
+  return deep;
+};
+```
