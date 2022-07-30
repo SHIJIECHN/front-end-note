@@ -503,3 +503,263 @@ then(onFulfilled, onRejected){
     return promise2;
   }
 ```
+
+4. resolvePromise()方法内部的操作
+   1. 判断返回值returnPromise和then方法返回值的实例对象是否相同
+   2. 判断返回值returnPromise是否是对象类型，如果不是对象类型当作原始值处理，直接调用resolve函数
+   3. 如果是对象类型，进一步判断，获取对象的then方法，此时可能是promise对象和thenable对象，如果不是的话按照普通对象处理，直接调用resolve函数
+   4. 如果是Promise对象或者是thenable对象，那么获取then方法，执行then方法，获取then方法中回调函数的携带的参数，分别传入相应的newPromise的回调函数当作参数。
+5. 确保每一次回调函数执行一次，需要设置called锁进行控制，如果执行一次后将锁关闭即可。
+
+```javascript
+then(onFulfilled, onRejected){
+    let promise2 = new MyPromise((resolve, reject) =>{
+      if(this.status === FULFILLED){
+        setTimeout(()=>{
+          try{
+            let x = onFulfilled(this.value );
+            resolvePromise(promise2, x, resolve, reject);
+          }catch(e){
+            console.log(e);
+            reject(e)
+          }
+        }, 0)
+      }
+    })
+    return promise2
+}
+
+function resolvePromise(promise2, x, resolve, reject) {
+    if (promise2 === x) {
+        return reject(new TypeError('Chaining cycle detected for promise #<Promise>]'));
+    }
+
+    let called = false;
+
+    if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+        try {
+            let then = x.then; // throw error
+
+            if (typeof then === 'function') { // Promise
+                then.call(x, (y) => {
+                    if (called) return;
+                    called = true;
+                    resolvePromise(promise2, y, resolve, reject)
+                }, (r) => {
+                    if (called) return;
+                    called = true;
+                    reject(r);
+                })
+            } else {
+                resolve(x);
+            }
+        } catch (e) {
+            if (called) return;
+            called = true;
+            reject(e);
+        }
+
+    } else {
+        resolve(x);
+    }
+}
+```
+## 源码实现
+```javascript
+const PENDING = 'pending',
+    FULFILLED = 'fulfilled',
+    REJECTED = 'rejected';
+
+function resolvePromise(promise2, x, resolve, reject) {
+    /**
+     * 此时存在三个问题：
+     * 1. 根据PromiseA++的规范，如果回调函数返回引用值，此时then方法返回
+     * 的PromiseU币能与回调函数返回的Promise实例相同。
+     * 2. 此时获取不到promise2实例对象，因为promise2作为Promise实例对象，
+     * 此时构造函数并未执行完成，而在内部获取promise2肯定是获取不到的，又
+     * 因为promise2被let声明，所以此时产生暂时性死区的问题-->通过setTimeout
+     * 解决。
+     * 3. 返回值x需不需要设置延迟的问题，如果不给返回值设置延时，此时
+     * promise2的executor函数是同步执行，此时x返回值会立即出结果，与全局同步
+     * 代码执行发生bug，所以也需要定时执行。
+     */
+    if (promise2 === x) {
+        return reject(new TypeError('Chaining cycle detected for promise #<Promise>]'));
+    }
+
+    // 为了让每一次then方法中的回调函数执行一次，所以可以设置一把锁
+    let called = false;
+
+    // 判断当前返回值x是promise对象、thenable对象、普通对象、普通值
+    if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+        // 判断对象类型
+        // 获取对象的then方法，此时then方法不存在，抛出异常，进行捕获
+        try {
+            let then = x.then; // throw error
+            if (typeof then === 'function') { // Promise，或者是thenable对象
+                // 改变promise对象回调函数，所以需要改变当前then方法中的this指向
+                then.call(x, (y) => {
+                    if (called) return;
+                    called = true;
+                    resolvePromise(promise2, y, resolve, reject)
+                }, (r) => {
+                    if (called) return;
+                    called = true;
+                    reject(r);
+                })
+            } else {
+                resolve(x);
+            }
+        } catch (e) {
+            if (called) return;
+            called = true;
+            // 普通对象，执行promise2成功的回调函数
+            reject(e);
+        }
+    } else {
+        resolve(x);
+    }
+}
+
+class MyPromise {
+    // 构造器
+    constructor(executor) {
+        // 设置Promise实例对象的状态，默认pending状态
+        this.status = PENDING;
+        // 设置Promise实例对象成功回调函数的参数，默认undefined
+        this.value = undefined;
+        // 设置Promise实例对象失败回调函数的参数，默认undefined
+        this.reason = undefined;
+
+        // 设置异步操作成功的回调函数
+        this.onFulfilledCallbacks = [];
+        // 设置异步操作失败的回调函数
+        this.onRejectedCallbacks = [];
+
+        // 设置成功回调函数
+        const resolve = (value) => {
+            // 成功回调函数控制Promise实例对象成功的状态和参数
+            if (this.status === PENDING) {
+                this.status = FULFILLED;
+                this.value = value;
+                // 发布。执行异步操作成功的回调函数
+                this.onFulfilledCallbacks.forEach(fn => fn())
+            }
+        }
+
+        // 设置失败回调函数
+        const reject = (reason) => {
+            // 失败回调函数控制Promise实例对象失败的状态和参数
+            if (this.status === PENDING) {
+                this.status = REJECTED;
+                this.reason = reason;
+                // 发布。执行异步操作失败的回调函数
+                this.onRejectedCallbacks.forEach(fn => fn())
+            }
+        }
+
+        // executor执行者函数执行
+        try {
+            /**
+             * 1. try...catch语句包裹因为executor函数执行可能存在异常，所以需要
+             * 捕获.
+             * 2. resolve，reject是形式参数还是实例参数，因为executor是作为实例
+             * 参数进行传递的，而resolve，reject是形式参数，那么形式参数要与实际
+             * 参数做对应。
+             */
+            executor(resolve, reject);
+        } catch (e) {
+            reject(e);
+        }
+
+    }
+
+    // Promise.prototype的then方法，存在成功的回调，失败的回调
+    then(onFulfilled, onRejected) {
+        onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value;
+        onRejected = typeof onRejected === 'function' ? onRejected : reason => { throw reason }
+            /**
+             * 1. then()方法的链式调用的入口在哪里？有人可能认为then方法返回
+             * this即可，但是返回this，此时当前的this指代的上一个Promise实例
+             * 对象，而下一个then方法与上一个Promise实例对象并没有关系，所以
+             * 每次调用then方法都会返回一个全新的Promise对象
+             * 2. 链式调用的关键在哪呢？也就是说上一次then方法中的成功或者失败
+             * 回调函数的返回值是下一次then方法成功或者失败回调函数的参数（针
+             * 对原始值）
+             */
+        let promise2 = new MyPromise((resolve, reject) => {
+            // 根据Promise实例对象的状态进行调用不同的回调函数
+            if (this.status === FULFILLED) {
+                setTimeout(() => {
+                    // 因为resolvePromise可能出现失败的情况，所以要try...catch
+                    try {
+                        let x = onFulfilled(this.value);
+                        /**
+                         * Promsie链式调用代码操作（成功或者失败函数返回引用值）
+                         * 的入口在哪呢？就是上一次成功或者失败函数返回值的判断：
+                         * 判断x是否是原始值还是引用值。
+                         */
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (e) {
+                        console.log(e);
+                        reject(e)
+                    }
+                }, 0)
+            }
+
+            if (this.status === REJECTED) {
+                setTimeout(() => {
+                    try {
+                        let x = onRejected(this.reason);
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (e) {
+                        reject(e)
+                    }
+                }, 0)
+            }
+
+            /**
+             * Promsie异步操作的入口在哪呢？setTimeout是同步接口，会在WebAPIS中
+             * 注册回调函数（异步），而promise.then是同步操作，此时promise的状态
+             * 必须等到回调函数执行才能够确定，所以此时promise的状态是pending，
+             * 所以Promise实例对象还存在一个pending状态
+             */
+            if (this.status === PENDING) {
+
+                /**
+                 * 通过哪种方式可以确定什么时间执行回调函数呢？利用发布订阅和装饰器
+                 * 的思想，先将回调函数保存，等到Promise实例对象状态确定之后再去
+                 * 执行。
+                 * 为什么不直接操作呢？因为如果直接保存成功或者失败的回调函数，此时
+                 * 回调函数的参数会丢失。
+                 */
+                this.onFulfilledCallbacks.push(() => {
+                    try {
+                        let x = onFulfilled(this.value);
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (e) {
+                        reject(e)
+                    }
+                })
+
+                this.onRejectedCallbacks.push(() => {
+                    try {
+                        let x = onRejected(this.reason);
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (e) {
+                        reject(e)
+                    }
+                })
+            }
+        })
+        return promise2;
+    }
+
+    // catch方法，实际上就是then方法传入失败的回调
+    catch (errorCallback) {
+        return this.then(null, errorCallback);
+    }
+}
+
+module.exports = MyPromise
+```
