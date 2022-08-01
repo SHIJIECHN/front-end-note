@@ -5,8 +5,7 @@ title: ES6深拷贝
 ---
 
 
-## 深拷贝
-ES5实现
+## 深拷贝(ES5)
 ```javascript
 var obj = {
     name: 'xiaoyesensen',
@@ -28,8 +27,11 @@ function deepClone(origin, target) {
 
     var arrType = '[object Array]',
         toStr = Object.prototype.toString;
+
     for (var key in origin) {
+        // 判断是否是原型上的属性
         if (origin.hasOwnProperty(key)) {
+            // origin[key] 是引用类型
             if (typeof origin[key] === 'object' && origin[key] !== null) {
                 if (toStr.call(origin[key]) === arrType) {
                     tar[key] = []
@@ -37,7 +39,7 @@ function deepClone(origin, target) {
                     tar[key] = {}
                 }
                 deepClone(origin[key], tar[key]);
-            } else {
+            } else { 
                 tar[key] = origin[key];
             }
         }
@@ -50,6 +52,7 @@ newObj.info.hobby[2].a = 123;
 console.log(newObj);
 ```
 
+## WeakMap
 WeakMap的理解:  
 WeakMap 键名只能是对象；Map键名可以是任意类型
 ```javascript
@@ -83,9 +86,8 @@ oBtn2.addEventListener('click', oBtnMap.get(oBtn2), false);
 oBtn1.remove();
 oBtn2.remove();
 ```
-
-ES6实现:    
-了解constructor
+## 深拷贝(ES6)    
+### 1. constructor
 ```javascript
 const obj = {};
 console.log(obj); // {}
@@ -99,10 +101,17 @@ const newArr = new arr.constructor();
 newArr.push(1);
 console.log(newArr); // [1] 新数组与arr没有任何关系了
 ```
-实现深拷贝
+
+### 2. deepClone
+以下4种情况：
+1. null, undefined
+2. Date, RegExp
+3. 对象{}, 或数组[]
+4. 循环引用
+
 ```javascript
 function deepClone(origin) {
-    // origin: null, undefined 
+    // origin: null, undefined 或者原始值
     if (origin == undefined || typeof origin !== 'object') {
         return origin;
     }
@@ -116,7 +125,7 @@ function deepClone(origin) {
         return new RegExp(origin);
     }
 
-    // {} [] 
+    // {} []。创建新的对象，不管是对象还是数组，只需要new origin的构造器
     const target = new origin.constructor();
 
     for (let key in origin) {
@@ -135,10 +144,11 @@ let test2 = {};
 test2.test1 = test1;
 test1.test2 = test2
 
-console.log(test2);
+console.log(deepClone(test2));
 ```
 所以需要有记录`test1`拷贝过后就不能再拷贝了。
 ```javascript
+// hasMap记录是否拷贝过
 function deepClone(origin, hasMap = new WeakMap()) {
     // origin: null, undefined 
     if (origin == undefined || typeof origin !== 'object') {
@@ -154,6 +164,7 @@ function deepClone(origin, hasMap = new WeakMap()) {
         return new RegExp(origin);
     }
 
+    // 找到hasKey，如果已经存在，就直接return
     const hasKey = hasMap.get(origin);
     if (hasKey) {
         return hasKey;
@@ -161,7 +172,7 @@ function deepClone(origin, hasMap = new WeakMap()) {
 
     // {} [] 
     const target = new origin.constructor();
-    hasMap.set(origin, target);
+    hasMap.set(origin, target); // 设置hasMap
 
     for (let key in origin) {
         if (origin.hasOwnProperty(key)) {
