@@ -1,5 +1,5 @@
 ---
-autoGroup-6: 字符串
+autoGroup-6: 二叉树
 sidebarDepth: 3
 title: 二叉树层序遍历
 ---
