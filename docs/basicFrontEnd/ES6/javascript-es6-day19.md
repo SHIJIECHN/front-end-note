@@ -5,7 +5,7 @@ title: 19. Promise基础
 ---
 
 ## Promise由来
-单线程如果遇到数据量大的问题，解决的方案是异步操作，而一步操作通常是通过回调函数的方式进行解决。在JQuery中也是通过Callbacks处理异步操作，而JQuery中的Deferred()方法返回的对象就是一个异步操作的容器对象（引出Promise的），储存异步操作，所以也可以说Promise是阉割版的Deferred()。   
+单线程如果遇到数据量大的问题，解决的方案是异步操作，而异步操作通常是通过回调函数的方式进行解决。在JQuery中也是通过Callbacks处理异步操作，而JQuery中的Deferred()方法返回的对象就是一个异步操作的容器对象（引出Promise的），储存异步操作，所以也可以说Promise是阉割版的Deferred()。   
 
 1. Jquery中的Deferred()代码
 ```js
@@ -37,11 +37,11 @@ w.done(function(){
 Promise A+规范：不止JQ利用callback实现promise，还有其他的库实现Promise，但是都是要遵循Promise A+规范进行开发的。
 
 ## Promise的作用
-1. Promise解决回调地狱的问题   
+### 1. Promise解决回调地狱的问题   
 异步操作通过回调地狱进行解决，但是多层嵌套的回调函数产生回调地狱的问题，导致后期代码维护困难，所以通过Promise解决回调地狱的问题。
 
-2. Promise解决try...catch只能捕获到同步代码的异常   
-try...catch只能捕获到同步代码中抛出的异常，而异步操作中的异常并不能够进行捕获。
+### 2. 异步代码错误捕获
+Promise解决try...catch只能捕获到同步代码的异常。try...catch只能捕获到同步代码中抛出的异常，而异步操作中的异常并不能够进行捕获。
 ```js
 try{
   // 同步异常
@@ -54,7 +54,7 @@ try{
   console.log(e); // ReferenceError: a is not defined at app.js:3:15
 }
 ```
-3. Promise解决同步并发异步代码的问题
+### 3. Promise解决同步并发异步代码的问题
 同步并发异步代码：回调在同步并发异步代码的问题上传统的ES5可以用发布订阅的模式进行解决，同步并发代码用回调函数来做会出现什么问题呢？   
 下面同时执行读取文件的异步操作，如果通过回调函数的方式进行，就不能够确定到底是哪一个回调函数首先执行，因为三个回调函数都会在web APIs中挂起，当第一个文件读取完毕之后，回调函数才会被推入到任务队列中等待执行，但是我们并不能够知道哪个回调函数首先执行。
 ```js
@@ -135,7 +135,7 @@ let promise = new Promise((resolve, reject) => {
 ```
 
 ### 4. Promise的executor执行函数
-executor函数：虽然执行函数时回调函数，但是执行函数是同步执行的代码，name同步执行的代码如何表示异步操作的呢？其实对应的操作就需要用到resolve，reject两参数；   
+executor函数：虽然执行函数是回调函数，但是执行函数是同步执行的代码，那么同步执行的代码如何表示异步操作的呢？其实对应的操作就需要用到resolve、reject两参数；   
 > 1. resolve：让promise异步操作的状态改为成功状态，然后触发执行绑定的成功的回调函数
 > 2. reject：让promise异步操作的状态改为失败状态，然后触发执行绑定的失败的回调函数
 
@@ -152,7 +152,7 @@ promise.then(data => {
 })
 ```
 
-1. 通常Promise代表异步的操作，而Promise中executor是同步执行的代码，如果我在executor中不写异步代码，namePromise还能正常执行吗？    
+1. 通常Promise代表异步的操作，而Promise中executor是同步执行的代码，如果我在executor中不写异步代码，Promise还能正常执行吗？    
 
 在executor执行函数中不写异步代码也是可以正常执行的，当然executor中的同步代码会按照正常的代码执行顺序执行。
 ```js
@@ -182,7 +182,7 @@ console.log(2);
 
 ### 5. Promise中的then方法
 1. Promise中的then方法基本认识
-> Promise实例对象具有then方法，也就是说在Promise.prototype定义了then()方法。它的作用就是为Promise实例操作Promise状态改变后的回调函数，then()方法的第一个参数是成功（resolve）回调函数，第二参数是失败（reject）函数.
+> Promise实例对象具有then方法，也就是说在Promise.prototype定义了then()方法。它的作用就是为Promise实例操作Promise状态改变后的回调函数，then()方法的第一个参数是成功（resolve）回调函数，第二参数是失败（reject）函数。
 
 ```js
 let promise = new Promise((resolve, reject) => {
@@ -195,7 +195,7 @@ promise.then(data=>{
 })
 ```
 2. Promise的链式调用  
-> then方法返回一个新的Promise对象实例（和原来的Promise实例不相等）。因此可以采取链式写法，在then后面直接调用另一个then方法
+> then方法返回一个新的Promise对象实例（和原来的Promise实例不相等）。因此可以采取链式写法，在then后面直接调用另一个then方法。
 
 ```js
 let promise = new Promise((resolve, reject) => {
