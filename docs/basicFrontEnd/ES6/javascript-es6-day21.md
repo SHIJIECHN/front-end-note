@@ -29,8 +29,11 @@ array, map, set, string, TypeArray, NodeList, arguments
 ### 4. 迭代器实现
 ```js
 function makeIterator(arr) {
+  // 如果没有迭代完成，生成一个索引
     let nextIndex = 0;
+    // 返回一个迭代器对象
     return {
+      // 迭代器对象里有个next()方法
         next() {
             if (nextIndex < arr.length) {
                 return { value: arr[nextIndex++], done: false }
@@ -302,7 +305,6 @@ function * demo(){
 ```
 
 ### 5. next方法的返回值
-#### 3. next方法可以带有一个参数，该参数会被当做上一个yield表达式的返回值。
 ```js
 function* foo() {
     let value1 = yield 1;
@@ -317,7 +319,9 @@ function* foo() {
 
 let iter = foo();
 // next参数标识上一个yield表达式的返回值，所以第一次使用next方法时，传递参数是无效的。
-console.log(iter.next('one')); // {value: 1, done: false}
+// 第一次执行，不产生yield的返回值
+console.log(iter.next('one')); // {value: 1, done: false} 
+//第二次执行，产出yeild的返回值为第一次执行next()传入的值
 console.log(iter.next('two')); // value1: two  {value: 2, done: false}
 console.log(iter.next('three')); // value2: three  {value: 3, done: false}
 console.log(iter.next('four')); // value3: four  {value: 4, done: false}
@@ -343,6 +347,7 @@ for (let i of foo()) {
 
 Generator函数就是遍历器生成函数。因此可以把Generator赋值给对象Symbol.iterator属性。 
 
+### 6. 优化对象迭代器的函数
 采用generator函数优化obj部署迭代器
 ```js
 let obj = {
@@ -353,7 +358,8 @@ let obj = {
             arr = [...this.start, ...this.end],
             len = arr.length;
         while (nextIndex < len) {
-            yield arr[nextIndex++];
+          // 产出值
+          yield arr[nextIndex++];
         }
     }
 }
@@ -386,7 +392,7 @@ for (let i of obj) {
 }
 ```
 
-优化文件读取流程
+### 7. 优化文件读取流程
 ```js
 import fs from 'fs'
 
@@ -398,7 +404,7 @@ fs.readFile('./test1.txt', 'utf-8', (err, data) => {
     })
 })
 
-// // promisify 优化
+// 1. promisify 优化
 
 function myPromisify(fn) {
     return function(...args) {
@@ -421,7 +427,7 @@ readFilePromisify('./test1.txt', 'utf-8')
     .then(res => readFilePromisify(res, 'utf-8'))
     .then(res => console.log(res))
 
-// generator生成器函数优化
+// 2. generator生成器函数优化
 
 function* read() {
     let value1 = yield readFilePromisify('./test1.txt', 'utf-8'); // 返回Promise对象
@@ -446,7 +452,7 @@ value.then((val) => {
     })
 })
 
-// 优化
+// 3. Co模块优化：解决链式调用的问题
 
 function Co(iter) {
     return new Promise((resolve, reject) => {
@@ -470,7 +476,8 @@ promise.then((val) => {
 })
 ```
 
-return()方法
+### 8. 生成器对象上的return()/throw()方法 
+1. return()方法： 终结迭代方式，调用之后返回true
 ```js
 function* get() {
     yield 1;
@@ -481,7 +488,7 @@ function* get() {
 let g = get();
 console.log(g.next()); // {value: 1, done: false}
 console.log(g.return()); //  {value: undefined, done: true} 终止迭代
-console.log(g.next());
+console.log(g.next()); // {value: undefined, done: true}
 
 // 同等于
 
@@ -493,7 +500,7 @@ function* get() {
 }
 ```
 
-throw()方法
+2. throw()方法：throw()必须在next()之后执行才能捕获异常；throw()也相当于next()继续执行迭代。
 ```js
 let g = function*() {
     try {
@@ -509,6 +516,7 @@ console.log(i.next());
 console.log(i.throw()); // 必须写在next的后面才能被catch捕获到，因为g中有一个yield。后面的代码依旧会执行
 console.log(i.next());
 ```
+
 文件读取错误捕获
 ```js
 import fs from 'fs'
