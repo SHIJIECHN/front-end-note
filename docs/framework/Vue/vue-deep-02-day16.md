@@ -1,7 +1,7 @@
 ---
-autoGroup-2: Vue
+autoGroup-3: Vue本尊
 sidebarDepth: 3
-title: methods
+title: 3. 深入研究methods属性以及实例方法挂载
 ---
 
 ## methods

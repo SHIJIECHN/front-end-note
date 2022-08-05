@@ -1,7 +1,7 @@
 ---
-autoGroup-2: Vue
+autoGroup-3: Vue本尊
 sidebarDepth: 3
-title: data
+title: 2. 深入研究data属性以及数据响应式实现
 ---
 
 ## data

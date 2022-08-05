@@ -1,7 +1,7 @@
 ---
-autoGroup-2: Vue
+autoGroup-3: Vue本尊
 sidebarDepth: 3
-title: ES6深拷贝
+title: 1. ES5和ES6深拷贝
 ---
 
 
