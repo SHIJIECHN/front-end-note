@@ -307,3 +307,14 @@ app.use(express.static(path.join(__dirname, 'public')))
 <link href="/css/index.css">
 ```
 
+## 分享数据
+
+## 模板引擎
+### 1. pug
+
+
+### 2. express-handlebars
+
+
+### 3. ejs
+partials
