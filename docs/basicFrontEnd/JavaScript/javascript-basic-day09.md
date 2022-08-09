@@ -121,7 +121,29 @@ function Car(color, brand){
 }
 var car = Car('red', 'Mazda');
 ```
-
+模拟实现`new`
+1. 创建一个空对象，作为将要返回的对象
+2. 将空对象的原型指向构造函数的prototype属性。这一步是让这个对象能沿着原型链去使用构造函数中的prototype上的方法
+3. 将空对象赋值给构造函数内部的this。这一步作用是让构造器中设置再this上的属性最终设置再这个对象上。
+4. 返会这个对象
+```javascript
+/**
+ * var o = _new(F, 'a', 30) 与new F('a', 30)效果相同
+ * 1. arguments获取调用_nw式传入的实参。并不是真正的数组
+ * 2. 调用_new 时，传入的第一个参数就是构造器
+ * 3. shift的作用：取出数组的第一个元素（构造器），同时会修改原arguments数组
+ * 4. 保持原型链
+ * 5. 调用构造器，并将内部的this用obj来替代，此时arguments是取出第一个元素后的部分
+ * 6. 兼容返回值
+ */
+function _new(fn,) {
+  var obj = {};
+  var co = [].shift.call(arguments);
+  obj.__proto__ = co.prototype;
+  var rs = co.apply(obj, arguments);
+  return typeof rs === 'object' ? rs : obj;
+}
+```
 
 
 ### 5. 构造函数return问题
