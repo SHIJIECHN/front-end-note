@@ -349,5 +349,300 @@ const importantDates: (string | Date)[] = [new Date(), '2020-10-01']
 一旦需要记录一些相似类型记录的数据结构时。
 
 ## 元组
+和数组很类似的数据结构，每一个元素代表一个记录的不同属性。  
+tuple元组格式为：\[string, boolean, number]
+```typescript
+const drink = {
+    color: 'brown',
+    carbonated: true,
+    sugar: 35
+}
 
+const pepsi: [string, boolean, number] = ['brown', true, 35];
 
+// 类型别名 Type Alias
+type Drink = [string, boolean, number];
+
+const  pepsi: Drink = ['brown', true, 35];
+const tea: Drink = ['brown', false, 0]
+```
+**为什么要用元组？**    
+在程序里面，使用元组的数据类型比较少，但特殊场景会用到，跟CSV文件打交道时会用。    
+**使用元组会有什么缺点？**       
+会丢失重要信息。  
+```typescript
+// 除了数值不能显示其他类型
+// 难以阅读值的信息代表什么
+const farm: [number, number] = [6, 8];
+
+// 侧向说明对象是一个更好的数据结构
+const fram = {
+    chick: 6,
+    duck: 8
+}
+```
+
+## 接口
+创建一个新的类型，来描述一个对象的属性名和属性值，对象的形式进行描述。     
+在Typescript中，会大量的使用接口和类来实现代码的高度复用，对类的一部分行为的抽象。
+### 1. 接口分类
+1. 函数类型接口
+2. 类类型接口：
+   1. 对类的一部分行为的抽象
+   2. 实现接口中的属性和方法
+3. 可索引类型接口
+4. 继承接口
+
+```typescript
+const uncleMike = {
+    name: 'Mike',
+    age: 20,
+    married: false
+}
+// 普通写法
+const printPerson = (person: { name: string, age: number, married: boolean }): void => {
+    console.log(`名字: ${person.name}`);
+    console.log(`年龄: ${person.age}`);
+    console.log(`结婚没: ${person.married}`);
+}
+
+// 定义接口写法
+interface Person {
+    name: string,
+    age: number,
+    married: boolean,
+    // 方法简写
+    summary(): string
+}
+
+const printPerson = (person: Person): void => {
+    console.log(`名字: ${person.name}`);
+    console.log(`年龄: ${person.age}`);
+    console.log(`结婚没: ${person.married}`);
+}
+
+printPerson(uncleMike);
+```
+```typescript
+// 接口定义只有summary方法
+interface Reportbale {
+    summary(): string;
+}
+
+const uncleMike = {
+    name: 'Mike',
+    age: 20,
+    married: false,
+    summary(): string{
+        return `名字: ${this.name}`
+    }
+}
+
+const drink = {
+    color: '棕色',
+    carbonated: true,
+    sugar: 35,
+    summary(): string{
+        return `这个饮料的颜色是: ${this.color}`
+    }
+}
+// Reportbale接口是作为printSummary函数的门卫存在
+const printSummary = (item: Reportbale): void => {
+    console.log(item.summary());
+}
+
+// 必须满足Reportbale接口的必要条件才能够被printSummary函数使用
+printSummary(uncleMike);
+printSummary(drink);
+```
+在Typescript中代码复用的一般策略:
+1. 定义接收接口指定类型参数的函数
+2. 存在对象/类去满足接口的必要条件
+
+**interface和type有什么区别？**    
+1. 都可以用来定义接口，即定义对象或者函数的形状
+2. 都可以实现继承，也可以相互继承
+3. type可以实现类型别名
+
+## 类
+定义一个对象的蓝图，描述了这个对象的属性和方法。    
+在Typescript中，类具有双重特性：
+1. 创建实例（值）
+2. 代表类型（类型）
+
+**什么时候使用类？**     
+跟接口一样，在Typescript中，大量使用接口，为了不同文件里面的类进行一个配合工作。   
+```typescript
+// 定义一个蓝图。父类 super class
+class Person {
+    // 方法
+    scream(): void {
+        console.log('ahhh');
+    }
+
+    sing(): void {
+        console.log('lalala');
+    }
+}
+
+const person = new Person();
+person.scream(); // ahhh
+person.sing(); // lalala
+
+// 继承 inheritance
+// Men作为一种Person，Men可以做的，Person也可以做
+// 子类
+class Men extends Person{
+
+}
+const men = new Men();
+men.scream();
+```
+
+### 修饰符
+在TS中类有修饰符，ES6中的类没有修饰符。
+
+**什么是修饰符？**    
+一些用于封装的关键字public, private, protected，为了限制类里面不同属性和方法的访问。   
+
+**为什么要使用修饰符？**     
+限制访问防止开发者错误的调用方法导致程序的破坏
+
+修饰符：
+- public：这个方法能够在任何地方被调用（自身、子类、实例）
+- private：这个方法只能在当前这个类的其他方法中被调用（自身）
+- protected：这个方法能够在当前这个类的其他方法或者子类的其他方法中被调用（自身、子类）
+- implements：关键字，满足接口，告诉TS帮助检测类有没有正确的满足接口的实现，没有时会显示错误
+- abstract：关键字，将当前类定义为抽象类，无法创建实例，配合定义将来会用到的方法和接收的参数还有属性使用
+
+```typescript
+class Person {
+    // 方法
+    scream(): void {
+        console.log('ahhh');
+    }
+}
+
+// 子类 child class
+class Men extends Person{
+    private sing(): void{
+        console.log('wohoooo');
+    }
+
+    startSinging(): void{
+        this.sing();
+    }
+}
+const men = new Men();
+men.scream();
+```
+属性描述：
+```typescript
+class Person {
+    // 属性
+    name: string = 'Mike'
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+
+```
+
+## 配置
+利用parcel-bundler包简易的让Typescript代码运行在浏览器中     
+parcel-bundler包工作原理：将打包后的ts文件转为js文件注入到\<script>标签中
+```typescript
+//安装
+npm i -g parcel-bundler
+
+//index.html引入ts文件
+<script src="./src/index.ts"></script>
+
+//开启打包服务器
+parcel serve index.html
+
+//Server running at http://localhost:1234
+```
+
+## 案例
+### 1. 百度地图
+实现：
+1. 百度地图展示在页面
+2. 在地图上标识地点（用户/公司）
+3. 给标注地点添加信息窗口
+
+技术：Typescript类+faker包。
+
+**faker**    
+faker包随机生成数据提供浏览器或node使用
+```typescript
+//安装faker
+npm i -D faker@4.1.0
+
+//引入
+import faker from 'faker';
+
+//在类型定义文件中定义帮助TS项目认识faker包
+//JS库(包) -> 类型定义文件 -> TS代码
+//如流行的JS库如axios自带类型定义文件不用额外去下载
+
+//如果不下载类型定义文件，TS推断会提示需要下载
+//去npm下载faker的类型定义文件 搜索@types/faker
+npm i -D @types/faker
+```
+
+**声明时类型定义文件？**   
+通过类型定义文件检测JS库中是否含有符合TS程序所需要的包文件
+
+**类型定义文件存储库**   
+Definitely Typed      
+保存方式为：@types/{JS库的名字}，如@types/faker    
+
+#### 1.1 项目创建
+```typescript
+//1.引入标签
+<script type="text/javascript" src="https://api.map.baidu.com/api?v=1.0&type=webgl&ak=bdmzm8j1GXfW44ABN4D5LRGwXvV1hOOa"></script>
+
+//2.插入容器
+<div id="container"></div>
+
+//3.测试是否接入百度API,控制台输入BMapGL
+//打印：{version: 'gl', _register: Array(9), guid: 1, register: ƒ, getGUID: ƒ, …}
+
+//4.接入成功
+
+//5.在Map.ts文件中下载引入类型定义文件
+npm i -S @types/baidumap-web-sdk
+npm install --save @types/bmapgl
+
+//6.创建地图实例
+//实例化访问BMap底下的Map类
+//Map类接收两个参数：
+//参数1：HTMLElement挂载容器
+//参数2：配置对象
+const map = new BMapGL.Map('container', {
+  //最大放大
+  maxZoom: 1
+});
+
+//7.设置中心点坐标
+var point = new BMapGL.Point(116.404, 39.915);
+
+//地图初始化，同时设置地图展示级别
+map.centerAndZoom(point, 15);
+```
+#### 1.2 项目结构
+```md
+├─index.html
+├─package.json
+├─src
+|  ├─Company.ts - 定义公司类/使用公共接口
+|  ├─CustomMap.ts - 定义公共接口/地图类
+|  ├─index.ts - 出口文件
+|  └Users.ts - 定义用户类/使用公共接口
+```
+
+#### 1.3 项目总结
+1. 实现private关键字在index.ts中使用API的限制
+2. 实现将两个方法或多个方法合并一个方法，将新增属性或者方法归纳在*配合类工作）定义的接口里
+3. 实现主动检测提示类中是否含有接口定义的属性和方法（implement）
