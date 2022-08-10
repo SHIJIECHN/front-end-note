@@ -23,7 +23,7 @@ hooks是vue3底层提供的钩子实现函数方式（不像Vue2 options API）�
 > - 可能会有一些想要在不同的组件里使用的代码（代码复用）
 > - 团队倾向新的CompositionAPI
 
-```vue
+```js
 /vue2.0写法：
 export default {
   data() {
@@ -42,7 +42,7 @@ export default {
   }
 }
 ```
-```vue
+```js
 //vue3.0写法：(可选/不影响2.0使用)
 export default {
   setup() {
@@ -52,7 +52,7 @@ export default {
   }
 }
 ```
-```vue
+```js
 export default {
   setup() {
     //Composition functions
@@ -73,7 +73,7 @@ function useSorting() {}
 1. mixin提取公共代码到数据管理
 2. Mixin Factories工厂
 3. Scoped Slots作用域插槽方式
-```vue
+```js
 //方式一：mixins
 //存在优点：
 //1.根据不同的功能进行归类
@@ -105,7 +105,7 @@ export default {
 }
 ```
 
-```vue
+```js
 //方式二：Mixin Factories
 //存在优点：
 //1.提高可复用性
@@ -135,7 +135,7 @@ export default {
 //逻辑部分：
 export default function sortingMixinFactory(obj) { }
 ```
-```vue
+```js
 //方式三：Scoped Slots
 //存在优点：
 //1.解决Mixins大多数问题
@@ -428,7 +428,7 @@ export default{
         })
 
         function increaseCapacity(){
-            event.capacity ++;
+            event.capacity++;
         };
     }
 
@@ -512,6 +512,81 @@ export default function useEventSpace(){
   - 在数据更改导致的虚拟DOM重新渲染和更新完毕之后被调用。当这个钩子被调用时，组件DOM已经更新，所以你现在可以执行依赖于DOM的操作。然而在大多数情况下，你应该避免在此期间更改状态。如果要相应状态改变，通常最好使用计算属性和侦听器取而代之。注意，updated不会保证所有的子组件也都被重新渲染完毕。如果你希望等待整个视图都渲染完毕，可以在updated内部使用vm.$nextTick
 - beforeUnmounte -> onBeforeUnmount
   - 在卸载组件实例之前调用。在这个阶段，实例仍然是完全正常的
+  
 - unmounted -> onUnmounted
-  - 卸载组件实例后调用。
+  - 卸载组件实例后调用。调用此钩子时，组件实例的所有指令被移除绑定，所有事件侦听器都被移除，所有子组件实例被卸载。
+  
+- errorCaptured -> onErrorCaptured
+  - 在捕获一个来自后代组件的错误时被调用。此钩子会受到三个参数：错误对象、发生错误的组件实例以及一个包含错误来源信息的字符串。此钩子可以返回false以阻止该错误继续向上传播
+
+- renderTriggered -> onRenderTriggered
+  - 当虚拟DOM重新渲染被触发时调用。和renderTracked类似，接收debugger event 作为参数。此事件告诉你是什么操作触发了重新渲染，以及改操作的目标对象和键。
+
+- activated -> onActivated
+  - 被keep-alive缓存的组件激活时调用
+
+- deactivated -> onDeactivated
+  - 被keep-alive缓存的组件失活时调用
+
+```javascript
+// 钩子使用
+import {onBeforeMount}from '@vue/composition-api'
+
+export default {
+  setup() {
+    onBeforeMount(() => {
+      console.log('onBeforeMount')
+    })
+  }
+}
+```
+### 1. 生命周期钩子函数的调用
+```javascript
+// onBeforeMount onMounted
+import {ref, onBeforeMount, onMounted}from '@vue/composition-api'
+export default {
+  // 组合API
+  setup() {
+    const capacity = ref(3);
+    const root = ref(null)
+    console.log(capacity.value)
+    console.log('setup')
+
+    onBeforeMount(() => {
+      console.log('onBeforeMount: '+ capacity.value +', root: '+root.value)
+    })
+
+    console.log('after onBeforeMount');
+
+    onMounted(() => {
+      console.log('onMounted: '+ capacity.value +', root: '+root.value)
+    })
+
+    return {capacity}
+  },
+
+  // 选项API
+  beforeMount() {
+    console.log('beforeMount: '+this.$el)
+  },
+  mounted() {
+    console.log('mounted: '+this.$el)
+  }
+}
+/**
+3
+setup
+after onBeforeMount
+beforeMount: undefined
+onBeforeMount: 3, root: null
+mounted: [object HTMLDivElement]
+onMounted: 3, root: null
+*/
+```
+
+### 2. onRenderTracked() 状态跟踪
+跟踪页面上所有的方法跟变量，也就是我们return返回的属性与方法，它都会进行跟踪。当页面有update时，会生成一个event对象。我们可以通过这个event对象查看程序的问题所在。
+
+### 3. onRenderTriggered() 状态触发
+它不会跟踪每一个值，而是给你变化值的信息，并且新值和旧值都会给你明确的展示出来。
 

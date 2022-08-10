@@ -23,7 +23,7 @@ console.log(p);
 1. 构造函数起作用的最根本操作时必须要经过new，如果不new的话原型就不存在。
 2. 原型要在构造函数上生成，如果不生成的话，不可能在new了以后生成对象再去prototype。因为原型是属于祖先性质的，所有都继承与它，所有说实例化出来的对象继承这个构造函数的原型属性。
 3. 原型对象实际上就是构造函数的一个属性，只不过这个属性是对象而已。
-4. 我们经过new实例化这个人构造函数出来这个对象以后，这个对象是完全继承于这个prototype。
+4. 我们经过new实例化这个构造函数出来这个对象以后，这个对象是完全继承于这个prototype。
 5. p对象上面没有name属性，但是p继承了Person这个构造函数的原型，能够通过原型去访问到这个name。
   
 总结：
@@ -80,10 +80,10 @@ student = {
 }
 */
 ```
-解释：student继承了原型链上的所有属性。
+解释：student继承了原型链上的所有属性。    
 缺点：并不需要所有属性都继承，比如name。
 
-### 3. call_apply实现继承，借取属性
+### 3. call和apply实现继承，借取属性
 ```javascript
 Teacher.prototype.wife = 'Ms.Liu';
 function Teacher(name, mSkill, age, major) {
@@ -101,8 +101,9 @@ console.log(student);
 ```
 解释：
 1. 使用apply解决，通过apply来改变this的指向。然后借用别人的属性和方法。
-2. 实现借用别人的属性和方法的时候用这种方法（但是这种方法并不是继承）。
-3. 这种方式构造的student无法获取到teacher原型上的属性。
+2. 实现借用别人的属性和方法的时候用这种方法（但是这种方法并不是继承）。    
+
+缺点：这种方式构造的student无法获取到teacher原型上的属性。
 
 ### 4. 公共原型
 ```js
@@ -210,7 +211,7 @@ Teacher.prototype = {
 ## 闭包的实现方式
 ### 1. 普通的闭包
 ```js
-function tess(){
+function test(){
     var num = 0; //私有变量 成为了add的私有变量，其他地方访问不到
     function add(){
         num++;
@@ -338,7 +339,12 @@ var initProgrammer = (function(){
         work: '编写应用程序',
         duration: '10个小时',
         say: function(){
-            console.log(`我是一名${this.myName} ${this.name}，我的工作是用${this.tool}${this.work}，我每天工作${this.duration}，我的工作需要用到${this.lang.toString()}.`)
+            console.log(
+                `我是一名${this.myName} ${this.name}，
+                我的工作是用${this.tool}${this.work}，
+                我每天工作${this.duration}，
+                我的工作需要用到${this.lang.toString()}.
+            `)
         }
     }
 
@@ -365,9 +371,7 @@ var backEnd = new initProgrammer.BackEnd();
 frontEnd.say();
 backEnd.say();
 ```
-解释：
-1. 在全局容易污染其他的变量，在函数里伪造了一个伪全局，为了防止污染外面的空间，自己造另一个自己的空间。
-2. 
+解释：在全局容易污染其他的变量，在函数里伪造了一个伪全局，为了防止污染外面的空间，自己造另一个自己的空间。
 
 ### 2. 案例二：计算器
 ```js
@@ -399,7 +403,7 @@ initCompute();
 
 ## CSS圣杯布局
 ```html
-// 主要利用 margin负值  padding赋值  position:reative做的
+// 主要利用 margin负值  padding负值  position:reative做的
 <!DOCTYPE html>
 <html lang="en">
 <head>

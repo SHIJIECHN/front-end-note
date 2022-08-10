@@ -48,7 +48,7 @@ var myLang = {
   No2: 'CSS',
   Mo3: 'JavaScript',
   myStudyingLang: function(num){
-    console.log(this['No' + num])
+    console.log(this['No' + num])// 动态访问对象的属性
   }
 }
 myLang.myStudying(1); // HTML
@@ -299,10 +299,6 @@ var p = new Programmer();
 console.log(p);
 ```
 
-::: tip
-
-:::
-
 ## callee与caller
 ### 1. callee
 ```js
@@ -426,7 +422,7 @@ console.log(undefined === null); // false
 console.log(isNaN(100)); // false
 console.log(parseInt('1a') == 1); // true
 ```
-实现`isNaN`
+`isNaN`模拟实现
 ```js
 function isNaN1(num){
   var res = Number(num) + '';
@@ -462,7 +458,7 @@ function test(){
 test(); // 2
 new test(); // 2
 console.log(a)// 3  
-// 因为test()执行的时候this.a->window.a->，所以在最后打印的输出是3
+// 因为test()执行的时候this.a->window.a->3，所以在最后打印的输出是3
 
 /**
 test(): 

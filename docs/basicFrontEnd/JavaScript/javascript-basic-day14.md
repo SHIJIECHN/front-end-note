@@ -22,8 +22,8 @@ var person1 = {
 // person2 拥有person1 所有的内容
 var person2 = person1;
 person2.name = 'Asha';
-//person2中的属性与person1相同，如果改变person2中son的值。
-// 则person1中son属性的属性值也会发生改变 
+//person2中的属性与person1相同，如果改变person2中name的值。
+// 则person1中name属性的属性值也会发生改变 
 console.log(person1);
 ```
 解释：因为person2在栈中存储的是person1在堆内存中的引用地址。现在person2和person1指向的是同一个内存地址，所以任意改变一方，其他都会随之修改。
@@ -34,7 +34,11 @@ var person1 = {
     name: 'Tom',
     age: 20,
     height: 180,
-    weight: 140
+    weight: 140,
+    son: {
+        first: 'Jack',
+        second: 'Tom'
+    }
 }
 
 // 创建新的对象
@@ -73,7 +77,7 @@ var person2 = {}
 Object.prototype.num = 1;
 
 clone(person1, person2);
-consoe.log(person2);
+console.log(person2);
 ```
 原型上的属性num也会在person2属性中显示。   、
 
@@ -84,7 +88,7 @@ function clone(origin, target){
     var tar = target || {};
     for(var key in origin){
         // 过滤原型上的属性
-        fi(origin.hasOwnProperty(key)){
+        if(origin.hasOwnProperty(key)){
             tar[key] = origin[key];
         }
     }
@@ -145,13 +149,13 @@ function deepClone(origin, target) {
 }
 
 var person2 = deepClone(person1);
-console.log(person2);
+
 // 修改对象的应用值
 person2.children.forth = {
     name: 'Four',
     age: 20
 }
-console.log(person2);
+console.log(person1, person2);
 ```
 
 ## 练习
@@ -196,7 +200,7 @@ var a = {
 
 var fun = a.say;
 // var fun = function(){
-//     console.log(thi.name)
+//     console.log(this.name)
 // }
 fun(); // '222' -> this指向window
 a.say(); // '111' -> this 指向a
@@ -245,11 +249,11 @@ function test(){
     var test3 = {
         name: 'test3'
     }
-    test3.printName = marty.printName;
+    test3.printName = marty.printName; // 相当于test3对象新增了printName方法
     marty.printName.call(test1); // test1
     marty.printName.apply(test2); // tets2
     marty.printName(); // marty
-    test3.printName(); // test3
+    test3.printName(); // test3  
 }
 test();
 ```

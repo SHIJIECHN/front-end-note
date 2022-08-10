@@ -339,8 +339,7 @@ Object.prototype.toString.call(1); // [object Number] 对象类型的Number构�
 Number.prototype.toString.call(1); // '1'
 ```
 
-## call、apply
-。
+## call和apply
 ### 案例一
 ```js
 function test(){
@@ -399,7 +398,7 @@ compute.mul(1, 2); // 2
 compute.div(1, 2); // 0.5
 ```
 
-## bind
+## bind基本使用
 bind改变this指向后，返回一个新的函数，不执行。call改变this指向并立即执行。
 ```js
 var p1 = {
@@ -427,7 +426,10 @@ fn();
 ```js
 bindEvent: function() {
   var _self = this;
-  // 使用call修改this指向，this.tabClick.call(this)是会直接执行的，改变了this指向以后立马执行tabClick，但是我并没有点击，就执行了，肯定是不对的。而事件处理函数，在没有click是不会执行的，所以使用一个匿名函数。
+  // 使用call修改this指向，this.tabClick.call(this)是会直接执行的，
+  // 改变了this指向以后立马执行tabClick，但是我并没有点击，就执行了，
+  // 肯定是不对的。而事件处理函数，在没有click是不会执行的，所以使用
+  // 一个匿名函数。
   this.tab.addEventListener('click', function() {
       _self.tabClick.call(_self); 
   }, false);
@@ -451,8 +453,8 @@ function Person() {
     console.log(this.age);
 }
 
-Person.call(p);
-Person.apply(p);
+Person.call(p); // {age: 18} 18
+Person.apply(p); // {age: 18} 18
 Person.bind(p)();
 ```
 
@@ -467,32 +469,43 @@ function Person() {
 }
 
 var person2 = Person.bind(p); // this指向失败
-new person2();
+new person2(); // Person{} undefined
 /**
- * bind仅仅是返回一个新的函数，把这个函数交给person2，在new person2()的时候this指向也发生了改变，此时的this指向了实例化后的对象本身：var p2 = new person2()。这个bind失效了。因为new的时候，this指向Person了。所以var person2 = Person.bind(p);等于没有用。
+ * bind仅仅是返回一个新的函数，把这个函数交给person2，在new person2()
+ * 的时候this指向也发生了改变，此时的this指向了实例化后的对象本身：
+ * var p2 = new person2()。这个bind失效了。因为new的时候，this指向
+ * Person了。所以var person2 = Person.bind(p);等于没有用。
  * 
- * var person2 = Person.bind(p);  // Person`()
+ * var person2 = Person.bind(p);  // person2实际上就是Person()
  * var p2 = new person2();
  * 等效于
- * var p2 = new Person().
+ * var p2 = new Person()
  * 
  * 
  * function Person(){
  *      this -> window
- *      'use strict' - this -> null
+ *      'use strict' =>  this -> null
  *  }
  * 
- * new Person() Person(){
+ * new Person(){
  *      this -> 实例对象
  *  }
  * 
- * function Person(){...}作为普通函数情况下，this指向window，使用Person.bind(p)之后，相当于，修改了普通函数Person的this指向，把this从window修改为p。
- * 同时Person.bind(p)返回了一个新的函数Person()`，person2和Person`指向同一个引用，使用new的时候是将person2中的this指向实例对象。只要使用new，person2就是一个构造函数，它里面的this就指向实例对象。
+ * function Person(){...}作为普通函数情况下，this指向window，使用
+ * Person.bind(p)之后，相当于，修改了普通函数Person的this指向，把this
+ * 从window修改为p。
+ * 同时Person.bind(p)返回了一个新的函数Person()，person2和Person指向
+ * 同一个引用，使用new的时候是将person2中的this指向实例对象。只要使用
+ * new，person2就是一个构造函数，它里面的this就指向实例对象。
 */
 ```
+### bind模拟实现
+bind的两个特点：
+1. 不执行。
+2. 接收传入参数。
+3. 实例化失效。
 
-bind的两个特点：1. 不执行。2. 实例化失效。   
-1. 不执行：
+#### 1. 不执行
 ```js
 var p = {
     age: 20
@@ -517,7 +530,7 @@ Person.bind(p)();
 Person.bindy(p)();
 ```
 
-2. 传入参数：
+#### 2. 传入参数：
 ```js
 // 传入参数第一种情况
 Person.bind(p, '张三', 'male')();
@@ -539,21 +552,28 @@ function Person(name, sex) {
 
 Function.prototype.bindy = function(context) {
     var _self = this;
-    args = Array.prototype.slice.call(arguments, 1); // 返回一个数组。第一个参数是this，去掉第一个参数，后面才是需要的参数。
+    // 返回一个数组。第一个参数是this，去掉第一个参数，后面才是需要的参数。
+    args = Array.prototype.slice.call(arguments, 1); 
     console.log(args);
     return function() {
-        var newArgs = Array.prototype.slice.call(arguments); // 匿名函数的参数列表
+        // 匿名函数的参数列表
+        var newArgs = Array.prototype.slice.call(arguments); 
         console.log(args, newArgs);
         _self.apply(context, args.concat(newArgs));
     }
 }
 Person.bindy(p, '张三')('male');
 ```
-3. 实例化失效
-要求
+#### 3. 实例化失效
+
 ```js
+// 要求
+// 1. new时，this指向构造函数（Person）的实例对象
 var p2 = Person.bind(p, '张三');
-new p2('male'); // this指向构造函数的实例对象
+new p2('male'); // 
+
+// 2. 直接执行，this指向p
+var p1 = Person.bind(p, '张三')('male');
 ```
 实际上，此时的this指向p对象。
 ```js
@@ -564,7 +584,8 @@ Function.prototype.bindy = function(context) {
         var newArgs = Array.prototype.slice.call(arguments);
         console.log(this); // 实例化对象，因为new了
         console.log(_self); // 构造函数Person
-        console.log(this instanceof _self);// false。因为_self在bindy时已经改变了this指向， 那怎么样让它是_self构造出来的呢？
+        console.log(this instanceof _self);// false。
+        // 因为_self在bindy时已经改变了this指向， 那怎么样让它是_self构造出来的呢？
 
         // this如果是构造函数构造出来的，也就是new出来的，那么原本的context就要指向this；
         _self.apply(this instanceof _self ? this : context, args.concat(newArgs));

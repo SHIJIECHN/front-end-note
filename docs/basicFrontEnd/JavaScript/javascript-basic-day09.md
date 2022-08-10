@@ -136,7 +136,7 @@ var car = Car('red', 'Mazda');
  * 5. 调用构造器，并将内部的this用obj来替代，此时arguments是取出第一个元素后的部分
  * 6. 兼容返回值
  */
-function _new(fn,) {
+function _new() {
   var obj = {};
   var co = [].shift.call(arguments);
   obj.__proto__ = co.prototype;
