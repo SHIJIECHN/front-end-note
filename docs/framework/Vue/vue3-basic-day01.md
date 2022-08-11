@@ -590,3 +590,39 @@ onMounted: 3, root: null
 ### 3. onRenderTriggered() 状态触发
 它不会跟踪每一个值，而是给你变化值的信息，并且新值和旧值都会给你明确的展示出来。
 
+## computed
+
+
+## watch
+```javascript
+// 侦听器写法
+<div id="app">
+  复合关键字的活动的数目：{{results}}
+</div>
+
+import { ref, watch } from '@vue/composition-api';
+import eventApi from '@/api/event.js'
+
+export default {
+  setup(){
+    const searchInput = ref('');
+    const results = ref(0);
+
+    // setup 函数底下的getEventCount()方法只触发一次
+    // 不能实时监听，所以用watch侦听
+    results.value = eventApi.getEventCount(searchInput.value)
+
+    // 侦听searchInput属性，若发生改变执行右侧箭头函数
+    watch(searchInput,(newValue, oldValue)=>{
+      results.value = eventApi.getEventCount(searchInput.value)
+    })
+
+    // 多属性数据写法
+    watch([firstName, lastName], ([newFirst, newLast], [oldFirst, oldLast])=>{
+      //...
+    })
+
+    return{ searchInput, results }
+  }
+}
+```
