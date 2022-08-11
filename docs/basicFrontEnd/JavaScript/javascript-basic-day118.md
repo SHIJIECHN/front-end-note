@@ -316,7 +316,7 @@ Vue2.x的时候是采用defineProperty实现的，Vue里面设置的对数组方
 为什么Vue2.x并没有使用Proxy呢？  
 因为Proxy是ES6的构造函数，考虑到兼容性问题，就没有使用Proxy。   
 
-Proxy不是数据劫持，仅仅是代理了数据进行操作，而数据劫持是在进行访问源对象的时候，就要进行拦截，对源对象进行操作的时候就进行拦截，如访问target，defineProperty直接对target进行处理了以后，只要访问target.a，就要经过get方法。而Proxy不是拦截，它是代理target去处理问题，直接操作target，不起作用，必须操作proxy。使用Proxy就不是操作源对象，相当于Vue中的data在defineProperty的时候是直接操作data，所以需要写成函数的形式data(){return {}}，一是为了防止引用值对象的重写，二是defineProperty是直接操作return里面的对象的，直接对return中的对象进行包装的。而Proxy就不存在这些问题，data: {}。
+Proxy不是数据劫持，仅仅是代理了数据进行操作，而数据劫持是在进行访问源对象的时候，就要进行拦截，对源对象进行操作的时候就进行拦截，如访问target，defineProperty直接对target进行处理了以后，只要访问target.a，就要经过get方法。而Proxy不是拦截，它是代理target去处理问题，直接操作target，不起作用，必须操作proxy。使用Proxy就不是操作源对象，相当于Vue中的data在defineProperty的时候是直接操作data，所以需要写成函数的形式data(){return {} }，一是为了防止引用值对象的重写，二是defineProperty是直接操作return里面的对象的，直接对return中的对象进行包装的。而Proxy就不存在这些问题，data: {}。
 
 ## Reflect反射
 ES6定义的内置对象，就是方法集合的容器。ES6全局内置对象，直接保存静态方法，不需要实例化

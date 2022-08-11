@@ -79,7 +79,7 @@ typeof new Set()    // 'object'
 ```
 总结：
 1. typeof 可以判断除了null以外的原始类型。
-2. typeof只能盘算对象类型中的Function，其他判断不出来，都为object。
+2. typeof只能判断对象类型中的Function，其他判断不出来，都为object。
 
 ### 2. instanceOf
 1. 检测构造函数的prototype属性是否出现在某个实例对象的原型上 

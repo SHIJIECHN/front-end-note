@@ -8,10 +8,10 @@ title: 18. 错误信息、try_catch、严格模式
 JS错误信息类型
 ### 1. `SyntaxError` 语法错误
 #### 1. 变量名不规范
-    ```js
-    var 1 = 1; // Uncaught SyntaxError: Unexpected number
-    var 1ab = 1; // Uncaught SyntaxError: Invalid or unexpected token
-    ```
+```js
+var 1 = 1; // Uncaught SyntaxError: Unexpected number
+var 1ab = 1; // Uncaught SyntaxError: Invalid or unexpected token
+```
 #### 2. 关键字不可赋值
    ```js
    new = 5; // Uncaught SyntaxError: Unexpected token '='
@@ -142,7 +142,7 @@ try{
 1. `ES5`中分为正常模式和严格模式。
 2. `IE9`及以下`IE`不支持严格模式。在3.0的基础上加上了严格模式。
 3. 严格模式关键字`use strict`。
-4. 严格模式的作用：按照ES5的羽凡规范执行代码
+4. 严格模式的作用：按照ES5的语法规范执行代码
 
 
 ### 2. with语句

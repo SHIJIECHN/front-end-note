@@ -162,7 +162,7 @@ console.log(obj.push(6)); // obj.push not is function 报错
 通过继承数组的方法，使用数组方法。
 ```js
 var obj = {
-	'0':1,
+  '0':1,
   '1':2,
   '2':3,
   '3':4,
@@ -246,13 +246,13 @@ var person = {
 Object.prototype.splice = Array.prototype.splice;
 Object.prototype.push = Array.prototype.push;
 
-console.log(person[1]);
-console.log(person.weight);
-console.log(person.length);
+console.log(person[1]); // 张小二
+console.log(person.weight); // 140
+console.log(person.length); // 3
 
 for (var key in person) {
     if (person.hasOwnProperty(key)) {
-        console.log(key);
+        console.log(key); // 0 1 2 name age weight height length
     }
 }
 ```
@@ -281,7 +281,7 @@ Array.prototype.unique = function() {
 }
 console.log(arr.unique());
 
-// 无法过滤0
+// 无法过滤0。重复的0无法去重
 /******************************************/
 var arr = [1, 1, 2, 3, 2, 3, '1', undefined, 'undefined', undefined];
 Array.prototype.unique = function() {
@@ -513,7 +513,7 @@ function uniqueArr(array) {
 
 ```
 
-5. includes
+5. includes    
 includes与indexOf的区别：
 - 返回值不同：indexOf返回具体位置或-1，includes返回true或false
 - indexOf对NaN无效，includes可以判断NaN

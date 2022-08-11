@@ -1,9 +1,10 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: day05
+title: 5. 样式操作
 ---
-## 读写样式属性
+## 样式属性
+### 1. 操作样式
 DOM间接操作CSS。通过标签中的style属性，操作样式。
 ```html
     <style type="text/css">
@@ -17,6 +18,7 @@ DOM间接操作CSS。通过标签中的style属性，操作样式。
     <div></div>
     <script type="text/javascript">
         var oDiv = document.getElementsByTagName('div')[0];
+        // 如果行间样式/内联样式没有填写属性的情况访问不了
         console.log(oDiv.style.width); // ''  拿不到样式表的数值
         oDiv.style.width = '200px'; // 修改的是element.style，而不是样式表
         oDiv.style.height = '200px';
@@ -30,6 +32,7 @@ DOM间接操作CSS。通过标签中的style属性，操作样式。
         oDiv.style.left = '200px';
         oDiv.style.top = '200px';
 
+        // 浮动cssFloat
         oDiv.style.cssFloat = 'left';
     </script>
 </body>
@@ -43,26 +46,45 @@ elem.style.xxx：
 
 查看css属性方法：oDiv.style
 
-查看计算样式：  
-window.getComputedStyle(elem, null)：获得元素的所有样式。也可获取元素的相应属性。IE8及以下不支持，替换elem.currentStyle。
+### 2. 获取元素属性  
+- window.getComputedStyle(elem, null)：获得元素的所有样式。也可获取元素的相应属性。
+- elem.currentStyle。IE8及以下。
+
+```javascript
+//查看计算样式
+//IE8及以下不支持 用 elem.currentStyle
+//没设置的样式默认值并被getComputedStyle函数查询到
+//此方法获取属性值比较准确
+window.getComputedStyle(div, null);
+window.getComputedStyle(elem, null)[prop];
+```
 ```html
 <body>
     <div style="width: 100px; height: 200px;background-color: green;"></div>
     <script type="text/javascript">
         var oDiv = document.getElementsByTagName('div')[0];
 
+        /**
+         * 获取元素属性
+         * 避免使用offsetWidth&offsetHeight
+         * @elem 元素
+         * @prop 属性
+         */
         function getStyles(elem, prop) {
+            //检测getComputedStyle是否存在
             if (window.getComputedStyle) {
                 if (prop) {
+                    //存在，打印具体属性值
                     return parseInt(window.getComputedStyle(elem, null)[prop]);
                 } else {
+                    //不存在，打印集合
                     return window.getComputedStyle(elem, null)
                 }
             } else {
                 if (prop) {
                     return parseInt(elem.currentStyle[prop]);
                 } else {
-                    elem.currentStyle;
+                    return elem.currentStyle;
                 }
             }
         }
@@ -72,6 +94,7 @@ window.getComputedStyle(elem, null)：获得元素的所有样式。也可获取
 </body>
 ```
 访问样式表的宽高：oDiv.offsetWidth和oDiv.offsetHeight。但是不常用。如果在动态设置宽高时，会把padding计算进去。
+
 getComputedStyle第二个参数是为了获取伪元素属性预留的。只读。
 ```html
     <style type="text/css">
@@ -131,4 +154,20 @@ getComputedStyle第二个参数是为了获取伪元素属性预留的。只读�
         }
     </script>
 </body>
+```
+
+## 元素运动
+```javascript
+//JS运动相关
+var box = document.getElementsByClassName('box')[0];
+
+box.onclick = function () {
+  //这里offsetWidth会存在margin，有Bug
+  // var width = this.offsetWidth;
+  //解决方法(企业级写法)：用封装的getStyles拿宽高 
+  //返回带单位的字符串 如 '100px' 在用parseInt()截取一下
+  var width = parseInt(getStyles(this, 'width'));
+
+  this.style.width = width + 10 + 'px';
+}
 ```

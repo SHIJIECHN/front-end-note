@@ -1,100 +1,118 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: day03
+title: 3. DOM树、节点操作
 ---
 
-## 元素节点的方法-创建
-### 创建元素
-`document.createElement`
-```html
-<body>
-    <script type="text/javascript">
-        // 创建元素
-        var div = document.createElement('div');
-        div.innerHTML = 123;
-        // 挂到body中
-        document.body.appendChild(div);
-    </script>
-</body>
-```
+## DOM树结构
+<img :src="$withBase('/basicFrontEnd/JavaScript/DOM.png')" alt="DOM"> 
 
-### 创建文本节点和注释
-`createTextNode()`和`createComment()`
-```html
+Node 
+- Document 
+  - HTMLDocument
+- CharacterData(字符数据) 
+  - Text
+  - Comment
+- Element
+  - HTMLElement 
+    - HTMLHead Element
+    - HTMLBody Element  
+- Attributes
+
+```html 
 <body>
-    <script type="text/javascript">
-        // 创建文本节点 createTextNode
-        var text = document.createTextNode('123456');
-        document.body.appendChild(text);
-        // 创建注释 createComment
-        var comment = document.createComment('我是注释');
-        document.body.appendChild(comment);
-    </script>
-</body>
-```
-### appendChild
-增加子节点。方法在`Node.prototype`中。`body`和`head`是在`document`中的，如果放在`Document.prototype`中，`element`无法使用。而放在`Element.prototype`中，`Document`无法使用。终上所述，放在`Node.prototype`中最合适。   
-动态增加节点
-```html
-<body>
-    <div></div>
+    <div>123</div>
+    <p>234</p>
     <script type="text/javascript">
         var div = document.getElementsByTagName('div')[0];
-        var p = document.createElement('p');
-        p.innerHTML = 'JavaScript';
 
-        var text = document.createTextNode('ECMAScript');
-        var comment = document.createComment('我是注释');
+        // Text、CharacterData。文件节点构造函数Text
+        Text.prototype.a = 'aaa';
+        CharacterData.prototype.b = 'bbb';
+        var text = div.childNodes[0];
+        console.log(text.b); // bbb
 
-        div.appendChild(p);
-        div.appendChild(text);
-        div.appendChild(comment);
+        // HTMLDivElement -> HTMLElement -> Element
+        Element.prototype.a = 'aaa';
+        HTMLElement.prototype.b = 'bbb';
+        HTMLDivElement.prototype.c = 'ccc';
+        var p = document.getElementsByTagName('p')[0]; // HTMLParagraphElement
+        
+        console.log(div.c); // ccc
+        console.log(div.b); // bbb
+        console.log(div.a); // aaa
+
+        console.log(p.a); // aaa  
+        console.log(p.b); // bbb
+        console.log(p.c); // undefined
+
+        console.log(Object.prototype.toString.call(div)); // [object HTMLDivElement]
     </script>
 </body>
 ```
-动态剪切节点
-```html
-<body>
-    <a href="">我是超链接</a>
-    <script type="text/javascript">
-        var a = document.getElementsByTagName('a')[0];
-        var div = document.createElement('div');
-        div.innerHTML = '<p>我是段落标签</p>';
 
-        document.body.appendChild(div);
-        div.appendChild(a); // 剪切功能 把原来的a剪切，并复制到div，成为div最后一个标签。
-    </script>
-</body>
+## 节点创建
+- document.createElement()：创建元素节点
+- document.createTextNode()：创建文本节点
+- document.createComment()：创建注释节点
 
+```javascript
+//创建元素节点
+// 创建元素
+var div = document.createElement('div');
+div.innerHTML = 123;
+// 挂到body中
+document.body.appendChild(div);
+
+//创建文本节点
+var text = document.createTextNode('woaini');
+document.body.appendChild(text);
+
+//创建注释节点
+var comment = document.createComment('woshizhushijun');
+document.body.appendChild(comment);
 ```
 
-### insertBefore
+## 节点增加
+- node.appendChild(node)：增减子节点（在Node.prototype）
+- node.insertBefore()：指定位置插入子节点
+
+### 1. appendChilde的作用：
+- 追加节点
+- 剪切节点
+
+```javascript
+// 追加节点
+var div = document.getElementsByTagName('div')[0];
+var p = document.createElement('p');
+p.innerHTML = 'JavaScript';
+div.appendChild(p);
+
+// 剪切节点
+var a = document.getElementsByTagName('a')[0]; // 页面中原本存在的元素节点
+var div = document.createElement('div');
+div.innerHTML = '<p>我是段落标签</p>';
+document.body.appendChild(div);
+div.appendChild(a); 
+// 剪切功能：把原来的a剪切，并复制到div，成为div最后一个标签。
+```
+
+### 2. insertBefore
 `c.insertBefore(new, origin)`：插入节点。在父级`c`节点下的子节点`origin`之前插入`new`节点。方法在`Node.prototype`中。
-```html
-<body>
-    <div>
-        <p>我是段落节点</p>
-    </div>
-    <script type="text/javascript">
-        var div = document.getElementsByTagName('div')[0];
-        var p = document.getElementsByTagName('p')[0]; // origin
-        var a = document.createElement('a'); // new 
-        a.href = '';
-        div.insertBefore(a, p);
-        var h1 = document.createElement('h1');
-        h1.innerHTML = '我是标题标签';
-        div.insertBefore(h1, a);
-    </script>
-</body>
+```js
+var div = document.getElementsByTagName('div')[0];
+var p = document.getElementsByTagName('p')[0]; // origin
+var a = document.createElement('a'); // new 
+a.href = '';
+div.insertBefore(a, p);
 ```
 
-## 元素节点的方法-删除
+## 节点删除
+- node.removeChild(子节点)：移除子节点。实际上只是剪切掉了，节点还在堆内存中
+- node.remove()：消回节点，释放内存
 
-### `removeChild`
-父节点.`removeChild`(子节点)。实际上只是剪切掉了，节点还在堆内存中。    
 
-`DOM`对象就是元素节点。
+### 1. `removeChild`
 ```html
 <body>
     <div>
@@ -120,7 +138,8 @@ var p = document.getElementsByTagName('p')[0];
 function getElementsByTagName(element){
     /**
         * 1. 从HTML中把p元素选择出来
-        * 2. 实例化new HTMLParagraphElement() -> DOM节点、DOM元素。就具备了节点的属性和方法。
+        * 2. 实例化new HTMLParagraphElement() -> DOM节点、DOM元素。
+        * 就具备了节点的属性和方法。
     */
 }
 ```
@@ -142,8 +161,17 @@ function getElementsByTagName(element){
 </body>
 ```
 
-## `innerHTML`和`innerText`
-两者在`HTMLElement.prototype`中。`innerHTML`在`Element.prototype`中也有。
+## 文本节点 
+- HTMLElement.innerHTML：设置和获取元素的HTML
+- HTMLElement.innerText
+
+注意点：
+- 父节点HTML不要写错
+- 在inner HTML里的HTML字符串不要写
+- document写法1：document.body.innerHTML
+- document写法2：document.documentElement.innerHTML
+- 元素内部的所有内容都会被删除掉
+
 ```html
 <body>
     <div>
@@ -164,7 +192,6 @@ function getElementsByTagName(element){
     </script>
 </body>
 ```
-
 `innerText`：获取标签中的文本。老版火狐不支持，替代品`textContent`，但是`IE`老版本不支持`textContent`。
 ```html
 <body>
@@ -177,21 +204,37 @@ function getElementsByTagName(element){
 ```
 `innerHTML`会将`<`, `>`, `/`显示成字符实体，而`innerText`不能。
 
+```md
+设置inner HTML到底发生了什么？
+1. innerHTML = '\<h1>123</h1>'
+2. 用DocumentFragment将这个HTML文档结构变成DOM节点
+3. 原本父节点上的所有内容都会被替换成这个DOM节点
+```
+
 ## 节点替换
 `parent.replaceChild(new, origin)`
-```html
-<body>
-    <div>
-        <h1></h1>
-    </div>
-    <script type="text/javascript">
-        var div = document.getElementsByTagName('div')[0];
-        var h1 = document.getElementsByTagName('h1')[0];
-        var h2 = document.createElement('h2');
+```js
+var div = document.getElementsByTagName('div')[0];
+var h1 = document.getElementsByTagName('h1')[0];
+var h2 = document.createElement('h2');
 
-        div.replaceChild(h2, h1); // 将h1节点替换成h2节点
-    </script>
-</body>
+div.replaceChild(h2, h1); // 将h1节点替换成h2节点
+```
+
+## 文档碎片 
+- document.createDocumentFragment()
+  
+```javascript
+var oUl = document.getElementById('list');
+var oDiv = document.createElement('div'); 
+for (var i = 0; i < 10000; i++) {
+    var oLi = document.createElement('li');
+    oLi.innerHTML = i + '、这是第' + i + '个项目';
+    oLi.className = 'list-item';
+    oDiv.appendChild(oLi);
+}
+
+oUl.appendChild(oDiv);
 ```
 
 ## setAttribute和getAttribute

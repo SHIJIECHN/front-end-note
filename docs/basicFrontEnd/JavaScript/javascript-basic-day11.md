@@ -500,7 +500,8 @@ new person2(); // Person{} undefined
 */
 ```
 ### bind模拟实现
-bind的两个特点：
+
+bind模拟实现的两个特点：
 1. 不执行。
 2. 接收传入参数。
 3. 实例化失效。

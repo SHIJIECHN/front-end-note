@@ -1,12 +1,8 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: DOM结构/节点属性与操作/节点方法
+title: 2. DOM结构、节点属性与操作、节点方法
 ---
-
-## DOM树结构
-<img :src="$withBase('/basicFrontEnd/JavaScript/DOM.png')" alt="DOM"> 
-
 
 ## 节点属性 
 1. `nodeName`：返回节点的`nodeName`大写，只读。   
@@ -26,20 +22,33 @@ title: DOM结构/节点属性与操作/节点方法
 
     <script type="text/javascript">
         var div = document.getElementsByTagName('div')[0];
-        console.log(div);
-        /********nodeName********/
+        //查看nodeName
+        console.log(document.nodeName); //#document
+        console.log(div.nodeName); //DIV
         console.log(div.nodeName.toLocaleLowerCase()); // div
-        /********nodeValue********/
+
+        // nodeValue
         console.log(div.childNodes[1].nodeValue); // 我是注释
+        // 元素节点没有nodeValue
+        console.log(div.childNodes[3]); //<h1>我是标题标签</h1>
+        console.log(div.childNodes[3].nodeValue); //null
+
+        // 属性节点
         console.log(div.getAttributeNode('id').nodeValue); // box
         console.log(div.getAttributeNode('id').value); // box
-        /************nodeType***********/
-        console.log(div.nodeType);
-        console.log(div.firstChild.nodeType);
-        /************attributes***********/
+
+        // 节点类型nodeType
+        console.log(div.nodeType); //1 元素节点
+        console.log(div.firstChild.nodeType); //3文本节点
+        console.log(div.childNodes[1].nodeType); //8注释节点
+        console.log(div.getAttributeNode('id').nodeType); //2属性节点
+
+        // 元素属性集合attributes
+        // NamedNodeMap {0: class, 1: id, 2: style, class: class, id: id, style: style, length: 3}
         console.log(div.attributes); 
-        /************hasChildNodes***********/
-        console.log(div.hasChildNodes())
+
+        // 是否有子节点 hasChildNodes
+        console.log(div.hasChildNodes()) // true
     </script>
 </body>
 ```
@@ -53,6 +62,7 @@ function elemChildren(node) {
         children = node.childNodes;
     for (var i = 0; i < children.length; i++) {
         var childItem = children[i];
+        // 找出元素节点 
         if (childItem.nodeType === 1) {
             arr.push(childItem);
         }
@@ -61,7 +71,6 @@ function elemChildren(node) {
 }
 
 console.log(elemChildren(div));
-
 ```
 采用类数组方法
 ```js
@@ -89,8 +98,8 @@ function elemChildren(node) {
 
 console.log(elemChildren(div));
 ```
-`document` 构造函数是 `HTMLDocument`  
-`HTMLDocument` 构造函数是 `Document`   
+`document` 构造函数 ->  `HTMLDocument`  
+`HTMLDocument` 构造函数 -> `Document`   
 `HTMLDocument`构造出来的对象里面有`__proto__`：`Document.prototype`
 ```js
 document.__proto__ = HTMLDocument.prototype;
@@ -109,36 +118,6 @@ document.eat(); // 我刚刚吃饭
 ```
 `document`可以访问`Document.prototype`和`HTMLDocument.prototype`上的方法。
 
-## `Element`
-```html 
-<body>
-    <div>123</div>
-    <p>234</p>
-    <script type="text/javascript">
-        var div = document.getElementsByTagName('div')[0];
-        /****************Text、CharacterData****************************/
-        Text.prototype.a = 'aaa';
-        CharacterData.prototype.b = 'bbb';
-        var text = div.childNodes[0];
-        console.log(text.b); // bbb
-        /******************Element、HTMLElement、HTMLDivElement*********/
-        Element.prototype.a = 'aaa';
-        HTMLElement.prototype.b = 'bbb';
-        HTMLDivElement.prototype.c = 'ccc';
-        var p = document.getElementsByTagName('p')[0]; // HTMLParagraphElement
-        
-        console.log(div.c); // ccc
-        console.log(div.b); // bbb
-        console.log(div.a); // aaa
-
-        console.log(p.a); // aaa  
-        console.log(p.b); // bbb
-        console.log(p.c); // undefined
-
-        console.log(Object.prototype.toString.call(div)); // [object HTMLDivElement]
-    </script>
-</body>
-```
 
 ## `DOM`操作深入
 1. `getElementById()`
