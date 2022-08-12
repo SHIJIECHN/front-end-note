@@ -704,10 +704,14 @@ interface WatchOptions extends WatchEffectOptions {
 可以直接导入 `onXXX` 一族的函数来注册生命周期钩子：
 
 ```js
-import { onMounted, onUpdated, onUnmounted } from 'vue'
+import { onMounted, onUpdated, onUnmounted, getCurrentInstance } from 'vue'
 
 const MyComponent = {
   setup() {
+    // 获取当前组件实例的方法
+    const instance = getCurrentInstance();
+    console.log(instance)
+
     onMounted(() => {
       console.log('mounted!')
     })
@@ -736,6 +740,95 @@ const MyComponent = {
 + `beforeDestroy` -> `onBeforeUnmount`
 + `destroyed` -> `onUnmounted`
 + `errorCaptured` -> `onErrorCaptured`
+
+```javascript
+import {
+  ref,
+  watchEffect,
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+} from "vue";
+
+
+export default {
+  name: "App",
+  setup() {
+    const count = ref(0);
+    setTimeout(() => {
+      count.value = 1;
+    }, 2000);
+
+    // 这里会同步执行。所以首次渲染时，setup在watchEffect的前面打印
+    console.log("setup");
+
+    watchEffect(() => {
+      const a = count.value;
+      console.log(a);
+      console.log("watchEffect");
+    });
+
+    // watchEffect会在onBeforeMounted前打印
+    onBeforeMount(() => {
+      console.log("onBeforeMount");
+    });
+
+    onMounted(() => {
+      console.log("onMounted");
+    });
+
+    // 数据发生改变，watchEffect在onBeforeUpdate前打印
+    onBeforeUpdate(() => {
+      console.log("onBeforeUpdate");
+    });
+
+    onUpdated(() => {
+      console.log("onUpdated");
+    });
+
+    return {
+      count,
+    };
+  },
+};
+/**
+ * setup
+ * 0
+ * watchEffect
+ * onBeforeMount
+ * onMounted
+ * 1
+ * watchEffect
+ * onBeforeUpdate
+ * onUpdated
+*/
+```
+修改watchEffect相关参数
+```javascript
+watchEffect(
+  () => {
+    const a = count.value;
+    console.log(a);
+    console.log("watchEffect");
+  },
+  {
+    flush: "post", // 会是watchEffect在onBeforeMounte之后执行
+  }
+);
+/**
+ * setup
+ * 0
+ * onBeforeMount
+ * watchEffect
+ * onMounted
+ * 1
+ * onBeforeUpdate
+ * watchEffect
+ * onUpdated
+*/
+```
+
 
 ### 2. 新增的钩子函数
 
