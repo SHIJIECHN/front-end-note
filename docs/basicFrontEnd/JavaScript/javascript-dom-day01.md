@@ -62,24 +62,10 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
 ```
 
 ### 2. querySelector获取直系子元素
-```html
-<body>
-    <div id="box">
-        <h1>
-            <p>123</p>
-        </h1>
-    </div>
-    <div>
-        <p>234</p>
-    </div>
-
-    <script type="text/javascript">
-        var p1 = document.querySelector('div > p'); // div下的直系子元素
-        var p2 = document.querySelector('div p'); // div下面的p，有两个，但是只会打印第一个
-        var box = document.querySelector('#box');
-        console.log(p1, p2, box);
-    </script>
-</body>
+```js
+var p1 = document.querySelector('div > p'); // div下的直系子元素
+var p2 = document.querySelector('div p'); // div下面的p，有两个，但是只会打印第一个
+var box = document.querySelector('#box');
 ```
 
 ### 2. querySelectorAll缺点  
