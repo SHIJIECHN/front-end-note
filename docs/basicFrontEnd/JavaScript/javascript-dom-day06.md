@@ -1,7 +1,7 @@
 ---
 autoGroup-3: DOM
 sidebarDepth: 3
-title: day06
+title: 6. 事件冒泡、事件捕获
 ---
 
 ## 事件处理函数
@@ -22,92 +22,45 @@ oDiv.onclick = function(){
 事件句柄：`onclick = function(){...}`  
 这种形式就是事件句柄的绑定形式。
 
-### 三种绑定事件处理函数方式
+### 1. 三种绑定事件处理函数方式
 如何绑定事件处理函数？  
-1. `elem.onclick = function(){..}`
-```html
-    <style>
-        button {
-            outline: none;
-        }
-        
-        .loading {
-            background-color: #ddd;
-            color: #fff;
-        }
-    </style>
+#### 1. `elem.onclick = function(){..}`
+```js
+var oBtn = document.getElementsByTagName('button')[0];
+oBtn.onclick = function() {
+    // ....
+}
 
-<body>
-    <button>加载更多</button>
-    <script>
-        var oBtn = document.getElementsByTagName('button')[0];
-        oBtn.onclick = function() {
-            this.innerHTML = '加载中...';
-            this.className = 'loading';
-
-            var self = this;
-            setTimeout(function() {
-                self.innerHTML = '加载更多';
-                self.className = '';
-            }, 2000);
-        }
-
-        // 缺点：覆盖上面的事件处理函数。
-        oBtn.onclick = function(){
-            console.log('bb');
-        }
-    </script>
-</body>
+// 缺点：覆盖上面的事件处理函数。
+oBtn.onclick = function(){
+    console.log('bb');
+}
 ```
 
-2. `elem.addEventListener(事件类型，事件处理函数，false)`
+#### 2. `elem.addEventListener(事件类型，事件处理函数，false)`
 `IE9`以下不支持，`W3C`规范。
-```html
-    <style>
-        button {
-            outline: none;
-        }
-        
-        .loading {
-            background-color: #ddd;
-            color: #fff;
-        }
-    </style>
+```js
+var oBtn = document.getElementsByTagName('button')[0];
+oBtn.addEventListener('click', function() {
+    // ... 
+}, false);
 
-<body>
-    <button>加载更多</button>
-    <script>
-        var oBtn = document.getElementsByTagName('button')[0];
-        oBtn.addEventListener('click', function() {
-            this.innerHTML = '加载中...';
-            this.className = 'loading';
-
-            var self = this;
-            setTimeout(function() {
-                self.innerHTML = '加载更多';
-                self.className = '';
-            }, 2000)
-        }, false);
-
-        oBtn.addEventListener('click', function(){
-            console.log('加载更多');
-        }, false)
-        
-    </script>
-</body>
+oBtn.addEventListener('click', function(){
+    console.log('加载更多');
+}, false)
 ```
-通过`addEventLisener`可以给同一个元素的同一事件绑定多个处理函数。上面两个事件都会执行。
+通过`addEventListener`可以给同一个元素的同一事件绑定多个处理函数。上面两个事件都会执行。
 
 ```js
-oBtn.addEventLisener('click', test, false);
-oBtn.addEventLisener('click', test, false);
+oBtn.addEventListener('click', test, false);
+oBtn.addEventListener('click', test, false);
 function test(){
     console.log(111);
 }    
 ```
 只会输出一个。同一个元素(`oBtn`)的同一事件(`click`)绑定多个处理函数，但是他们都是`test`处理函数，`test`是同一个函数引用。如果是写两个匿名函数，他们是两个不同的函数引用。
 
-3. `elem.attachEvent(事件类型，事件处理函数)`     
+#### 3. `elem.attachEvent(事件类型，事件处理函数)`     
 `IE8`及以下的绑定方法。
 ```js
 oBtn.attachEvent('onclick', function(){
@@ -144,6 +97,7 @@ oBtn.attachEvent('onclick', test);
             item;
 
         for (var i = 0; i < len; i++) {
+            // 使用立即执行函数
             (function(i) {
                 item = oLi[i];
                 item.addEventListener('click', function() {
@@ -155,7 +109,7 @@ oBtn.attachEvent('onclick', test);
 </body>
 ```
 
-### 事件处理程序的运行环境（this）
+### 2. 事件处理程序的运行环境（this）
 ```html
 <body>
     <button>点击</button>
@@ -182,7 +136,7 @@ oBtn.attachEvent('onclick', test);
     </script>
 </body>
 ```
-### 封装函数
+### 3. 封装函数
 封装事件处理函数
 ```js
 /*
@@ -210,9 +164,9 @@ var oBtn = document.getElementsByTagName('button')[0];
 })
 ```
 
-### 解除事件处理
+### 4. 解除事件处理
 1. `elem.onclick = null/ false`
-2. `elem.removeEventLisener('click', test, false)`, 括号中的形式和`addEventLisener`一定要一模一样，否则清除不了。
+2. `elem.removeEventLisener('click', test, false)`, 括号中的形式和`addEventListener`一定要一模一样，否则清除不了。
 3. `elem.detachEvent('onclick', test)`。
 ```html
     <style type="text/css">
@@ -341,8 +295,20 @@ var oBtn = document.getElementsByTagName('button')[0];
 没有事件冒泡的事件：`focus`, `blur`, `change`, `submit`, `reset`, `select`。  
 注意：`IE`没有事件捕获。
 
+## 事件源对象
+存放在事处理函数的参数里，IE8存放在window里  
+- 鼠标对象
+- 键盘对象
+
+需要兼容性写法：
+```javascript
+appaly.addEventListener('click', function(e){
+  var e = ev || window.event;
+}, false)
+```
+
 ## 阻止冒泡默认事件
-### 取消冒泡
+### 1. 取消冒泡
 两种方法：
 1. `W3C`：`e.stopPropagation()` 方法在`Event.prototype`
 2. `IE`: `e.cancelBubble = true` 属性在`PointerEvent`
@@ -416,7 +382,7 @@ function cancelBubble(e) {
     </script>
 </body>
 ```
-### 取消默认事件
+### 2. 取消默认事件
 两种方式：  
 1. 第一种方式：`return false`。
 2. 第二种方式：

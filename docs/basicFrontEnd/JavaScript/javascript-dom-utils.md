@@ -133,3 +133,62 @@ function getStyles(elem, prop) {
     }
 }
 ```
+
+## 封装兼容低版本的事件绑定处理函数
+```javascript
+/**
+ * 封装兼容低版本的事件绑定处理函数
+ * @el 元素
+ * @type 事件类型
+ * @fn 事件处理函数
+ */
+function addEvent(el, type, fn) {
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, false);
+  } else if (el.attachEvent) {
+    el.attachEvent('on' + type, function () {
+      fn.call(el);
+    })
+  } else {
+    el['on' + type] = fn;
+  }
+}
+```
+
+## 封装取消冒泡方法
+```javascript
+function cancelBubble(e) {
+    var e = e || window.event;
+
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    } else {
+        e.cancelBubble = true;
+    }
+}
+```
+
+## 封装页面坐标函数
+```javascript
+/**
+ * 封装页面坐标函数pagePos()
+ * @e 元素
+ * @返回值 页面内的x/y坐标
+ */
+function pagePos(e) {
+    // 获取滚动条距离
+    // 使用获取滚动条距离
+    var sLeft = getScrollOffset().left,
+        sTop = getScrollOffset().top,
+        // 获取文档偏移
+        // IE8为undefined，如果是undefined就取0，说明没有文档偏移
+        cLeft = document.documentElement.clientLeft || 0, 
+        cTop = document.documentElement.clientTop || 0;
+
+    return {
+        // 可视区域坐标 + 滚动条距离 - 偏移距离
+        X: e.clientX + sLeft - cLeft,
+        Y: e.clientY + sTop - cTop
+    }
+}
+```
