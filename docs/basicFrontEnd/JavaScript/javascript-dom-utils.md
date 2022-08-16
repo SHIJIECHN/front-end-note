@@ -168,6 +168,31 @@ function cancelBubble(e) {
 }
 ```
 
+## 阻止默认事件
+```javascript
+function preventDefaultEvent(e) {
+    var e = e || window.event;
+    if (e.preventDefault) {
+        e.preventDefault();
+    } else {
+        e.returnValue = false;
+    }
+}
+```
+
+## 移除事件处理函数
+```javascript
+function removeEvent(elem, type, fn) {
+    if (elem.addEventListener) {
+        elem.removeEventListener(type, fn, false);
+    } else if (elem.attachEvent) {
+        elem.detachEvent('on' + type, fn);
+    } else {
+        elem['on' + type] = null;
+    }
+}
+```
+
 ## 封装页面坐标函数
 ```javascript
 /**
@@ -189,6 +214,36 @@ function pagePos(e) {
         // 可视区域坐标 + 滚动条距离 - 偏移距离
         X: e.clientX + sLeft - cLeft,
         Y: e.clientY + sTop - cTop
+    }
+}
+```
+## 封装拖拽的函数
+```javascript
+function elemDrag(elem) {
+    var x,
+        y;
+
+    addEvent(elem, 'mousedown', function(e) {
+        var e = e || window.event,
+            x = pagePos(e).X - getStyles(elem, 'left'),
+            y = pagePos(e).Y - getStyles(elem, 'top');
+
+        addEvent(document, 'mousemove', mouseMove);
+        cancelBubble(e); // 取消冒泡
+        preventDefaultEvent(e); // 取消默认事件
+        addEvent(document, 'mouseup', mouseUp)
+    })
+
+    function mouseMove(e) {
+        var e = e || window.event;
+        elem.style.left = pagePos(e).X - x + 'px';
+        elem.style.top = pagePos(e).Y - y + 'px';
+    }
+
+    function mouseUp(e) {
+        var e = e || window.event;
+        removeEvent(document, 'mousemove', mouseMove);
+        removeEvent(document, 'mouseup', mouseUp);
     }
 }
 ```
