@@ -127,8 +127,8 @@ promise.then((value) => {
     console.log('Rejected2: ', reason);
 });
 ```
-1. Promise构造器中executor是同步代码，首先执行setTimeout，由于setTimeout是同步接口，它会在WebApis注册一个异步的计时回调函数；异步回调函数代码会在WebApis中进行挂起，等待执行；promise.then方法实行，此时Promise实例的对象状态并没有发生改变，当异步回调函数执行后，resolve('success')才会执行，此时才会改变Pro貌似额实例对象状态，所以当promise.then执行时，promise实例对象的状态应该为默认pending状态。
-2. then()方法中设置Promise实例对象为pending状态的逻辑，处理异步代码执行的逻辑；通过发布订阅和修饰器的思想进行处理：由于不确定异步函数回调的具体执行的时间，name我们可以先将其收集起来**此时注意，不能够直接将回调函数push进入数组找那个，因为会丢失参数，需要push入一个函数，在函数中执行传入的异步回调函数**，当需要执行的时候（promise状态改变的时候）再拿出来执行。
+1. Promise构造器中executor是同步代码，首先执行setTimeout，由于setTimeout是同步接口，它会在WebApis注册一个异步的计时回调函数；异步回调函数代码会在WebApis中进行挂起，等待执行；promise.then方法实行，此时Promise实例的对象状态并没有发生改变，当异步回调函数执行后，resolve('success')才会执行，此时才会改变Promise实例对象状态，所以当promise.then执行时，promise实例对象的状态应该为默认pending状态。
+2. then()方法中设置Promise实例对象为pending状态的逻辑，处理异步代码执行的逻辑；通过发布订阅和修饰器的思想进行处理：由于不确定异步函数回调的具体执行的时间，那么我们可以先将其收集起来**此时注意，不能够直接将回调函数push进入数组找那个，因为会丢失参数，需要push入一个函数，在函数中执行传入的异步回调函数**，当需要执行的时候（promise状态改变的时候）再拿出来执行。
 3. 因为resolve()方法，reject()方法可以改变Promise实例对象状态，所以需要在该函数内部进行执行异步回调函数。
 4. 利用数组储存异步回调函数，并且在执行的时候循环遍历执行每一个异步回调函数，解决了同一实例对象多次调用then方法的问题。
 
@@ -412,7 +412,7 @@ then(onFulfilled, onRejected){
         })
         this.onRejectedCallbacks.push(()=>{
           try{
-          let x = onRejected(this.reason)
+            let x = onRejected(this.reason)
           }catch(e){
             reject(e)
           }
@@ -574,7 +574,7 @@ function resolvePromise(promise2, x, resolve, reject) {
     /**
      * 此时存在三个问题：
      * 1. 根据PromiseA++的规范，如果回调函数返回引用值，此时then方法返回
-     * 的PromiseU币能与回调函数返回的Promise实例相同。
+     * 的Promise与回调函数返回的Promise实例相同。
      * 2. 此时获取不到promise2实例对象，因为promise2作为Promise实例对象，
      * 此时构造函数并未执行完成，而在内部获取promise2肯定是获取不到的，又
      * 因为promise2被let声明，所以此时产生暂时性死区的问题-->通过setTimeout

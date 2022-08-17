@@ -132,6 +132,7 @@ static all(promiseArr) {
         // }
 
         // 如果idx === promiseArr.length说明全部完成，
+        // 这里idx自增 是为了防止有异步promise返回时间不确定，也有可能出现并发的情况
         if (++idx === promiseArr.length) {
             resolve(resArr);
         }
@@ -237,8 +238,10 @@ static race(promiseArr) {
     return new MyPromise((resolve, reject) => {
         promiseArr.map((promise) => {
             if (isPromise(promise)) {
+                //直接then 拿到resolve/reject结果
                 promise.then(resolve, reject)
             } else {
+                //普通值直接抛出
                 resolve(promise);
             }
         })
@@ -353,10 +356,15 @@ finally(finallyCallback) {
 工具函数utils.js
 ```javascript
 module.exports = {
+    //接收函数方法 如fs.readFile
     promisify(fn) {
+        // 返回一个函数 如readFile(promise).then()
+        //...args形参 => './data/user.json', 'utf8'
         return function(...args) {
             return new MyPromise((resolve, reject) => {
                 // fn -> fs.readFile
+                // fn()执行后才能then()
+                //参数2：原生带有一个自定义的回调函数
                 fn(...args, (error, data) => {
                     if (error) {
                         return reject(error)
@@ -368,11 +376,18 @@ module.exports = {
         }
     },
     promisifyAll(fns) {
+        //遍历每一个方法且加上async
+        // Object.keys()遍历出自身的可枚举的键名(不含继承属性)
         Object.keys(fns).map(fnName => {
+
+            //有可能不是方法而是属性，需排除
             if (typeof fns[fnName] === 'function') {
+
+                //1.更改名称
                 fns[fnName + 'Async'] = this.promisify(fns[fnName]);
             }
         });
+        //返回包装后的fns
         return fns;
     }
 }
@@ -384,7 +399,7 @@ const fs = require('fs').promises;
 const util = require('./util.js');
 const readFile = util.promisify(fs.readFile);
 
-fs.readFile('./data/user.json', 'utf8').then(res => {
+readFile('./data/user.json', 'utf8').then(res => {
     console.log(res);
 }, err => {
     console.log(err);
@@ -533,11 +548,17 @@ class MyPromise {
                 setTimeout(() => {
                     // 因为resolvePromise可能出现失败的情况，所以要try...catch
                     try {
+                        //如有new Error()异常,捕获它
+                        //普通值x需要处理且不能直接resolve()抛出，因为会影响程序后面返回
+                        // new Promise()的执行
                         let x = onFulfilled(this.value);
                         /**
-                         * Promsie链式调用代码操作（成功或者失败函数返回引用值）
-                         * 的入口在哪呢？就是上一次成功或者失败函数返回值的判断：
-                         * 判断x是否是原始值还是引用值。
+                         * 专门处理x的函数
+                         * resolvePromise()
+                         * 参数1：@promise2 被抛出的promise2的成功/失败是未知的
+                         * 参数2：@x onFulfilled() 返回的值有可能是普通值/promise
+                         * 参数3: @resolve 因为外部无法访问内部的resolve所以需传入
+                         * 参数4: @reject 因为外部无法访问内部的reject所以需传入
                          */
                         resolvePromise(promise2, x, resolve, reject);
                     } catch (e) {
@@ -575,6 +596,7 @@ class MyPromise {
                  */
                 this.onFulfilledCallbacks.push(() => {
                     try {
+                        //因为需要传参this.value 所以用函数嵌套的方式写
                         let x = onFulfilled(this.value);
                         resolvePromise(promise2, x, resolve, reject);
                     } catch (e) {
@@ -598,7 +620,9 @@ class MyPromise {
     // catch方法，实际上就是then方法传入失败的回调
     catch (errorCallback) {
         return this.then(null, errorCallback);
-    } finally(finallyCallback) {
+    } 
+
+    finally(finallyCallback) {
         return this.then(value => {
             return MyPromise.resolve(finallyCallback()).then(() => value);
         }, reason => {
@@ -657,7 +681,8 @@ class MyPromise {
     static allSettled(promiseArr) {
         let resArr = [],
             idx = 0;
-
+            
+        //判断promiseArr是否是可迭代对象
         if (!isIterable(promiseArr)) {
             throw new TypeError('MyError: ' + promiseArr + ' is not iterable (cannot read property Symbol(Symbol.iterator)) at Function.allSettled');
         }

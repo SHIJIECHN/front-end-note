@@ -187,6 +187,10 @@ box.onmousedown = function(e) {
 ```
 
 ### 3. 封装拖拽的函数
+思路：
+1. 给需要绑定的元素绑定鼠标落下的事件处理函数mousedown，并且记录当前鼠标落下的坐标，计算出点击源坐标距离元素的距离x，y（不会变化的值）
+2. document绑定鼠标移动事件处理函数mousemove，获取当前元素的坐标pageX/pageY 减去x/y，计算出当前元素的坐标
+3. document绑定鼠标抬起事件处理函数mouseup，解绑document的mousemove事件和document的mousedown事件
 ```js
 function elemDrag(elem) {
     var x,
@@ -198,6 +202,7 @@ function elemDrag(elem) {
             y = pagePos(e).Y - getStyles(elem, 'top');
 
         addEvent(document, 'mousemove', mouseMove);
+        // (防止出现意外,取消冒泡事件,阻止默认行为)
         cancelBubble(e); // 取消冒泡
         preventDefaultEvent(e); // 取消默认事件
         addEvent(document, 'mouseup', mouseUp)
@@ -215,59 +220,4 @@ function elemDrag(elem) {
         removeEvent(document, 'mouseup', mouseUp);
     }
 }
-```
-案例
-```html
-    <style type="text/css">
-        .box {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100px;
-            height: 100px;
-            background-color: orange;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="box"></div>
-    <script src="js/utils.js"></script>
-    <script type="text/javascript">
-        var box = document.getElementsByClassName('box')[0],
-            x,
-            y;
-
-        elemDrag(box);
-
-        function elemDrag(elem) {
-            var x,
-                y;
-
-            addEvent(elem, 'mousedown', function(e) {
-                var e = e || window.event
-                x = pagePos(e).X - getStyles(this, 'left'),
-                    y = pagePos(e).Y - getStyles(this, 'top');
-
-                addEvent(document, 'mousemove', mouseMove);
-                cancelBubble(e); // 取消冒泡
-                preventDefaultEvent(e); // 取消默认事件
-                addEvent(document, 'mouseup', mouseUp)
-            })
-
-            function mouseMove(e) {
-                var e = e || window.event;
-                elem.style.left = pagePos(e).X - x + 'px';
-                elem.style.top = pagePos(e).Y - y + 'px';
-            }
-
-            function mouseUp(e) {
-                var e = e || window.event;
-                removeEvent(document, 'mousemove', mouseMove);
-                removeEvent(document, 'mouseup', mouseUp);
-            }
-        }
-    </script>
-</body>
 ```
