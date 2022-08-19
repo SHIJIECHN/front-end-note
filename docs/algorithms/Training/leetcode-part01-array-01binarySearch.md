@@ -147,7 +147,7 @@ function searchInsert(nums, target){
 
 ```js
 function searchRange(nums, target){
-    // 找到第一个小于target的元素位置
+    // 找到第一个大于target的元素位置
     // 二分查找，寻找target的右边界（不包括target）
     // 如果rightBorder为没有被赋值（即target在数组范围的左边，例如数组[3,3]，target为2），为了处理情况一
     const getRightBorder = (nums, target) => {
@@ -165,7 +165,7 @@ function searchRange(nums, target){
         }
         return rightBorder;
     }
-    // 找到第一个大于target的元素位置
+    // 找到第一个小于target的元素位置
     // 二分查找，寻找target的左边界leftBorder（不包括target）
     // 如果leftBorder没有被赋值（即target在数组范围的右边，例如数组[3,3],target为4），为了处理情况一
     const getLeftBorder = (nums, target) => {

@@ -101,6 +101,8 @@ Connection:Keep-alive(存在请求头中), 只是普通的连接，跟管道化�
 
 ### 2. 强缓存
 <img :src="$withBase('/basicComputer/Network/cache01.png')" alt="cache"> 
+
+
 流程：
 1. 查看header头中的Expire和Cacher-control来判断是否满足规则；
 2. 如果满足规则，就直接返回缓存数据；
@@ -109,4 +111,6 @@ Connection:Keep-alive(存在请求头中), 只是普通的连接，跟管道化�
 5. 将新数据存入缓存。
 
 ### 3. 缓存位置
-浏览器的缓存存放在哪里，如何在浏览器中判断强制缓存是否生效？from disk cache和from memory cache。
+浏览器的缓存存放在哪里，如何在浏览器中判断强制缓存是否生效？
+
+from disk cache和from memory cache。
