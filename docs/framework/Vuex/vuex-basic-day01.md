@@ -3,6 +3,7 @@ autoGroup-1: Vuex
 sidebarDepth: 3
 title: 原理
 ---
+
 ## 核心原理
 1. Vuex本质是一个对象
 2. Vuex对象有两个属性，一个是install方法，一个是Store这个类
@@ -454,7 +455,7 @@ class Store{
     this.actions[method](arg);
   }
 
-  commit=(method,arg)=>{
+  commit = (method,arg) => {
     this.mutations[method](arg)
   }
   

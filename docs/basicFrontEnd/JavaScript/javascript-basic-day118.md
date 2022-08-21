@@ -352,3 +352,43 @@ console.log(proxy);
 
 好处：统一管理方法；合理的返回值；   
 
+## Proxy对数组的操作
+```javascript
+let arr = [1, 2, 3];
+const handler = {
+    get(target, key, receiver) {
+        console.log('get操作', key)
+        return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receiver) {
+        console.log('set操作', key, value)
+        return Reflect.set(target, key, value, receiver)
+    }
+}
+let proxy = new Proxy(arr, handler);
+
+proxy.push(4);
+// 能够打印出很多内容
+// get操作 push     (寻找 proxy.push 方法)
+// get操作 length   (获取当前的 length)
+// set操作 3 4      (设置 proxy[3] = 4)
+// set操作 length 4 (设置 proxy.length = 4)
+```
+分析：
+1. push操作是应用了当前对象的上下文，即this或者代理对象proxy。而不是引用原生对象的上下文。
+2. 代理的对象是有上下文的，并且和原生对象不同，所以它也是一个实例类型，只不过内容是代理了原生对象。
+
+为什么会打印出上面的内容呢？   
+1. 首先要知道下一个下标，所以需要拿到proxy.length（访问getter）
+2. 将下一个下标进行设定值proxy\[proxy.length] = 4
+3. proxy.length自增
+
+```javascript
+// pop
+proxy.pop();
+// get操作 pop      (寻找 proxy.pop 方法)
+// get操作 length   (获取当前的 length)
+// get操作 3        (获取当前的proxy数值3)
+// set操作 length 3 (设置 proxy.length = 3)
+```
+
