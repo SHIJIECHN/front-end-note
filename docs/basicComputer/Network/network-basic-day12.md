@@ -273,6 +273,9 @@ var xhr = (function() {
 
 ### 1. 功能点1： 利用JSONP跨域获取数据
 利用手动或者封装的Ajax进行跨域请求数据
+```html
+<input type="text"  class="J_searchInput"/>
+```
 ```javascript
 ;(function(doc){
 	var oSearchInput = doc.getElementsByClassName('J_searchInput')[0];
@@ -291,7 +294,7 @@ var xhr = (function() {
 		var val = _trimSpace(this.value),
 				len = val.length;
 		// 判断当前输入框输入字符的长度
-		if(len) {
+		if(val) {
 			// 通过JSONP跨域请求数据
 			getDatas(val, 'setDatas');
 		}
@@ -315,6 +318,9 @@ var xhr = (function() {
 	window.setDatas = function(data) {
 		console.log(data);
 	}
+
+    
+    init();
 	
 })(document);
 ```

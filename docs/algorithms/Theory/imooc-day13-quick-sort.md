@@ -44,7 +44,7 @@ title: 13. 快速排序
 ## 源码
 
 ### quick-sort.ts
-```typescript
+```javascript
 /**
  * @description 快速排序
  */
