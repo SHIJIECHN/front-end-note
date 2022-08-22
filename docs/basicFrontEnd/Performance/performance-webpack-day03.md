@@ -1,16 +1,25 @@
 ---
 autoGroup-4: Webpack
 sidebarDepth: 3
-title: Babel
+title: 3. Babel
 ---
 
 
 ## babel处理ES6代码
+
+### 1. babel-loader与@babel/core
 1. 使用`babel-loader`建立与`webpack`的联系，使用`@babel/preset-env`将`ES6`代码转换成`ES5`的语法
 2. 使用`@babel/polyfill`添加`ES6`新特性的实现
 
+安装`babel-loader`和`@babel/core`: `npm install --save-dev babel-loader @babel/core`  
+```javascript
+//babel-loader:是建立起babel与webpack沟通的桥梁
+npm install --save-dev babel-loader @babel/core
 
-1. 安装`babel-loader`和`@babel/core`: `npm install --save-dev babel-loader @babel/core`   
+//babel/preset-env:是将ES6转成ES5
+npm install @babel/preset-env --save-dev
+``` 
+
 添加配置
 ```javascript
 // webpack.config.js
@@ -27,9 +36,11 @@ module.exports = {
     }
 }
 ```
-   
-还需要安装`@babel/preset-env`: `npm install @babel/preset-env --save-dev` 
-因为`babel-loader`不能将`ES6`翻译成`ES5`代码，`babel-loader`仅仅是将`babel`与`webpack`建立起联系，而代码转换是`@babel/preset-env`负责。
+因为`babel-loader`不能将`ES6`翻译成`ES5`代码，`babel-loader`仅仅是将`babel`与`webpack`建立起联系，而代码转换是`@babel/preset-env`负责
+ 
+
+### 2. @babel/preset-env
+安装`@babel/preset-env`: `npm install @babel/preset-env --save-dev` 
 ```javascript
 // webpack.config.js
 module.exports = {
@@ -48,14 +59,39 @@ module.exports = {
     }
 }
 ```
-问题: 低版本浏览器中`ES6`的对象，如`Promise`，并没有实现的。
+问题: 低版本浏览器中`ES6`的对象，如`Promise`，并没有实现的。解决方法：polyfill。
 
-2. 需要安装`@babel/polyfill`：`npm install @babel/preset-env --save-dev`    
+### 3. 全局使用polyfill
+安装`@babel/polyfill`：`npm install @babel/polyfill --save`    
 直接导入使用
 ```javascript
 // index.js
-import '@babel/polyfill';
+import '@babel/polyfill'; // 引用所有
 ```
+使用`@babel/polyfill`是为了打一个补丁，就是希望代码里面出现的`Promise`，`map`等这些低版本浏览器不存在的特性，需要通过`@babel/polyfill`打一个补丁去写一段用`ES5`原生的代码实现`Promise`，`map`等。`corejs`就是这样产生的，但是`corejs`缺少对`generator`的支持，所以又出现了`regenerator`，它包含了对`generator`函数的实现。`corejs+regenerator=@babel/polyfill`两者结合对所有新特性的支持。
+```javascript
+// webpack.config.js
+module.exports = {
+    module: {
+        rules: [
+            // 处理js文件
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                options: {
+                    presets: [
+                        ['@babel/preset-env']
+                    ]
+                },
+                exclude: /node_modules/ // 排除node_modules里面的代码
+            }
+        ]
+    }
+}
+```
+
+
+### 4. polyfill按需加载
 打包后`main.js`会变得很大，因为它把`ES6`新特性的实现全部加入了，因此我们可以设置按需引入。
 ```javascript
 // webpack.config.js
@@ -69,7 +105,8 @@ module.exports = {
                 options: {
                     presets: [
                         ['@babel/preset-env', {
-                            useBuiltIns: 'usage', // 查看源代码中使用了哪些ES6的新特性，polyfill把使用到的新特性的代码实现加入
+                            useBuiltIns: 'usage', 
+                            // 查看源代码中使用了哪些ES6的新特性，polyfill把使用到的新特性的代码实现加入
                         }]
                     ]
                 },
@@ -108,10 +145,16 @@ module.exports = {
 删除`index.js`中引入的`@babel/polyfill`。
 再次打包报错：`Module not found: Error: Can't resolve 'core-js/modules/es.array.map.js' in ...`     
 
-使用`@babel/polyfill`是为了打一个补丁，就是希望代码里面出现的`Promise`，`map`等这些低版本浏览器不存在的特性，需要通过`@babel/polyfill`打一个补丁去写一段用`ES5`原生的代码实现`Promise`，`map`等。`corejs`就是这样产生的，但是`corejs`缺少对`generator`的支持，所以又出现了`regenerator`，它包含了对`generator`函数的实现。`corejs+regenerator=@babel/polyfill`两者结合对所有新特性的支持。    
+
 安装`corejs`：`npm install --save core-js@3.8.3`   
-`@babel/polyfill`会污染全局环境，使用`transform-runtime`。   
-安装：`npm install --save-dev @babel/plugin-transform-runtime` 和 `npm install --save @babel/runtime`
+`@babel/polyfill`会污染全局环境，使用`transform-runtime`。  
+
+安装：
+```javascript
+npm install --save-dev @babel/plugin-transform-runtime
+
+npm install --save @babel/runtime
+```
 ```javascript
 // webpack.config.js
 module.exports = {
@@ -142,6 +185,8 @@ module.exports = {
     }
 }
 ```
+
+### 5. 优化babel
 `babel`配置非常多，造成`webpack`臃肿。项目根目录下创建`.babelrc`文件。
 ```javascript
 // .babelrc
@@ -151,12 +196,12 @@ module.exports = {
     //     [
     //         "@babel/preset-env",
     //         {
-    //             "useBuiltIns": "usage",
-    //             "corejs": 3
+    //             "useBuiltIns": "usage", // 按需加载引用polyfill
+    //             "corejs": 3 // corejs版本号为3
     //         }
     //     ]        
     // ],
-    // 只有开发库才会使用
+    // 只有开发库才会使用plugin-transform-runtime，避免全局污染
     "plugins": [
         [
             "@babel/plugin-transform-runtime",

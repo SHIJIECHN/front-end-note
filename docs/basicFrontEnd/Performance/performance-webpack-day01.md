@@ -1,13 +1,16 @@
 ---
 autoGroup-4: Webpack
 sidebarDepth: 3
-title: Webpack简介/Loader
+title: 1. Webpack基础、图片loader、css loader
 ---
 
 ## webpack
-模块化规范：`ES module`/ `CommonJS`/ `AMD`/ `CMD`.     
-`webpack`是模块打包工具。     
-支持模块的类型：`js`, `css`, `vue`, `png`, `jpg`...，默认支持`js`模块，其余需要配置。
+webapck是一个打包模块化JavaScript的工具，在webpack里一切文件皆模块，通过Loader转换文件，通过Plugin注入钩子，最后输出由多个模块组合成的文件。
+
+在webpack眼中都是一个个模块，这样的好处是能够清晰的描述出各个模块之间的依赖关系，以方便webpack对模块进行组合打包。经过webpack的处理，最终会输出浏览器能使用的静态资源。
+
+- 模块化规范：`ES module`/ `CommonJS`/ `AMD`/ `CMD`.          
+- 支持模块的类型：`js`, `css`, `vue`, `png`, `jpg`...，默认支持`js`模块，其余需要配置。
 ```javascript
 npx webpack // Insufficient number of arguments or no entry found
 ```
@@ -30,7 +33,12 @@ module.exports = {
     // 改变生成的目录名字
     output: {
         filename: 'bundle.js', // 生成的文件名为bundle.js，如果没有默认是main.js
-        path: path.resolve(__dirname, 'dist') // 输出的文件夹名。路径需要配置成绝对路径，这里需要用到path模块。__dirname是当前webpack.config.js所在的目录的名字，也就是这里的webpackTest文件夹，拼接dist是将bundle.js放到dist文件夹下。
+        path: path.resolve(__dirname, 'dist') 
+        /**
+         *  输出的文件夹名。路径需要配置成绝对路径，这里需要用到path模块。
+         * __dirname是当前webpack.config.js所在的目录的名字，也就是这里的
+         * webpackTest文件夹，拼接dist是将bundle.js放到dist文件夹下。
+         */
     }
 }
 ```
@@ -48,12 +56,18 @@ import jspp from './jspp.jpg'
 报错：    
 `ERROR in ./src/jspp.jpg.You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file`
 
-1. `file-loader`
-安装依赖：`npm install file-loader --save-dev`
+### 1. `file-loader`
+安装依赖：
+```javascript
+npm install file-loader --save-dev
+```  
+
+**重点：file-loader 让打包生成后的图片文件与源码代码的图片文件名称一致**
 ```javascript
 // webapck.config.js
 module.exports = {
     // ...
+
     // 模块，告诉webpack遇到什么模块应该怎么处理
      module: {
         rules: [
@@ -62,10 +76,11 @@ module.exports = {
                 test: /\.(jpg|png\jpe?g|gif)$/,
                 use: {
                     loader: 'file-loader',
+                    // options对file-loader进行配置
                     options: {
                         // 最终打包生成的图片名与原图片名相同
                         name: '[name].[ext]',
-                        // 生成的图片放到imgs文件夹下
+                        // 产出文件存放池，生成的图片放到imgs文件夹下
                         outputPath: 'imgs/'
                     }
                 }
@@ -74,14 +89,28 @@ module.exports = {
     }
 }
 ```
-当在源代码中引入图片模块，`file-loader`把图片从源代码目录移动到`dist`目录中，并且改了文件名。
+当在源代码中引入图片模块，`file-loader`把图片从源代码目录移动到`imgs`目录中，并且改了文件名。
 
-2. `url-loader`
+### 2. `url-loader`
+安装依赖：
+```javascript
+npm install url-loader --save-dev
+```
+
+1. url-loader 工作方式很像file-loader，但是它的返回DataURL，即base64的图片编码。
+2. 只会生成bundle.js文件
+
 返回的是`base64`编码字符串。图片直接插入到生成的`bundle.js`文件中，不会单独生成到`imgs`文件夹中。   
-    - 如果图片很大，对应的`base64`字符串也很大，直接插入使`bundle.js`文件也会臃肿，造成`index.html`加载`bundle.js`时间很长。因此，大图片适合使用`file-loader`单独生成一个文件，`index.html`引入文件。    
-    - 如果图片很小，单独生成图片文件，缺点就是需要多发送一次`HTTP`请求。因此，小图片适合使用`url-loader`直接解析成`base64`字符串，设置到`img src`属性上，就不需要发送额外的请求图片的`HTTP`请求。
+使用区别
+```md
+图片很大 -> base64字符串很大 -> bundle.js体积很大 -> index.html加载 bundle.js时间就会很长
+图片很大 -> file-loader -> 单独生成 XXX.jpg文件 -> index.html 引入XXX.jpg文件 -> bundle.js 体积就会很小 -> 页面加载快
+因此，大图片适合使用`file-loader`单独生成一个文件，`index.html`引入文件。    
+
+图片很小 -> file-loader -> 单独生成 XXX.jpg 文件 -> 多发送一次HTTP请求
+图片很小 -> url-loader -> 解析成base64字符串 -> 设置img src属性上 -> 不需要发送额外的请求图片的HTTP请求
+```  
       
-安装依赖：`npm install url-loader --save-dev`
 ```javascript
 // webapck.config.js
 module.exports = {
@@ -109,7 +138,7 @@ module.exports = {
 
 ## 样式
 
-### css文件
+### 1. css文件
 新建`index.css`并导入
 ```javascript
 // index.js
@@ -153,7 +182,7 @@ module.exports = {
 
 5. 最后通过`npm install --save-dev css-loader@5.2.7`进行安装。
 
-### scss文件
+### 2. scss文件
 ```javascript
 // index.scss
 body {
@@ -198,9 +227,13 @@ module.exports = {
 1. 下载安装`Python`。
 2. 删除文件夹下`package-lock.json`文件，将`node-sass`版本号修改为需要安装的版本号。再进行`npm install`。
 
-### 样式前缀
+### 3. 样式前缀
 `postcss-loader`: 主要是为了解决在低版本浏览器中无法使用`CSS3`的语法（如`transform`），使用`postcss-loader`处理后可以为属性添加厂商前缀（如`-webkit-transform`）。
-安装：`npm i -D postcss-loader@4.3.0`  
+安装：
+```javascript
+npm i -D postcss-loader@4.3.0
+```
+
 ```javascript
 // webpack.config.js
 module.exports = {
@@ -222,7 +255,10 @@ module.exports = {
 }
 ``` 
 `postcss-loader`必须与插件`autoprefixer`一起使用。
-安装： `npm i autoprefixer@^9.8.8 -D` 
+安装： 
+```javascript
+npm i autoprefixer@^9.8.8 -D
+```
 根目录下创建`postcss.config.js`配置文件
 ```javascript
 // postcss.config.js
@@ -262,7 +298,8 @@ module.exports = {
                     {
                         loader: 'css-loader', // 分析css代码
                         options: {
-                            importLoaders: 2 // 还要走前面2个loader，也就是postcss-loader和sass-loader
+                            importLoaders: 2 
+                            // 还要走前面2个loader，也就是postcss-loader和sass-loader
                         }
                     },
                     'postcss-loader',
@@ -274,7 +311,7 @@ module.exports = {
 }
 ```
 
-### 字体文件
+### 4. 字体文件
 新增配置
 ```javascript
 // webpack.config.js

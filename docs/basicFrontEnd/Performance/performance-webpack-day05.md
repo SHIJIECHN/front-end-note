@@ -1,13 +1,14 @@
 ---
 autoGroup-4: Webpack
 sidebarDepth: 3
-title: 代码分割
+title: 5. 代码分割
 ---
 
 ## 代码分割
 index.js分成两个部分：
 1. 业务逻辑的代码
-2. lodash 包的代码   
+2. lodash 包的代码  
+
 打包后main.js就包括了这两个部分，只要业务代码发生改变，就会重新打包。我们希望只打包业务代码，不用打包lodash部分代码。   
 代码分割(Code Splitting)：按照项目结构把第三方库代码或者公共部分代码拆分出去，打包之后的结果也是分开的文件，将来有业务代码发生改变我们也只需要加载业务部分的代码。而公共的代码就不需要加载了，性能得到了提升。
 ```javascript
@@ -27,31 +28,12 @@ module.exports = {
     }
 }
 ```
-
-异步代码分割
 ```javascript
-// index.js
-// 异步代码
-function createElement() {
-    setTimeout(() => {
-        return import ( /*webpackChunkName: "lodash"*/ 'lodash').then(({ default: _ }) => {
-            const result = _.join(['test1', 'test2', 'test3'], '-');
-            const div = document.createElement('div');
-            div.innerText = result;
-            return div;
-        })
-    }, 3000);
-}
-
-const createElementPromise = createElement();
-createElementPromise.then(div => {
-    document.body.appendChild(div);
-})
-
 // webpack.config.js
 module.exports = {
     // 优化配置项
     optimization: {
+        // 代码分割
         splitChunks: {
             chunks: 'all',
             cacheGroups: {
@@ -63,6 +45,7 @@ module.exports = {
 }
 ```
 打包出来dist：
+
 <img :src="$withBase('/basicFrontEnd/Performance/webpack-splitChunk01.png')" alt="webpack-splitChunk01"> 
 
 ## splitChunk参数
@@ -78,7 +61,7 @@ module.exports = {
     },
 }
 ```
-index.js为异步代码：
+### 1. index.js为异步代码：
 ```javascript
 function createElement() {
     return import ( /*webpackChunkName: "lodash"*/ 'lodash').then(({ default: _ }) => {
@@ -88,16 +71,17 @@ function createElement() {
         return div;
     })
 }
-
+// 代码只有执行到createElement()，以上异步的代码才会被执行，lodash才会被引用
 const createElementPromise = createElement();
 createElementPromise.then(div => {
     document.body.appendChild(div);
 })
 ```
 打包结果dist：
+
 <img :src="$withBase('/basicFrontEnd/Performance/webpack-splitChunk02.png')" alt="webpack-splitChunk02">        
 
-index.js为同步代码
+### 2. index.js为同步代码
 ```javascript
 import _ from 'lodash'
 
@@ -107,6 +91,7 @@ div.innerText = result;
 document.body.appendChild(div);
 ```
 打包结果dist：
+
 <img :src="$withBase('/basicFrontEnd/Performance/webpack-splitChunk03.png')" alt="webpack-splitChunk03" />  
 
 代码没有进行分割，所有的代码都在main.js中。当chunks为async时只会对异步代码进行打包，如果要对同步代码也进行打包，chunks设置为all。
@@ -121,7 +106,8 @@ module.exports = {
     },
 }
 ```
-同步代码打包结果：
+同步代码打包结果： 
+
 <img :src="$withBase('/basicFrontEnd/Performance/webpack-splitChunk04.png')" alt="webpack-splitChunk04">    
 
 输出是文件名有vendors~main.js。如果想要修改文件的名字就需要配置项CacheGroup配置。
@@ -130,7 +116,7 @@ module.exports = {
 module.exports = {
     optimization: {
         splitChunks: {
-            chunks: 'all', // 
+            chunks: 'all',  
             cacheGroups: {
                 // 'verdors'决定输出的文件名：verdors~main.js。如果修改为test，那么输出的文件名就是test~main.js
                 vendors: {
@@ -176,7 +162,9 @@ module.exports = {
                     test: /[\\/]node_modules[\\/]/,
                     priority: -10,
                     filename: 'vendors.js',
-                    minChunks: 2, // 默认为1，一个模块在入口文件里面被使用了多少次，由于测试的lodash只引入来一次，所以就不会进行代码分割
+                    minChunks: 2, 
+                    // 默认为1，一个模块在入口文件里面被使用了多少次，由于测试的lodash只引入来一次，
+                    // 所以就不会进行代码分割
                 },
                 // 公共模块
                 default: {
@@ -194,7 +182,10 @@ module.exports = {
 
 ## CSS分割
 在生产环境中，css文件通过link的方式引入，而不是直接插入style标签中。   
-插件mini-css-extract-plugin安装：npm install mini-css-extract-plugin@1.6.2 --save-dev     
+插件mini-css-extract-plugin安装：
+```javascript
+npm install mini-css-extract-plugin@1.6.2 --save-dev    
+```
 只需要在生产环境中使用因此需要将开发环境配置进行修改，同时生产环境中对css文件loader处理与开发环境不同，因此需要将css的loader的配置分别提取到开发环境与生产环境配置中。
 ```javascript
 // webpack.prod.js
@@ -223,7 +214,7 @@ module.exports = {
     }
 }
 ```
-打包后发现，没有css文件l， 在index.html中也没有style标签。主要是因为Tree Shaking的原因，因为index.css引入后并没有使用。需要修改package.json中sizeEffects。
+打包后发现，没有css文件， 在index.html中也没有style标签。主要是因为Tree Shaking的原因，因为index.css引入后并没有使用。需要修改package.json中sizeEffects。
 ```json
 "sizeEffects": [
     "*.css"
@@ -233,7 +224,11 @@ module.exports = {
 
 
 生产环境下压缩css代码：   
-安装css-minimizer-webpack-plugin： npm install css-minimizer-webpack-plugin@1.3.0 --save-dev
+安装css-minimizer-webpack-plugin：
+
+```javascript
+npm install css-minimizer-webpack-plugin@1.3.0 --save-dev
+``` 
 ```javascript
 // webpack.prod.js
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');

@@ -1,11 +1,20 @@
 ---
 autoGroup-4: Webpack
 sidebarDepth: 3
-title: Plugin/SourceMap/WebpackDevServer/热更新
+title: 2. Plugin、SourceMap、WebpackDevServer热更新
 ---
 
 ## plugin
-`HTMLWebpackPlugin`：生成一个`HTML`文件。直接`npm run build`生成的`index.html`文档没有`app`，要使用自己的模板。   
+Plugin是用来扩展Webpack功能的，通过在构建流程中注入钩子实现，它给Webpack带来了很大的灵活性。
+### 1. html-webpack-plugin
+作用：
+1. 为html文件中引入的外部资源如script、link动态添加每次compile后的hash，防止引用缓存的外部文件问题
+2. 可以生成创建html如楼文件，比如单页面可以生成一个html文件入口，配置N个html-webpack-plugin可以生成N个页面入口。
+
+原理：将webpack中entry配置相关入口chunk和 extract-text-webpack-plugin抽取的css样式插入到该组件提供的template或者templateContent配置项指定的内容基础上生成一个html文件，具体插入方式是将样式link插入到head元素中，script插入到head或body中。
+     
+`HtmlWebpackPlugin`: 生成一个`HTML`文件。直接`npm run build`生成的`index.html`文档没有`app`，要使用自己的模板。解决了打包后，还需要手动添加index.html文件的问题。
+
 安装：`npm install --save-dev html-webpack-plugin@4.5.2`
 ```javascript
 // webpack.config.js
@@ -20,11 +29,14 @@ module.exports = {
 }
 ```
 
+### 2. clean-webpack-plugin
 `clean-webpack-plugin`：在打包之前，将`dist`目录清空，再进行打包，将打包生成的文件放到`dist`目录。
+
 安装：`npm install --save-dev clean-webpack-plugin@^4.0.0`   
 ```javascript
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const CleanWebpackPlugin = require('clean-webpack-plugin'); // 报错 TypeError: CleanWebpackPlugin is not a constructor 因为是对象里面的属性
+// const CleanWebpackPlugin = require('clean-webpack-plugin'); 
+// 报错 TypeError: CleanWebpackPlugin is not a constructor 因为是对象里面的属性
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
@@ -36,6 +48,7 @@ module.exports = {
     ]
 }
 ```
+## entry
 
 多个入口文件  
 ```javascript
@@ -50,6 +63,7 @@ module.exports = {
     },
     output: {
         filename: 'bundle.js', // 如果没有默认是main.js
+        // 如果没有设置filename，打包的时候，会拿entry.main的key当做filename
         path: path.resolve(__dirname, 'dist') 
     }
 }
@@ -75,6 +89,8 @@ module.exports = {
         main: './src/index.js',
         sub: './src/index.js'
     },
+    // 打包之后会生成main.js 和 sub.js 两个文件
+    // 如果打包输出的文件需要和入口文件相对应，可以如下配置
     output: {
         filename: '[name].js',  
         path: path.resolve(__dirname, 'dist')
@@ -87,7 +103,8 @@ module.exports = {
 // webpack.config.js
 module.exports = {
     output: {
-        publicPath: 'http://cdn.com.cn', // 生成的index.html引入的js文件路径前会加上http://cdn.com.cn
+        // 生成的index.html引入的js文件路径前会加上http://cdn.com.cn
+        publicPath: 'http://cdn.com.cn', 
         filename: '[name].js',  
         path: path.resolve(__dirname, 'dist')
     }
@@ -108,13 +125,16 @@ module.exports = {
 <body>
     <div id="app"></div>
     <!--引入的js文件路径前会加上http://cdn.com.cn-->
-<script src="http://cdn.com.cn/main.js"></script><script src="http://cdn.com.cn/sub.js"></script></body>
-
+    <script src="http://cdn.com.cn/main.js"></script>
+    <script src="http://cdn.com.cn/sub.js"></script>
+</body>
 </html>
 ```
 
 ## sourceMap
 帮助调试代码，当源代码出错，可以定位错误到源代码的具体位置。
+
+source-map 打包之后会生成一个.map文件，是打包文件与源文件的映射文件。   
 ```javascript
 // webpack.config.js
 module.exports = {
@@ -124,19 +144,20 @@ module.exports = {
 }
 ```
 在开发环境(`development`)使用：`cheap-module-eval-source-map`   
-在生产环境(`production`)使用：`cheap-module-source-map`   
+在生产环境(`production`)使用：`cheap-module-source-map`    
 - `inline`: `Source map`转换为`DataUrl`后添加到`bundle`中.
 - `cheap`: 提示代码是哪一行错了，但是哪一列得自己找。忽略`loader`和第三方模块。    
-- `module`: 将`loader`和第三方模块的错误也会提示出来
+- `module`: 将`loader`和第三方模块的错误也会提示出来。
+- `eval`不会生成`map`文件，会使用eval语句展示映射关系。
 
 
-## WebpackDevServer
+## Webpack-dev-server
 每次修改了源代码，都需要重新执行`npm run build`进行打包，再刷新页面才能看到最新的源代码执行的结果。`WebpackDevServer`可以优化流程。  
 安装：`npm install webpack-dev-server@3.11.3 --save-dev` 
 ```javascript
 // webpack.confi.js
 module.exports = {
-    // 充当服务器的作用，会启东一个本地的端口，访问这个端口，就会返回打包生成的html内容。只适用于开发环境
+    // 充当服务器的作用，会启动一个本地的端口，访问这个端口，就会返回打包生成的html内容。只适用于开发环境
     devServer: {
         contentBase: './dist', // 告诉浏览器从哪里提供内容，dist文件夹
         open: true, // 第一次打包完毕自动打开网页
@@ -146,13 +167,15 @@ module.exports = {
 // package.json
 "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch", // 监听源代码的变化，发现源代码变了就打包。webpack自带的监听功能，打包出来的文件没有index.html，需要手动添加index.html
+    "watch": "webpack --watch", 
+    // 监听源代码的变化，发现源代码变了就打包。webpack自带的监听功能，
+    // 打包出来的文件没有index.html，需要手动添加index.html
     "dev": "webpack-dev-server" // 监听源代码的变化
 }
 ```
 修改源代码，直接就看到了最新的源代码执行结果。
 
-请求转发   
+## 请求转发   
 ```javascript
 // webpack.config.js
 module.exports = {
@@ -164,7 +187,8 @@ module.exports = {
             // 如果路径开头是/Yixiantong，那么就要转发到http://study.jsplusplus.com/ 域名下
             '/Yixiantong': {
                 target: 'http://study.jsplusplus.com/',
-                changeOrigin: true, // http://study.jsplusplus.com/对源做了限制，所以得设置为true才能访问
+                changeOrigin: true, 
+                // http://study.jsplusplus.com/对源做了限制，所以得设置为true才能访问
 
             }
         }
@@ -234,15 +258,15 @@ module.exports = {
 `css`热更新：源代码`css`文件发生改变，网页中的状态、路由、输入框、变量都不会消失。`css`修改的样式发生改变。
 ```javascript
 // webpack.config.js
-const webpack = require('webpack');
+const webpack = require('webpack'); // 热更新第二步
 
 module.exports = {
     devServer: {
-        // 热更新
+        // 热更新第一步
         hot: true
     },
     plugin: [
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin() // 热更新第三步
     ]
 }
 ```
@@ -263,7 +287,7 @@ module.exports = {
     ]
 }
 
-// index.js
+// 热更新第四步 修改 index.js
 // 如果开启了热更新
 if (module.hot) {
     // 设置监听的文件(numbre文件)，如果监听的文件里面发生改变，就执行回调回调函数的内容。

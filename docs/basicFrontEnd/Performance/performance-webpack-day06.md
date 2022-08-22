@@ -19,7 +19,9 @@ module.exports = {
                 test: /\.js$/,
                 loader: 'babel-loader',
                 options: {
-                    cacheDirectory: true, // 1.将babel（es6->es5）编译好的es5代码缓存到文件夹里面，下次使用时先去缓存文件夹中查看有没有编译好的代码，如果有就直接从文件夹中拿出编译好的代码
+                    cacheDirectory: true, 
+                    // 1.将babel（es6->es5）编译好的es5代码缓存到文件夹里面，下次使用时先去
+                    // 缓存文件夹中查看有没有编译好的代码，如果有就直接从文件夹中拿出编译好的代码
                 },
                 exclude: /node_modules/, // 2. path.resolve(__dirname, 'node_modules) 排除不进行编译的模块
             }
@@ -35,13 +37,15 @@ moment是js时间库。直接import就把所有国家的语言包都导入了，
 module.exports = {
     noParse: [/vue\.min\.js$/], // 告诉vue.min.js文件不需要进行打包和解析的
     plugins: [
-        new webpack.IgnorePlugin(/\.\/locale/, /moment/), // 忽略moment库的locale文件夹。这里面包含所有国家的语言包。再导入需要的语言包：import 'moment/locale/zh-cn', 只引入了中文
+        new webpack.IgnorePlugin(/\.\/locale/, /moment/),
+         // 忽略moment库的locale文件夹。这里面包含所有国家的语言包。再导入需要的语言包：
+        //  import 'moment/locale/zh-cn', 只引入了中文
     ]
 }
 ```
 区别：IgnorePlugin不引入相应的代码，最终打包生成的代码没有代码；noParse不做打包，最终生成的代码有代码。
 
-3. 多进程打包
+3. 多进程打包（HappyPack）
 JS单线程->NodeJS基于JS 单线程 -> Webpack基于NodeJS 单线程 开启多进程打包。多核CPU适合多进程打包。   
 happyPack  
 ```javascript
