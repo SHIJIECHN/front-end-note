@@ -57,6 +57,7 @@ function selectionSort(array, compareFn = defaultCompare) {
     // 从当前i的值开始至数组结束
     for (let j = i; j < length; j++) {
       // 比较是否位置j的值比当前最小值小，如果是，则改变最小值至新的最小值
+      // 注意是 indexMin 的数值和 j 的数值比较
       if (compareFn(array[indexMin], array[j]) === Compare.BIGGER_THAN) {
         indexMin = j;
       }
@@ -85,6 +86,7 @@ function insertionSort(array, compareFn = defaultCompare) {
     temp = array[i];
 
     // 只要j比0大，并且数组中前面的值比待比较的值大
+    // 注意是 j - 1 和 temp 的数值进行比较
     while (j > 0 && compareFn(array[j - 1], temp) === Compare.BIGGER_THAN) {
       // 把这个值已到当前位置上，并减小j，最终找到正确的插入位置
       array[j] = array[j - 1];
