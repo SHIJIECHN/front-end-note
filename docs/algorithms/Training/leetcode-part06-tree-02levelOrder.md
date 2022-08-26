@@ -150,7 +150,16 @@ function averageOfLevels(root: TreeNode | null): number[] {
 
 ## N 叉树的层序遍历
 [力扣题目链接](https://leetcode.cn/problems/n-ary-tree-level-order-traversal/)
+给定一个 N 叉树，返回其节点值的层序遍历。（即从左到右，逐层遍历）。
 
+树的序列化输入是用层序遍历，每组子节点都由 null 值分隔
+```md
+输入：root = [1,null,3,2,4,null,5,6]
+输出：[[1],[3,2,4],[5,6]]
+
+输入：root = [1,null,2,3,4,5,null,null,6,7,null,8,null,9,10,null,null,11,null,12,null,13,null,null,14]
+输出：[[1],[2,3,4,5],[6,7,8,9,10],[11,12,13],[14]]
+```
 ```ts
 function levelOrder(root: Node | null): number[][] {
   let res: number[][] = []
@@ -226,13 +235,14 @@ function largestValues(root: TreeNode | null): number[] {
 [力扣题目链接](https://leetcode.cn/problems/populating-next-right-pointers-in-each-node/)
 
 给定一个 完美二叉树 ，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：
-
+```javascript
 struct Node {
   int val;
   Node *left;
   Node *right;
   Node *next;
 }
+```
 填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。
 
 初始状态下，所有 next 指针都被设置为 NULL。
@@ -310,6 +320,51 @@ function maxDepth(root: TreeNode | null): number {
       if (curNode.right !== null) helperQueue.push(curNode.right);
       len--;
     }
+  }
+  return deep;
+};
+```
+
+## 二叉树的最小深度
+[力扣题目链接](https://leetcode.cn/problems/minimum-depth-of-binary-tree/)
+
+给定一个二叉树，找出其最小深度。
+
+最小深度是从根节点到最近叶子节点的最短路径上的节点数量。
+
+说明：叶子节点是指没有子节点的节点。
+
+```md
+输入：root = [3,9,20,null,null,15,7]
+输出：2
+
+输入：root = [2,null,3,null,4,null,5,null,6]
+输出：5
+```
+
+```javascript
+var minDepth = function (root) {
+  let deep = 0;
+  if (root == null) return deep;
+  const helperStack = []
+  let curNode = root;
+  helperStack.push(root);
+  while (helperStack.length > 0) {
+    let len = helperStack.length;
+    let flag = false;
+    deep++;
+    while (len > 0) {
+      curNode = helperStack.shift();
+      if (curNode.left) helperStack.push(curNode.left);
+      if (curNode.right) helperStack.push(curNode.right);
+      //  当左右子节点都为空表明到了叶子节点且就是我们要的最小深度那一层
+      if (!curNode.left && !curNode.right) {
+        flag = true;
+        break;
+      }
+      len--;
+    }
+    if (flag) return deep;
   }
   return deep;
 };

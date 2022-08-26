@@ -57,7 +57,7 @@ class TreeNode{
 ```ts
 function traverse(node: TreeNode | null, res: number[]): void{}
 ```
-2. 确定总是条件：在递归的过程中，如何算是递归结束了呢，当然是当前遍历的节点是空了，name本层递归就要结束了，所以如果当前遍历的这个节点是空，就直接return。
+2. 确定终止条件：在递归的过程中，如何算是递归结束了呢，当然是当前遍历的节点是空了，那么本层递归就要结束了，所以如果当前遍历的这个节点是空，就直接return。
 ```ts
  if (node === null) return;
 ```
