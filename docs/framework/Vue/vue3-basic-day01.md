@@ -24,7 +24,7 @@ hooks是vue3底层提供的钩子实现函数方式（不像Vue2 options API）�
 > - 团队倾向新的CompositionAPI
 
 ```js
-/vue2.0写法：
+// vue2.0写法：
 export default {
   data() {
     return {
