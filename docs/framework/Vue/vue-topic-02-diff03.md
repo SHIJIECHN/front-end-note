@@ -13,7 +13,8 @@ title:  1. Diff算法（小野）
 <img :src="$withBase('/framework/Vue/diff10.jpg')" alt="diff" />
 
 1. 创建虚拟节点(createElement)
-2. 转换成真实DOM结构(render)
+2. 转换成真实DOM结构(render)渲染到页面
+3. 
 
 ## 虚拟节点差异
 <img :src="$withBase('/framework/Vue/diff11.jpg')" alt="diff" />

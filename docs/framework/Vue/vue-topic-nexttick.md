@@ -98,7 +98,7 @@ this.$nextTick(()=>{
 源码位置：/src/core/util/next-tick.js
 ```js
 const callbacks = [] // 队列
-let pending = false  // 标识同一时间只能执行一次 timerFunc()
+let pending = false  // 标识同一事件只能执行一次 timerFunc()
 let timerFunc
 
 export function nextTick (cb?: Function, ctx?: Object) {
