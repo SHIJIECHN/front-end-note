@@ -6,7 +6,7 @@ title: Utility Types
 
 
 ## Utility Types
-TS内置额实用类型，用于类型转换。
+TS内置的实用类型，用于类型转换。
 
 ## 1.Partial
 将传入的T类型所有属性设置为可选
