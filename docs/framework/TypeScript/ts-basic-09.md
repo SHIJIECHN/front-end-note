@@ -114,3 +114,46 @@ type Num = Flatten<number>;
 
 ## 在条件类型里推断（Inferring Within Conditional Types）
 infer关键词：可以从正在比较的类型中推断类型，然后再true分支里引用该推断结果。
+```typescript
+type Flatten<Type> = Type extends Array<infer Item> ? Item : Type
+
+type Str = Flatten<string[]>;
+// type Str = string
+
+type Num = Flatten<number>;
+// type Num = number;
+```
+使用infer关键字写一些有用的类型帮助别名（helper type aliases）
+```typescript
+type GetReturnType<Type> = Type extends (...args: never[]) => infer Return 
+  ? Return 
+  : never;
+
+type Num = GetReturnType<()=> number>
+// type Num = number
+
+type Str = GetReturnType<(x: string) => string>
+// type Str = string
+
+type Bools = GetReturnType<(a: boolean, b: boolean) => boolean[]>
+// type Bools = boolean[]
+```
+
+## 分发条件类型（Distributive Conditional Types）
+当在泛型中使用条件类型的时候，如果传入一个联合类型，就会变成分发的（distributive）
+```typescript
+type ToArray<Type> = Type extends any ? Type[] : never;
+
+type StrArrOrNumber = ToArray<string | number>;
+// type StrArrOrNumber = string[] | number[]
+
+// 1. 传入string | Number
+// 2. 遍历联合类型成员 ToArray<string> | ToArray<number>
+// 3. 最终结果 string[] | number[]
+```
+如果想要避免上面行为，可以用方括号包裹extends关键的每一个部分
+```typescript
+type ToArrayNonDist<Type> = [Type] extends [any] ? Type[] : never;
+type StrArrOrNumArr = ToArrayNonDist<string | number>;
+// type StrArrOrNumArr = (string | number)[]
+```

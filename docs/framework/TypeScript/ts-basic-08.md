@@ -26,7 +26,7 @@ type AliveOrName = 'alive' | 'name';
 type I3 = Person[AliveOrName];
 // type I3 = string | boolean
 ```
-使用number老获取数组元素的类型
+使用number来获取数组元素的类型
 ```typescript
 const MyArray = [
   {name: 'Alice', age: 15},

@@ -32,7 +32,7 @@ function loggingIdentify<Type>(arg: Type[]): Type[]{
   return arg;
 }
 ```
-可以这样立即logginIdentify函数：泛型函数loggingIdentity接受一个Type类型参数和一个实参arg，实参arg是一个Type类型的数组。而该数组返回一个Type类型的数组。
+可以这样理解logginIdentify函数：泛型函数loggingIdentity接受一个Type类型参数和一个实参arg，实参arg是一个Type类型的数组。而该数组返回一个Type类型的数组。
 
 ## 泛型类型（Generic Types）
 泛型函数
