@@ -1,7 +1,7 @@
 ---
 autoGroup-1: Typescript
 sidebarDepth: 3
-title: Utility Types
+title: 工具类型
 ---
 
 

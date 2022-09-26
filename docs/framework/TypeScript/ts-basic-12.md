@@ -322,3 +322,152 @@ function fn(x) {
   /* ... */
 }
 ```
+
+### this类型（this Types）
+```typescript
+class Box{
+  contents: string = '';
+  set(value: string){
+    this.contents = value;
+    console.log(this); // ClearableBox: { "contents": "hello" } 
+    return this;
+  }
+}
+
+class ClearableBox extends Box{
+  clear(){
+    this.contents = "";
+  }
+}
+
+const a = new ClearableBox();
+const b = a.set("hello"); // const b: ClearableBox
+console.log('b: '+JSON.stringify(b)); // b: {"contents":"hello"}
+```
+
+### 基于this的类型保护（this-based type guards）
+在类和接口的方法返回的位置，使用this is Type。目标对象的类型会被收窄为更具体的 Type.
+```typescript
+// @strictPropertyInitialization: false
+class FileSystemObject {
+  isFile():this is FileRep{
+    return this instanceof FileRep;
+  }
+  isDirectory(): this is Directory {
+    return this instanceof Directory;
+  }
+
+  constructor(public path:string, private networked: boolean){}
+}
+
+class FileRep extends FileSystemObject {
+  constructor(path: string, public content: string){
+    super(path,false)
+  }
+}
+
+class Directory extends FileSystemObject{
+  children: FileSystemObject[];
+}
+
+
+const fso: FileSystemObject = new FileRep("foo/bar.txt", 'foo');
+
+if(fso.isFile()){
+  fso.content;
+  // const fso: FileRep
+}else if(fso.isDirectory()){
+  fso.children;
+  // const fso: Directory
+}
+```
+一个常见的基于this的类型保护的使用例子，会对一个特定的字段进行懒校验（lazy validation）。
+```typescript
+class Box<T>{
+  value?: T;
+  hasValue(): this is {value: T}{
+    return this.value !== undefined;
+  }
+}
+
+const box = new Box();
+box.value = "Gameboy";
+
+box.value;
+// (property) Box<unknown>.value?: unknown
+
+// 当hasValue被验证为true时，会从类型中移除undefined
+if(box.hasValue()){
+  box.value;
+  // (property) value: unknown
+}
+```
+
+## 参数属性（Parameter Properties）
+参数属性：TypeScript把一个构造函数参数转成一个同名同值的类属性。可以通过在构造函数参数前添加一个可见性修饰符public、protected、private或者readonly来创建参数属性。
+```typescript
+class Params {
+  constructor(
+    public readonly x: number,
+    protected y: number,
+    private z: number
+  ){
+    // ...
+  }
+}
+
+const a = new Params(1,2,3);
+console.log(a.x); 
+// (property) Params.x: number
+
+console.log(a.z);
+// Property 'z' is private and only accessible within class 'Params'.
+```
+
+## 类表达式（Class Expressions）
+类表达式不需要名字
+```typescript
+const someClass = class<Type>{
+  content: Type;
+  constructor(value: Type){
+    this.content = value;
+  }
+}
+
+const m = new someClass("hello");
+// const m: someClass<string>
+```
+
+## 抽象类和成员（abstract Classes and Members）
+抽象类的作用是作为子类的基类，让子类实现所有的抽象成员。当一个类没有任何抽象成员，它就会被认为是具体的（concrete）。
+```typescript
+abstract class Base {
+  abstract getName(): string;
+
+  printName(){
+    console.log("hello, "+ this.getName());
+  }
+}
+
+// 抽象类不能直接实例化
+// const b = new Base();
+// Cannot create an instance of an abstract class.
+
+class Derived extends Base {
+  getName(){
+    return 'world';
+  }
+}
+
+const d = new Derived();
+d.printName(); // "hello, world" 、、
+
+// 如果没有实现基类的抽象成员，就会报错
+class DerivedA extends Base{
+  // Non-abstract class 'DerivedA' does not implement 
+  // inherited abstract member 'getName' from class 'Base'.
+  // 没有实现基类抽象成员
+}
+```
+
+
