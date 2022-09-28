@@ -19,6 +19,7 @@ class Title extends React.Component {
     }
 }
 
+// 封装时钟
 class DateTime extends React.Component {
     constructor(props) {
         super(props)
@@ -88,6 +89,7 @@ setTimeout(() => {
    this.setState({
         result: this.state.result + this.props.content
    })
+
    // 解决方案：使用回调函数
    this.setState((state, props) => {
         // state是上一个state
@@ -96,6 +98,32 @@ setTimeout(() => {
     })
    ```
 4. setState操作合并的原理是浅合并
+   ```javascript
+    constructor(props) {
+        super(props);
+        this.state = {
+        posts: [],
+        comments: []
+        }
+    }
+
+    // 更新posts、comments
+    componentDidMount() {
+        fetchPostes().then(response => {
+        this.setState({
+            posts: response.posts
+        })
+        });
+
+        fetchComments().then(response => {
+        this.setState({
+            comments: response.comments
+        })
+        })
+    }
+    // this.setState({comments})完整保留了this.state.posts，
+    // 但完全替换了this.state.comments
+   ```
 :::
 
 关于组件中的state：
@@ -108,3 +136,5 @@ setTimeout(() => {
 
 ## 单向数据流（One-Way Data Flow）
 从父组件到子组件由上而下的传递流动的数据状态，叫单向数据流。
+
+## setState 专题

@@ -148,7 +148,4 @@ cd my-react-app
 
 // 3. 启动开发环境
 yarn start/npm start
-
-// 4. 打包项目
-
 ```

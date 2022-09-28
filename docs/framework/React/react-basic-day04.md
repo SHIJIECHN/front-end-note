@@ -16,6 +16,7 @@ props的作用是什么？
 数据是什么？
 
 组件一般是内部管理数据集合（state），外部传入配置集合（props）
+
 ```typescript
 // 类组件
 class Test extends React.Component {
@@ -82,6 +83,9 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
+
+## 渲染组件 
+
 组件渲染的过程：
 1. React主动调用组件
 2. 将属性集合转换成对象 props => { title: 'This is a class Component.'}
@@ -246,7 +250,8 @@ ReactDOM.render(
 )
 ```
 
-## props
+## props的只读性 
+
 属性props和数据状态state的区别：
 1. state叫数据池对象，组件内部的管理数据的容器，可写读
 2. props叫配置池对象，外部使用（调用）组件时传入的属性集合，组件内部只读

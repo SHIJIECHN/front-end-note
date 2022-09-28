@@ -9,6 +9,8 @@ html中的div容器叫根节点。
 
 根节点内的所有内容都是由`ReactDOM`进行管理，一个`React`应用只有一个根节点。
 
+ReactDOM负责更新DOM与React元素保持一致。
+
 用`ReactDOM.render`方法将`React`元素渲染到根节点.
 ```javascript
 const rEl = <h1>This is a title.</h1>;
@@ -22,7 +24,8 @@ ReactDOM.render(
     rEl,
     document.getElementById('app')
 )
-
+```
+```javascript
 // 类组件
 // 不是React元素，
 // 使用方式：1. <Title />; 2. React.createElement(Title) 
@@ -54,8 +57,10 @@ ReactDOM.render(
   - 不能删除属性
   - 不能修改属性的枚举、配置、可写。
 
+## 更新
 观察`element`中根节点的更新状况
 ```javascript
+// 计时器
 function update() {
     const rEl = (
         <div>

@@ -285,3 +285,115 @@ type T7 = Parameters<Function>
 // Type 'Function' does not satisfy the constraint '(...args: any) => any'
 // type T7 = never
 ```
+
+## 11. ConstructorParameters\<Type>
+从构造函数类型Type的参数类型构造元组或数组类型（如果Type不是函数，则为never）
+```typescript
+type T0 = ConstructorParameters<ErrorConstructor>;
+// type T0 = [message?: string | undefined]
+
+type T1 = ConstructorParameters<FunctionConstructor>
+// type T1 = string[]
+
+class Dog {
+  private dogAge: number;
+  private dogName: string;
+  private dogKind: string;
+  constructor(dogAge: number, dogKind: string){
+    this.dogAge = dogAge;
+    this.dogKind = dogKind;
+  }
+}
+
+type DogGaveBirth = ConstructorParameters<typeof Dog>
+// type DogGaveBirth = [dogAge: number, dogKind: string]
+```
+
+## 12. ReturnType\<Type>
+构造一个含有Type函数的返回值的类型
+```typescript
+declare function f1(): {a: number, b: string};
+
+type T0 = ReturnType<() => string>
+// type T0 = string
+
+type T1 = ReturnType<(s:string) => void>
+// type T1 = void
+
+type T2 = ReturnType<<T>() => T>
+// type T2 = unknown
+
+type T3 = ReturnType<<T extends U, U extends number[]>() => T>
+// type T3 = number[]
+
+type T4 = ReturnType<typeof f1>
+// type T4 = {
+//     a: number;
+//     b: string;
+// }
+```
+
+## 13. InstanceType\<Type>
+构造一个由所有Type的构造函数的实例类型组成的类型
+```typescript
+class C{
+  x = 0;
+  y = 0;
+}
+
+type T0 = InstanceType<typeof C>
+// type T0 = C
+
+class Dog {
+  private dogAge: number;
+  private dogName: string;
+  private dogKind: string;
+  constructor(dogAge: number, dogKind: string){
+    this.dogAge = dogAge;
+    this.dogKind = dogKind;
+  }
+}
+
+type DogGaveBirth = InstanceType<typeof Dog>
+// type DogGaveBirth = Dog
+```
+InstanceType 与 ReturnType的区别是它多了构造签名，与ConstructorParameters的区别是它推断的不是参数类型，而是返回值类型。
+
+## 14. ThisParameterType\<Type>
+提取函数声明的this类型
+```typescript
+function toHex(this:number){
+  return this.toString(16);
+}
+
+function numberToString(n: ThisParameterType<typeof toHex>){
+  // (parameter) n: number
+  return toHex.apply(n)
+}
+
+interface Dog {
+  voice: {
+    bark(): void;
+  }
+}
+
+function dogBark(this: Dog){
+  this.voice.bark();
+}
+// dogBark调用
+declare const dog: Dog;
+
+dogBark.call(dog)
+```
+## 15. OmitThisParameter\<Type>
+类似于把可选属性的属性修饰符？给去掉，为了去掉这个修饰符，TS专门提供了一种方式，而OmitThisParameter是用TS已有的其他方式来对this进行剔除。
+```typescript
+function toHex(this: Number){
+  return this.toString(16);
+}
+
+const fiveToHex: OmitThisParameter<typeof toHex> = toHex.bind(5);
+// const fiveToHex: () => string
+
+console.log(fiveToHex()); // "5"
+```
