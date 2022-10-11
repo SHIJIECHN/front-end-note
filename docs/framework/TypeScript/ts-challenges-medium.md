@@ -81,4 +81,6 @@ type todo = MyReadonly2<Todo, 'title' | 'description'>
 // }
 ```
 
-## 
+```javascript
+
+```

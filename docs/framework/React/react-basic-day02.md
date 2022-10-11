@@ -45,6 +45,7 @@ ReactDOM.render(rEl1, document.getElementById('app'));
 
 rEl1编译以后会转化成rEl2，JSX实际上是React.createElement的上层。rEl1需要经过编译以后才会变成React元素，rEl2执行了就会返回一个React元素。
 
+
 ## 插值表达式
 一切有效的（符合JS编程逻辑的）表达式都写在 { } 里面。JSX有编译的过程，被编译以后转化为React元素，实际上是一个普通的对象。
 ```javascript
@@ -147,3 +148,7 @@ ReactDOM.render(
 const rEl = <img src="" />
 ```
 ReactDOM在渲染之前所有JSX内容都会转成字符串，所有输入的内容都会进行转义，可以有效防止XSS（cross-site-scripting，跨站脚本）攻击。
+
+## 总结
+1. JSX是什么
+2. 什么React不把视图标记和逻辑分开呢

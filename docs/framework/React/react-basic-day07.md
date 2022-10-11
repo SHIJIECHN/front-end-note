@@ -7,6 +7,11 @@ title: 条件渲染与列表渲染
 ## 条件渲染
 登录状态和非登录状态
 ```javascript
+// APP
+//   LoginForm
+//   Welcome
+//   Tip
+
 // 登录页面
 class LoginForm extends React.Component {
     state = {
@@ -69,6 +74,7 @@ class LoginForm extends React.Component {
         )
     }
 }
+
 // 欢迎页面
 class Welcome extends React.Component {
     render() {
@@ -126,7 +132,7 @@ class App extends React.Component {
     }
 
     render() {
-        // 结构出logged是否登录状态
+        // 解构出logged是否登录状态
         const { logged, count, tipShow } = this.state;
         // logged为true显示欢迎页面，为false显示登录页面
         // if (logged) {
@@ -163,6 +169,28 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
+根据logged的值来渲染不同的组件。
+
+### 阻止组件渲染
+如果你希望隐藏组件，可以让render方法直接返回null，而不进行任何渲染
+
+根据props的值进行条件渲染，如果tipShow的值是false，那么组件则不会渲染。
+```javascript
+class Tip extends React.Component {
+    render() {
+        const { tipShow } = this.props;
+        if (!tipShow) {
+            // 注意：如果render函数返回null，不会进行任何渲染
+            return null;
+        }
+
+        return (
+            <p>This is a Tip.</p>
+        )
+    }
+}
+```
+在组件的render方法中返回null并不会影响组件的生命周期。
 
 ## 列表渲染
 关于key值：
@@ -170,10 +198,11 @@ ReactDOM.render(
 - key是React查看元素是否改变的唯一标识
 - key必须在兄弟节点节点中唯一，确定的（兄弟结构是在同一列表中的兄弟元素）
 - 不建议使用index作为key值（禁止），建立在列表顺序改变，元素增删的情况下
-- 列表项增删或顺序改变，index的对应项就会改变，key对一个的项还是之前列表情况的对应元素的值。导致状态混乱，查找元素性能会变差。
+- 列表项增删或顺序改变，index的对应项就会改变，key对应的项还是之前列表情况的对应元素的值。
+- 导致状态混乱，查找元素性能会变差。
 
 解决方法：
-- 如果列表是静态不可操作的，可以选择index作为key，也不推荐，有了能这个列表在以后维护的时候有可能变更为可操作的列表
+- 如果列表是静态不可操作的，可以选择index作为key，也不推荐，有可能这个列表在以后维护的时候有可能变更为可操作的列表
 - 避免使用index
 - 可以用数据的ID
 - 使用动态生成一个静态ID，如通用包nanoid
@@ -312,3 +341,17 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
+提取一个ListItem组件，应该把key保留在ListItem元素上，而不是放在ListItem组件中的tr元素上。
+
+### key只是在兄弟节点之间必须唯一
+key在其兄弟节点之间应该是独一无二的，然后它们不需要是全局唯一的。
+
+key会传递信息给React，但是不会传递给你的组件，如果你的组件中需要使用key属性的值，用其他属性名显示传递这个值。
+```javascript
+<ListItem
+    item={item}
+    sid={sid}
+    key={sid}
+/>
+```
+ListItem组件可以读出props.sid，但是不能读出props.key。

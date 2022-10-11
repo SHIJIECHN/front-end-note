@@ -55,13 +55,14 @@ class MyButton extends React.Component {
 }
 ```
 总结：
-1. React提供了ReactAPI专门处理视图的API集合
+1. React提供了React API专门处理视图的API集合
 2. ReactDOM：从render函数到虚拟DOM节点到真实DOM节点需要用的库
 
 ### 1. React.createElement
+React.createElement 方法可以手动创建一个React元素
 ```javascript
 /**
- * React.createElement
+ * React.createElement 手动创建一个React元素
  * 标签名称
  * 新增属性
  * 标签文本内容/子节点标签
@@ -70,6 +71,7 @@ React.createElement('div', {
 'data-tag': 'div'
 }, 'This is my first React experience')
 ```
+React.render方法将react元素变成虚拟节点，然后变成真实节点
 ```javascript
 /**
  * ReactDOM.render(){}
@@ -90,16 +92,18 @@ ReactDOM.render(
     <div data-tag="div">This is my first React experience</div>
 </div>
 ```
+手动新增子节点的写法
+1. 新增子节点
+2. class写法是className
+3. 子节点插入到[]
 ```javascript
-// 手动新增子节点的写法
 // 1. 新增子节点
-// 2. class写法是className
-// 3. 子节点插入到[]
 var span = React.createElement('span', {
-    className: 'text',
+    className: 'text', // 2. class写法是className
     key: 1
 }, 'This is a span');
 
+// 3. 子节点插入到[]
 ReactDOM.render(
     React.createElement('div', {
         'data-tag': 'div'
@@ -114,7 +118,7 @@ ReactDOM.render(
     </div>
 </div>
 ```
-React.createElement方法也可以接受React类组件作为参数去创建一个真实节点
+React.createElement方法也可以接受**React类组件**作为参数去创建一个真实节点
 ```javascript
 ReactDOM.render(
     React.createElement(MyButton),
@@ -126,8 +130,10 @@ ReactDOM.render(
 ```
 
 总结：
-1. 继承React.Component
-2. render函数返回视图
+1. React.createElement 创建一个React元素
+2. React.render方法将react元素变成虚拟节点，然后变成真实节点
+3. 继承React.Component
+4. render函数返回视图
 
 ## 搭建React
 创建一个React

@@ -5,19 +5,16 @@ title: 组件与props
 ---
 
 ## 组件
-组件是什么？
+> 组件是什么？
+> 在前端，组件是视图的片段，组件包含视图标记、事件、数据、逻辑、外部的设置。
 
-在前端，组件是视图的片段，组件包含视图标记、事件、数据、逻辑、外部的设置。
+> props的作用是什么？
+> 组件是封闭的，要接收外部数据通过props来实现，props接收传递给组件的数据。
 
-props的作用是什么？
+> 数据是什么？
+> 组件一般是内部管理数据集合（state），外部传入配置集合（props）
 
-组件是封闭的，要接收外部数据通过props来实现，props接收传递给组件的数据。
-
-数据是什么？
-
-组件一般是内部管理数据集合（state），外部传入配置集合（props）
-
-```typescript
+```JSX
 // 类组件
 class Test extends React.Component {
     // 接收外部传入的属性配置在props里保存
@@ -251,6 +248,21 @@ ReactDOM.render(
 ```
 
 ## props的只读性 
+组件props可以传递什么类型的数据？
+```jsx
+<List
+  //字符串
+  name="rose"
+  //数值
+  age={19}
+  //数组
+  colors={['red', 'green', 'blue']}
+  //返回结果的函数
+  fn={() => consolo.log('this is a fn')}
+  //React元素
+  tag={<p>this is a p.</p>}
+/>
+```
 
 属性props和数据状态state的区别：
 1. state叫数据池对象，组件内部的管理数据的容器，可写读

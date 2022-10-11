@@ -70,7 +70,7 @@ ReactDOM.render(
 )
 
 setTimeout(() => {
-    // 卸载组价
+    // 卸载组件
     ReactDOM.unmountComponentAtNode(
         document.getElementById('app')
     )
@@ -78,7 +78,7 @@ setTimeout(() => {
 ```
 总结：
 1. 如果想使用组件的时候，传入数据props组件配置
-2. 如果数组件使用的数据，使用私有数据状态state
+2. 如果是组件使用的数据，使用私有数据状态state
 
 :::tip
 1. 必须使用setState方法来修改state
@@ -138,3 +138,28 @@ setTimeout(() => {
 从父组件到子组件由上而下的传递流动的数据状态，叫单向数据流。
 
 ## setState 专题
+setState()是异步更新数据的，可以多次调用，但只会触发一次渲染
+
+关于setState方法，状态是可变的，它的作用在于：
+1. 修改state状态
+2. 更新UI
+
+关于setState方法的推荐调用方法：
+```javascript
+// 此写法是异步更新的
+//state：最新的state
+//props：最新的props
+setState((state, props) => {
+  return {
+    //要更改的状态
+    count: state.count + 1;
+  }
+});
+```
+关于setState方法的第二个参数：在状态更新后（页面完成重新渲染）立即执行某个操作
+```javascript
+this.setState(
+  (state, props) => {},
+  () => { console.log('这个回调函数会在状态更新后立即执行') }
+);
+```
