@@ -14,14 +14,48 @@ title: 父子组件通信和状态提升
 
 > 如何解决两个组件需要共享同一状态并且状态同步的情况
 ```javascript
+//类组件调用(实例化)的时候，组件内部的状态是独立且唯一的
+//组件一, 
+class Info extentds React.Component { 
+  //业务逻辑1 
+}
 
+//组件二
+class UserNameInput extentds React.Component {
+  //业务逻辑2
+  
+  //使用了组件1
+  render(){
+    return (
+      <Info />
+    );
+  }
+}
+
+//父组件
+class App extends React.Component { 
+  //使用了两次组件2
+  render(){
+    return (
+      // 向各自的子组件传值
+      // 这样传值结果是：两个组件的state状态数据是不同步的，相互独立的
+      <UserNameInput inputNum={ 1 }/>
+      <UserNameInput inputNum={ 1 }/>
+    );
+  }
+}
+
+ReactDOM.render(
+  <App />,
+  document.getElementById('app')
+);
 ```
 
-类组件调用（实例化）的时候，组件内部的状态时唯一且独立的
-
-组件嵌套与调用，和类组件还是函数组件没有关系
-
-类组件与函数组件相互是可以调用的
+总结：
+1. 类组件调用（实例化）的时候，组件内部的状态时唯一且独立的
+2. 组件嵌套与调用，和类组件还是函数组件没有关系
+3. 类组件与函数组件相互是可以调用的
+4. 将子组件定义的状态提升到父组件去传值使用，实现两个组件同一状态同步
 
 ## 组件通信
 ### 1. 父传子
