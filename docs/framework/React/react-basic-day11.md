@@ -41,3 +41,8 @@ dynamic import应用场景：
 
 
 ## lazy
+React.lazy方法 / Suspense是React内置组件，挂载到React
+
+lazy是React
+
+## 路由懒加载
