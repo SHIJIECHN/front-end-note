@@ -76,20 +76,6 @@ class ErrorBoundary extends React.Component{
 ```
 懒加载组件内部发生错误，错误边界组件会捕获到。
 
-## 命名导出
-lazy只支持默认导出
-```javascript
-export {
-    Test1
-};
-// Uncaught (in promise) TypeError: Cannot convert object to primitive value
-```
-```javascript
-// 命名导出
-export {
-    Test1 as default,
-} from './Components.jsx'
-```
 
 ## 总结
 1. 错误边界组件使用static getDerivedStateFromError()渲染备用UI，使用componentDidCatch()打印错误信息
