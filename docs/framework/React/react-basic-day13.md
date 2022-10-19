@@ -268,3 +268,6 @@ const AContext = React.createContext('default a');
 AContext.displayName = 'MyAContext';
 ```
 针对devtool的设置,给Provider提供具体的名称方便调试
+
+## 动态Context嵌套
+案例：Context跨级共享应用
