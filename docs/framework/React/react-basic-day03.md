@@ -9,7 +9,7 @@ html中的div容器叫根节点。
 
 根节点内的所有内容都是由`ReactDOM`进行管理，一个`React`应用只有一个根节点。
 
-ReactDOM负责更新DOM与React元素保持一致。
+`ReactDOM`负责更新`DOM`与`React`元素保持一致。
 
 用`ReactDOM.render`方法将`React`元素渲染到根节点.
 ```javascript
@@ -50,7 +50,8 @@ ReactDOM.render(
 1. 组件使用`JSX`语法
 2. 使用`React.createElement`将组件转为`React`元素
 
-问题：`React`基本的更新逻辑有哪些？
+> `React`基本的更新逻辑有哪些？
+
 - `React`元素是不可变的对象（`immutable Object`）。
   - 不能添加属性
   - 不能修改属性
@@ -81,3 +82,7 @@ setInterval(update, 1000);
 - 渲染之前每个`React`元素组成一个虚拟`DOM`的对象结构然后去渲染
 - 更新之前形成新的虚拟DOM的对象结构，对比新旧的虚拟`DOM`节点，分析出不同的地方，形成一个`DOM`更新的补丁，打补丁到真实`DOM`去更新
 
+React只更新它需要更新的部分。
+
+
+ReactDOM.render()首次调用时，容器节点里的所有DOM元素都会被替换，后序的调用则会使用React的DOM差分算法（DOM Diff）进行高效的更新。

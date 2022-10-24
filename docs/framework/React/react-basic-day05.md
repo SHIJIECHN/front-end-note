@@ -102,23 +102,23 @@ setTimeout(() => {
     constructor(props) {
         super(props);
         this.state = {
-        posts: [],
-        comments: []
+            posts: [],
+            comments: []
         }
     }
 
     // 更新posts、comments
     componentDidMount() {
         fetchPostes().then(response => {
-        this.setState({
-            posts: response.posts
-        })
+            this.setState({
+                posts: response.posts
+            })
         });
 
         fetchComments().then(response => {
-        this.setState({
-            comments: response.comments
-        })
+            this.setState({
+                comments: response.comments
+            })
         })
     }
     // this.setState({comments})完整保留了this.state.posts，

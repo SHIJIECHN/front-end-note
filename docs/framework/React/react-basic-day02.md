@@ -5,7 +5,7 @@ title: JSX
 ---
 
 ## JSX是什么
-1. 一种标签语法、JS进行的语法扩展
+1. 一种标签语法、在JS上进行的语法扩展
 2. 不是字符串、不是HTML标签
 3. 描述UI呈现与交互的直观的表现形式
 4. 生成React元素
@@ -33,10 +33,12 @@ console.log(rEl);
  */
 
 // createElement
-const rEl2 = React.createElement('h1',
+const rEl2 = React.createElement(
+    'h1',
     {
         className: 'title'
-    }, 'This is my first JSX experience.'
+    }, 
+    'This is my first JSX experience.'
 );
 
 ReactDOM.render(rEl1, document.getElementById('app'));
@@ -92,9 +94,11 @@ ReactDOM.render(
 1. JSX 遵循JS的命名规范，一般使用camelCase（小驼峰）
 2. 插值表达式中是js语法
 
-为什么React不把视图标记和逻辑分开呢？
+> 为什么React不把视图标记和逻辑分开呢？
+
 1. 渲染和UI标记是有逻辑耦合
 2. 即使是这样的耦合也能实现关注点分离
+
 ```javascript
 render(){
     return (

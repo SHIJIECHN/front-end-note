@@ -6,13 +6,16 @@ title: 组件与props
 
 ## 组件
 > 组件是什么？
-> 在前端，组件是视图的片段，组件包含视图标记、事件、数据、逻辑、外部的设置。
+
+在前端，组件是视图的片段，组件包含视图标记、事件、数据、逻辑、外部的设置。
 
 > props的作用是什么？
-> 组件是封闭的，要接收外部数据通过props来实现，props接收传递给组件的数据。
+
+组件是封闭的，要接收外部数据通过props来实现，props接收传递给组件的数据。
 
 > 数据是什么？
-> 组件一般是内部管理数据集合（state），外部传入配置集合（props）
+
+组件一般是内部管理数据集合（state），外部传入配置集合（props）
 
 ```JSX
 // 类组件
@@ -85,19 +88,19 @@ ReactDOM.render(
 
 组件渲染的过程：
 1. React主动调用组件
-2. 将属性集合转换成对象 props => { title: 'This is a class Component.'}
-3. 将对象作为props传入组件
-4. 替换JSX中的props或者state中的变量
-5. ReactDOM将最终React元素通过一系列的操作转化成真实DOM进行渲染
+2. 将属性集合转换成对象 `props => { title: 'This is a class Component.'}`
+3. 将对象作为`props`传入组件
+4. 替换`JSX`中的`props`或者`state`中的变量
+5. `ReactDOM`将最终`React`元素通过一系列的操作转化成真实`DOM`进行渲染
 
 ::: tip
-使用类组件时，如写了构造函数，应该将props传递给super(),否则无法在构造函数中获取props
+使用类组件时，如写了构造函数，应该将`props`传递给`super()`,否则无法在构造函数中获取`props`
 :::
 
 组件调用规范：
 - 视图标记时HTML标签 `<div></div>`
 - 大驼峰写法作为一个React元素 `<Title />`组件 -> JSX -> React元素。`<Test title="This is a Class Component." />`
-- 组件转换React元素 React.createElement(Title, {...})
+- 组件转换`React`元素 `React.createElement(Title, {...})`
 
 ## 组合组件
 几个子组件放入到父组件里（返回的视图中组合）
@@ -326,4 +329,38 @@ ReactDOM.render(
     <App content="This is my content." />,
     document.getElementById('app')
 )
+```
+
+
+## props检验
+允许在创建组件的时候，就指定props的类型，格式等
+```javascript
+// 安装包
+npm i -S props-types
+
+// 引入
+import PropTypes from 'prop-types'
+
+MyComponent.propTYpes = {
+    a: propTypes.number,
+    fn: propTypes.func.isRequired,
+    tag: PropTYped.element,
+    // 特定结构的对象
+    filter: PropTYpes.shape({
+        area: PropTypes.string,
+        price: PropTypes.number
+    }),
+    //必选
+    requiredFunc: PropTypes.func.isRequired,
+
+}
+```
+
+常见类型： array，bool，function，number，object，string
+
+默认Props值
+```javascript
+MyComponent.defaultProps = {
+    name: 'Stranger'
+}
 ```
