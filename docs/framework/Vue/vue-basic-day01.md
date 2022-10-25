@@ -18,7 +18,7 @@ index.html移动端配置：
 
 轮播图：  
 vue-awesome-swiper@2.6.7
-样式穿透：`.sw-wrapper >>> `.swiper-pagination-bullet-active     
+样式穿透：`.sw-wrapper >>> .swiper-pagination-bullet-active`    
 异步处理：
 ```vue
 // 父组件：swiperList是异步请求返回的数据

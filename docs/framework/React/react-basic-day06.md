@@ -5,7 +5,7 @@ title: 事件处理函数绑定与事件对象
 ---
 
 ## 事件
-React元素也是采用了类似于DOM0标准中的事件属性定义的方法
+`React`元素也是采用了类似于`DOM0`标准中的事件属性定义的方法
 ```javascript
 // JSX 写法
 // onClic小驼峰
@@ -21,7 +21,7 @@ React.createElement(
   'click'
 )
 ```
-不能通过false阻止默认行为，需要使用preventDefault
+不能通过`false`阻止默认行为，需要使用`preventDefault`
 ```javascript
 class App extends React.Component {
   doSth(e) {
@@ -51,19 +51,21 @@ console.log(e);
  * 这个对象遵守W3C事件对象的规范，不存在任何的浏览器兼容性问题
  */
 ```
+`SyntheticEvent`是浏览器的原生事件的跨浏览器包装器，可解决所有浏览器兼容问题，还拥有浏览器原生事件相同的接口。
 
-为什么React要将事件处理直接在React元素上绑定？ 
+> 为什么`React`要将事件处理直接在`React`元素上绑定？ 
 
-React一直认为事件处理跟视图是有程序上的直接关系的，事件处理和视图写在一起可以更加直观的表述视图与逻辑的关系，更加好维护。
+`React`一直认为事件处理跟视图是有程序上的直接关系的，事件处理和视图写在一起可以更加直观的表述视图与逻辑的关系，更加好维护。
 
 ## this指向
-- 默认处理函数的 this 为 undefined
-- ES6 class模块默认是不对事件处理函数进行 this 的再绑定
+- 默认处理函数的 `this` 为 `undefined`
+- `ES6 class`模块默认是不对事件处理函数进行 `this` 的再绑定
 
 解决方法：
-1. 可以在构造器中 bind(this)
-2. 可以在视图中 bind(this)
-3. 利用回调加箭头函数 onClick = { () => this.doSth() }
+1. 可以在构造器中 `bind(this)`
+2. 可以在视图中 `bind(this)`
+3. 利用回调加箭头函数 `onClick = { () => this.doSth() }`
+4. `class field`
 
 ```javascript
 class App extends React.Component {
@@ -75,6 +77,11 @@ class App extends React.Component {
 
   doSth() {
     console.log(this); // undefined
+  }
+
+  // 3. class field
+  doSth = () => {
+    //...
   }
 
   render() {
@@ -93,7 +100,7 @@ class App extends React.Component {
 
 回调加箭头函数改变指向的缺点：
 
-每次render函数执行时会创建新的回调，给子组件的属性进行传递函数的时候，每次都要创建一个回调，子组件每次都会接收一个新的函数，就会有可能触发子组件的render渲染
+每次`render`函数执行时会创建新的回调，给子组件的属性进行传递函数的时候，每次都要创建一个回调，子组件每次都会接收一个新的函数，就会有可能触发子组件的`render`渲染
 
 ```javascript
 // 实验性写法 class field（推荐写法）
@@ -122,3 +129,14 @@ doSth(p1, p2, p3, e){ }
 // 隐式传入事件对象
 doSth2(p1, p2, p3, e) {}
 ```
+
+## React事件机制
+React自身实现了一套自己的事件机制，包括事件注册、事件的合成、事件冒泡、事件派发等。
+
+
+### 1. 合成事件
+
+### 2. 事件注册机制
+
+
+### 3. 事件执行机制
