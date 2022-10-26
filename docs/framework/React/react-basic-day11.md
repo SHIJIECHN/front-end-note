@@ -41,11 +41,11 @@ title: 代码分割
 
 
 ## lazy
-React.lazy方法，Suspense是React内置组件，挂载到React。
+`React.lazy`方法，`Suspense`是`React`内置组件，挂载到`React`。
 
-> lazy是什么？
+> `lazy`是什么？
 
-lazy是React提供给开发者的懒（动态）加载组件的方法React.lazy（参数：函数必须接收一个支持Promise的动态导入组件），好处是减少打包体积，对初次渲染不适用的组件延迟加载，它依赖一个内置组件Suspense，给lazy加上loading提示组件的一个容器组件。
+`lazy`是`React`提供给开发者的懒（动态）加载组件的方法`React.lazy`（参数：函数必须接收一个支持`Promise`的动态导入组件），好处是减少打包体积，对初次渲染不适用的组件延迟加载，它依赖一个内置组件Suspense，给lazy加上loading提示组件的一个容器组件。
 ```javascript
 // loading.jsx
 class Loading extends React.Component {
@@ -79,11 +79,11 @@ const MainComponent = React.lazy(() => import('./main.jsx'));
 class App extends React.Component { 
   render(){
     return (
-      <React.Supense fallback={ <Loading /> }>
+      <React.Suspense fallback={ <Loading /> }>
         <div>
           <MainComponent />
         </div>
-      </React.Supense>
+      </React.Suspense>
     );
   }
 }
@@ -147,7 +147,7 @@ class App extends Component {
 
 
 ## 命名导出
-lazy只支持默认导出(default exports)。如果想被引用的模块使用命名导出（named exports），可以创建一个中间模块，来重新导出为默认模块。
+`lazy`只支持默认导出(`default exports`)。如果想被引用的模块使用命名导出（`named exports`），可以创建一个中间模块，来重新导出为默认模块。
 ```javascript
 export {
     Test1

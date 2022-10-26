@@ -5,13 +5,13 @@ title: ConText
 ---
 
 ## Context
-ConText是上下文，理解为容器，里面可以装很多数据，这些数据可以给程序的多个地方传递数据，这个容器就叫做上下文。实际上就是程序在执行的时候可访问的容器。
+`ConText`是上下文，理解为容器，里面可以装很多数据，这些数据可以给程序的多个地方传递数据，这个容器就叫做上下文。实际上就是程序在执行的时候可访问的容器。
 
-> Context有什么作用？
+> `Context`有什么作用？
 
-给整个组件树共享全局的数据。当不想在组件树中通过逐层传递props或state方式来传递数据时，可以使用Context来实现跨层级的组件数据传递。
+给整个组件树共享全局的数据。当不想在组件树中通过逐层传递`props`或`state`方式来传递数据时，可以使用`Context`来实现跨层级的组件数据传递。
 
-Context最适合的场景是：
+`Context`最适合的场景是：
 - 杂乱无章的组件都需要同样一些数据的时候
 - 不合适在单纯的为了不层层传递属性
 - 它会弱化及污染组件的纯度导致组件复用性降低
@@ -97,7 +97,7 @@ class Header extends React.Component {
     }
 }
 ```
-如果只想避免层层传递一些属性，组合组件比context更好
+如果只想避免层层传递一些属性，组合组件比`context`更好
 ```javascript
 class App extends React.Component{
     constructor(props){
@@ -162,33 +162,33 @@ vite + context + react
 <img :src="$withBase('/framework/React/context.jpg')" alt="context" />
 
 ## Context API
-> 如何使用Context
+> 如何使用`Context`
 
-使用Context，需要用到两种组件:
-- 生产者Provider，通常是一个父节点
-- 消费者Consumer，通常是一个或多个子节点
-- 还需要声明静态属性ContextType提供给子组件的Context对象的属性
+使用`Context`，需要用到两种组件:
+- 生产者`Provider`，通常是一个父节点
+- 消费者`Consumer`，通常是一个或多个子节点
+- 还需要声明静态属性`ContextType`提供给子组件的`Context`对象的属性
 
 ### React.createContext
-- 创建一个指定的Context对象
-- 组件会找离自己最近的Provider获取其value(在state里定义的)
+- 创建一个指定的`Context`对象
+- 组件会找离自己最近的`Provider`获取其`value`(在`state`里定义的)
 
 ```javascript
-const AContext = React.createContext(defaultValue)
+const AContext = React.createContext(defaultValue);
 ```
-创建一个Context对象，当React渲染一个订阅了这个Context对象的组件，这个组件会从组件树中离自身最近的那个匹配的Provider中读取到当前的context值。
+创建一个`Context`对象，当`React`渲染一个订阅了这个`Context`对象的组件，这个组件会从组件树中离自身最近的那个匹配的`Provider`中读取到当前的`context`值。
 
-只有当组件所处的树中没有匹配到Provider时，其defaultValue参数才会生效。此默认值有助于在不使用Provider包装组件的情况下对组件进行测试。注意：将undefined、null传递给Provider的value时，消费组件的defaultValue不会生效。
+只有当组件所处的树中没有匹配到`Provider`时，其`defaultValue`参数才会生效。此默认值有助于在不使用`Provider`包装组件的情况下对组件进行测试。注意：将`undefined`、`null`传递给`Provider`的`value`时，消费组件的`defaultValue`不会生效。
 
 ### Context.Provider
 ```javascript
 <AContext.Provider value={ /**某个值 */}/>
 ```
-- 它是通过React.createContext创建的上下文对象里的一个组件
-- Provider组件可以插入其他组件的目的是可以订阅这个Context
-- 通过Provider的value属性来将数据传递给其他Consumer组件
+- 它是通过`React.createContext`创建的上下文对象里的一个组件
+- `Provider`组件可以插入其他组件的目的是可以订阅这个`Context`
+- 通过`Provider`的`value`属性来将数据传递给其他`Consumer`组件
 
-一个Provider可以和多个消费组件有对应关系。多个Provider也可以嵌套使用，里层的会覆盖外层的数据。
+一个`Provider`可以和多个消费组件有对应关系。多个`Provider`也可以嵌套使用，里层的会覆盖外层的数据。
 ```javascript
 <BContext.Provider value={this.state.b}>
     <AContext.Provider value={this.state.a}>
@@ -196,17 +196,17 @@ const AContext = React.createContext(defaultValue)
     </AContext.Provider>
 </BContext.Provider>
 ```
-当Provider的value值发生变化时，它内部的所有消费组件都会重新渲染。从Provider到其内部consumer组件的传播不受制于shouldComponentUpdate函数，因此当consumer组件在其祖先组件跳过更新的情况下也能更新。
+当`Provider`的`value`值发生变化时，它内部的所有消费组件都会重新渲染。从`Provider`到其内部`consumer`组件的传播不受制于`shouldComponentUpdate`函数，因此当`consumer`组件在其祖先组件跳过更新的情况下也能更新。
 
-通过新旧值检测确定变化，使用了与Object.is相同的算法
+通过新旧值检测确定变化，使用了与`Object.is`相同的算法
 
 ### Context.Consumer
-- 它使用的是Provider提供的value
-- 最大的作用是订阅context变更
-- Consumer内部使用函数作为子元素(专题：function as a child
+- 它使用的是`Provider`提供的`value`
+- 最大的作用是订阅`context`变更
+- `Consumer`内部使用函数作为子元素(专题：`function as a child`)
 - 有一种组件的内部是使用函数作为子元素
-- 特点是函数接收context最近的Provider提供的value
-- 如果没有写Provider会找默认值
+- 特点是函数接收`context`最近的`Provider`提供的`value`
+- 如果没有写`Provider`会找默认值
 ```javascript
 <MyContext.Consumer>
   {value => /* 基于 context 值进行渲染*/}

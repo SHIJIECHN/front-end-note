@@ -1,7 +1,7 @@
 ---
-autoGroup - 1: React
+autoGroup-1: React
 sidebarDepth: 3
-title: JSX
+title: JSX（二）
 ---
 
 
@@ -199,7 +199,7 @@ const { abc, ...others } = this.props;
 2. 字符串之间的多个空格压缩为一个空格，可以通过字符实体`&nbsp;`多个空格
 3. 字符串之间的换行压缩为一个空格。使用`<br/>`换行
 
-## 2. JSX作为JSX子元素
+### 2. JSX作为JSX子元素
 ```javascript
 class ListItems extends React.Component {
     render() {

@@ -5,26 +5,27 @@ title: 受控组件与非受控组件
 ---
 
 ## 受控组件
-在react有两种表单处理方式：
+在`react`有两种表单处理方式：
 - 受控组件
 - 非受控组件
 
-关于html和react中状态的冲突：
-- html中的表单元素是可输入的，有自己的可变状态
-- react中可变状态一般保存在state中
+关于`html`和`react`中状态的冲突：
+- `html`中的表单元素是可输入的，有自己的可变状态
+- `react`中可变状态一般保存在`state`中，并且只能通过使用`setState()`来更新
 
-react如何解决以上冲突？
+> react如何解决以上冲突？
 
-将state与表单中的value绑定在一起，由state值来控制表单元素的值
+将`state`与表单中的`value`绑定在一起，由`state`值来控制表单元素的值
 
-控制表单输入行为取值的方式的组件，跟input表单相关的渲染数据必须保存在自己的state数据里。
+控制表单输入行为取值的方式的组件，跟`input`表单相关的渲染数据必须保存在自己的`state`数据里。
+
 ```javascript
 <input type="text" value={this.state.txt} />
 ```
 
-受控使用步骤
-1. 在state中添加一个状态，作为表单元素的value值（控制表单元素的值的来源）
-2. 给表单元素绑定change事件，将表单元素的值设置为state的值（控制表单元素的值的变化）
+受控使用步骤:
+1. 在`state`中添加一个状态，作为表单元素的`value`值（控制表单元素的值的来源）
+2. 给表单元素绑定`change`事件，将表单元素的值设置为`state`的值（控制表单元素的值的变化）
 
 常见的表单元素：
 - 文本框
@@ -32,7 +33,7 @@ react如何解决以上冲突？
 - 下拉框
 - 单选框与复选框
 
-表单操作：通过修改页面的内容从而更改state数据，事件绑定`e.target.value/e.target.checked`
+表单操作：通过修改页面的内容从而更改`state`数据，事件绑定`e.target.value/e.target.checked`
 
 ```javascript
 class App extends React.Component {
@@ -136,20 +137,21 @@ this.handleChange = (e) => {
 
 受控组件和非受控组件的区别：
 - 受控组件（推荐使用）
-  - 视图表单数据受控于state状态数据组件
-  - 控制表单操作并且同步state
+  - 视图表单数据受控于`state`状态数据组件
+  - 控制表单操作并且同步`state`
 - 非受控组件：视图表单数据是只读的
 
 案例：用户信息提交表单
 
 
 ## 非受控组件
-不受控于state，使用React中的ref从DOM节点中获取表单数据得到的组件。
+不受控于`state`，使用`React`中的`ref`从`DOM`节点中获取表单数据得到的组件。
 
 ### ref使用的两种方式
-如何不通过state数据状态保存表单标签里面的值？
 
-通过ref可以保存，在标签里定义ref="xxxRef"，通过this.refs.xxx.value访问到保存的值。
+> 如何不通过`state`数据状态保存表单标签里面的值？
+
+通过`ref`可以保存，在标签里定义`ref="xxxRef"`，通过`this.refs.xxx.value`访问到保存的值。
 ```javascript
 // 1. 创建带有ref的输入框
  <input type="text" placeholder="用户名" ref="usernameRef" />
@@ -174,11 +176,11 @@ console.log(this.txtRef.current.value);
 ```
 
 ### 默认值
-在React渲染生命周期时，表单元素上的value将会覆盖DOM节点中的值。在非受控组件中，你经常希望React能赋予组件一个初始值，但是不去控制后续的更新。在这种情况下，你可以指定一个defaultValue属性，而不是value。在一个组件已经挂载之后去更新defaultValue属性的值，不会造成DOM上值的任何更新。
+在`React`渲染生命周期时，表单元素上的`value`将会覆盖`DOM`节点中的值。在非受控组件中，你经常希望`React`能赋予组件一个初始值，但是不去控制后续的更新。在这种情况下，你可以指定一个`defaultValue`属性，而不是`value`。在一个组件已经挂载之后去更新`defaultValue`属性的值，不会造成`DOM`上值的任何更新。
 
-form field默认值在组件挂载完毕后进行更新，不会导致DOM的任何更新。
-- select标签通过defaultValue属性拿到默认值
-- radio单选框/checkbox复选框标签通过defaultChek属性拿到默认值
+`form field`默认值在组件挂载完毕后进行更新，不会导致`DOM`的任何更新。
+- `select`标签通过`defaultValue`属性拿到默认值
+- `radio`单选框/`checkbox`复选框标签通过`defaultCheck`属性拿到默认值
 
 ```javascript
 class App extends React.Component {
@@ -203,7 +205,6 @@ class App extends React.Component {
             this.genderRef.current.value,
             this.fileRef.current.files[0]
         )
-
     }
 
     handleResetClick(e) {

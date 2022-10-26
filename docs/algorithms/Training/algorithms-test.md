@@ -109,3 +109,36 @@ function flatten(arr) {
 console.log(flatten(arr))
 ```
 
+
+## 手写new
+思路：
+1. 创建一个空对象
+2. 这个对象的__proto__要指向构造函数的原型prototype
+3. 执行构造函数，使用apply/call改变this的指向
+4. 返回为object类型则作为new方法的返回值返回，否则返回上述全新对象
+
+```javascript
+function myNew(fn, ...args) {
+  // 基于原型链，创建一个对象
+  let newObj = Object.create(fn.prototype);
+  // 添加属性到新对象上，并获取obj函数的结果
+  let res = fn.apply(newObj, args); // 改变this指向
+
+  // 如果执行结果有返回值并且是一个对象，返回执行的结果，否则，返回新创建的对象
+  return typeof res === 'object' ? res : newObj;
+}
+
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+Person.prototype.say = function () {
+  console.log(this.age);
+}
+
+let p1 = myNew(Person, 'poety', 18);
+console.log(p1.name); // poety
+console.log(p1); // Person { name: 'poety', age: 18 }
+p1.say();// 18
+```
