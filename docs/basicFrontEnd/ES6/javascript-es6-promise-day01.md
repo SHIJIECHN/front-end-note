@@ -51,7 +51,7 @@ promise.then((value) => {
     console.log('Rejected Error: ', reason);
 });
 ```
-1. 首先Promise构造函数中的executor执行者函数是同步执行，执行者作为实际参数传入传入到Promise构造器中，而内部的resolve，reject的函数作为形式参数被传入；所以手写Promise源码的时候，要编写resolve，reject函数与之对应；resolve函数：设置成功状态下的Promise实例对象的状态，成功状态下回调函数携带参数值；reject函数：设置失败状态下的Promise实例对象的状态，失败状态下回调函数携带的参数值。
+1. 首先Promise构造函数中的executor执行者函数是同步执行，执行者作为实际参数传入到Promise构造器中，而内部的resolve，reject的函数作为形式参数被传入；所以手写Promise源码的时候，要编写resolve，reject函数与之对应；resolve函数：设置成功状态下的Promise实例对象的状态，成功状态下回调函数携带参数值；reject函数：设置失败状态下的Promise实例对象的状态，失败状态下回调函数携带的参数值。
 2. 在Promise.prototype.then(onFulfilled, onRejected)方法需要传入成功状态的回调函数，失败状态的回调函数；根据Promise实例对象的状态进行调用不同的回调函数。
 ```javascript
 const PENDING = 'pending',
@@ -85,6 +85,7 @@ class MyPromise {
             }
         }
 
+        // 捕获executor执行错误
         try {
             executor(resolve, reject);
         } catch (e) {
@@ -127,7 +128,7 @@ promise.then((value) => {
     console.log('Rejected2: ', reason);
 });
 ```
-1. Promise构造器中executor是同步代码，首先执行setTimeout，由于setTimeout是同步接口，它会在WebApis注册一个异步的计时回调函数；异步回调函数代码会在WebApis中进行挂起，等待执行；promise.then方法实行，此时Promise实例的对象状态并没有发生改变，当异步回调函数执行后，resolve('success')才会执行，此时才会改变Promise实例对象状态，所以当promise.then执行时，promise实例对象的状态应该为默认pending状态。
+1. Promise构造器中executor是同步代码，首先执行setTimeout，由于setTimeout是同步接口，它会在WebApis注册一个异步的计时回调函数；异步回调函数代码会在WebApis中进行挂起，等待执行；promise.then方法执行，此时Promise实例的对象状态并没有发生改变，当异步回调函数执行后，resolve('success')才会执行，此时才会改变Promise实例对象状态，所以当promise.then执行时，promise实例对象的状态应该为默认pending状态。
 2. then()方法中设置Promise实例对象为pending状态的逻辑，处理异步代码执行的逻辑；通过发布订阅和修饰器的思想进行处理：由于不确定异步函数回调的具体执行的时间，那么我们可以先将其收集起来**此时注意，不能够直接将回调函数push进入数组找那个，因为会丢失参数，需要push入一个函数，在函数中执行传入的异步回调函数**，当需要执行的时候（promise状态改变的时候）再拿出来执行。
 3. 因为resolve()方法，reject()方法可以改变Promise实例对象状态，所以需要在该函数内部进行执行异步回调函数。
 4. 利用数组储存异步回调函数，并且在执行的时候循环遍历执行每一个异步回调函数，解决了同一实例对象多次调用then方法的问题。
@@ -354,7 +355,7 @@ let promise2 = promise1.then(value => {
   return value + '-> then -> promise2'
 })
 .then(value=>{
-  console.log(value);
+  console.log(value); // promise1-> then -> promise2
 })
 ```
 1. then方法的链式调用，有些人可能认为是return this实现链式调用的目的，但是这种情况对于Promise链式调用来说不可取，为什么呢？因为return this，此时的this指代的是上一个Promise实例对象，而下一个then方法与上一次Promise实例对象并没有任何关系；所以then方法返回的是一个全新的Promise实例对象。
@@ -439,13 +440,13 @@ let promise2 = promise1.then(value => {
   })
 })
 .then(value=>{
-  console.log(value);
+  console.log(value); // promise1-> then -> promise2
 })
 ```
 1. 返回值x此时返回的不再是原始值，而是Promise对象之类的数据类型，所以需要执行返回值Promise对象的then方法，获取then方法回调函数中的参数，将参数传递给新创建Promise实例对象then方法中的回调函数当作参数；resolvePromise(newPromise, returnPromise, resolve, reject)。
 2. 根据PromiseA+规范，then方法返回的Promise实例对象不能够与then方法中回调函数返回的Promise实例对象相同，也就是newPromise !== returnPromise
 3. 在创建resolvePromise方法时遇到两个问题
-   1. newPromise作为新创建的Promise实例对象获取不到，程序抛出问题，因为newPromise是作为新创建的实例对象，而在构造器中调用newPromise对象，此时newPromise还没创建完成，又因为newPromise被let进行声明，所以在啊let之前调用变量，出现暂时性死区的问题，解决方式：设置延时器。
+   1. newPromise作为新创建的Promise实例对象获取不到，程序抛出问题，因为newPromise是作为新创建的实例对象，而在构造器中调用newPromise对象，此时newPromise还没创建完成，又因为newPromise被let进行声明，所以在let之前调用变量，出现暂时性死区的问题，解决方式：设置延时器。
    2. 返回值是returnPromise是否也一同newPromise放入延时器中呢？如果不放入延时器中，因为executor函数时同步代码执行，所以返回值此时也是同步执行，而原生是异步执行，所以需要放入延时器。
 
 <img :src="$withBase('/basicFrontEnd/ES6/promise21.png')" alt="promise" />

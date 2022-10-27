@@ -271,3 +271,13 @@ AContext.displayName = 'MyAContext';
 
 ## 动态Context嵌套
 案例：Context跨级共享应用
+
+三个显示区域有按钮带有各自的样式，可以选择不同的样式同时更改按钮颜色，深入了解跨级应用。
+
+实现：
+- 改变按钮颜色
+- 登录与未登录显示
+
+<img :src="$withBase('/framework/React/context01.jpg')" alt="context01" />
+
+总结：父组件统一管理状态，嵌套的方式把不同的数据传入共享给响应的子组件，子组件将这些需要的数据渲染即可。

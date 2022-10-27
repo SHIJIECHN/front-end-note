@@ -142,3 +142,5 @@ console.log(p1.name); // poety
 console.log(p1); // Person { name: 'poety', age: 18 }
 p1.say();// 18
 ```
+
+## 手写Promise
