@@ -18,7 +18,24 @@ React会编译JSX变成React.createElement的调用形式，所以必须要让Re
 ## 点语法
 > 如何在JSX中使用点语法（对象访问的语法obj.a)
 
+在一个模块中定义多个React组件时，会很方便。
 ```javascript
+// 定义
+const MyUI = {
+    // 类组件
+    Button: class extends React.Component{
+        render(){
+            return <button>{this.props.children}</button>
+        }
+    },
+    Input: function(props){
+        return(
+            // ...
+        )
+    }
+}
+
+// 使用
  <MyUI.Button type="danger">Click</MyUI.Button>
 ```
 
@@ -52,26 +69,32 @@ class WelcomInfo extends React.Component {
 }
 
 class Header extends React.Component {
-    // 声明一个静态属性，运行时选择React类型
+    // 1. 声明一个静态属性，运行时选择React类型
     static components = {
         'login': LoginBtnGroup,
         'welcome': WelcomInfo
     }
     render() {
+        // 2. 将类型赋值给一个大写字母开头的变量
         const HeaderUser = Header.components[this.props.type]
         return (
+            // 正确
             <HeaderUser {...this.props} />
+
+            // 错误。JSX类型不能是一个表达式
+            <components[this.props.type] {...this.props}/>
+
         )
     }
 }
 ```
 
-## JSX中props属性
+## JSX中的props
 
-### 1. 表达式
+### 1. JS表达式作为props
 在JSX中的{}，它里面可以传入任何JS表达式，不包括语句if、for、switch、function，如果非要表达式，可以在JSX外面使用。
 
-案例：通过一个state来管理到底显示主标题函数子标题
+案例：通过一个state来管理到底显示主标题还是子标题
 1. 使用if表达式
 2. 使用switch表达式
 3. 使用三元运算符
@@ -115,6 +138,11 @@ class App extends React.Component {
                 title = <h3>There is no Title</h3>
                 break;
         }
+        return(
+            <div>
+                {title}
+            </div>
+        )
 
         // 解构
         const { titleShow, mainTitle, subTitle } = this.state;
@@ -203,8 +231,9 @@ const { abc, ...others } = this.props;
 ```javascript
 class ListItems extends React.Component {
     render() {
-        // 返回数据
+        // React组件也能够返回存储在数组中的一组数据
         // return [
+        //    需要设置key
         //     <li key="1">This is content 1.</li>,
         //     <li key="2">This is content 2.</li>,
         //     <li key="3">This is content 3.</li>
@@ -325,7 +354,7 @@ class Get extends React.Component{
   }
   
   render(){
-    return <tr></tr>
+    return this.state.component;
   }
 }
 
@@ -342,7 +371,7 @@ class App extends React.Component{
             <tr><td>正在加载中...</td></tr>
           }
         >
-          //传入一个函数给子组件
+          {/* 传入一个函数给子组件 */}
           {
             (data) => {
               return data.map(item => (

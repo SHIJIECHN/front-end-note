@@ -62,7 +62,7 @@ function Test2() {
 }
 ```
 
-## Refs转发机制
+## Refs转发到DOM组件机制
 在父组件中将子组件元素节点input清空并聚焦，需要获得子组件中input的DOM，因此需要将ref传递。
 
 > 如何将子节点的ref暴露给父组件？
@@ -133,9 +133,9 @@ function InputHoc(WrapperComponent) {
 ```
 
 
-## Refs转发机制的各种方式
+## 将DOM Refs暴露给父组件
 
-### 1. props包含有ref
+### 1. 使用refs转发机制
 React 16.2及以下Refs转发。
 ```javascript
 // 1. 创建ref对象
@@ -154,14 +154,21 @@ class MyInput extends React.Component {
 }
 ```
 
-### 2. 回调方式一
-在本组件中设置回调函数
+### 2. 回调Refs方式一
+使用ref回调函数，在实例的属性中存储对DOM节点的引用。在组建挂载时，会调用ref回调函数并传入DOM元素。在componentDidMount或componentDidUpdate触发前，保证refs一定是最新的。
 ```javascript
 class MyInput extends React.Component{
   constructor(props){
     super(props);
     this.myInput = null;
   }
+  this.focusInput = ()=>{
+    if(this.myInput) this.myInput.focus();
+  }
+  componentDidMount(){
+    this.focusInput();
+  }
+
   // 2. 回调函数会接收一个el的参数，这个参数就是节点
   setMyInput(el){
     this.myInput = el;
@@ -178,11 +185,27 @@ class MyInput extends React.Component{
 ### 3. 回调方式二
 在父组件中设置回调函数，父组件通过props的方式将ref传进去。
 ```javascript
-// App.jsx
-<MyInput inputRef={el => this.oInput = el}
+class MyInput extends React.Component {
+    render() {
+        return (
+            <input type="text" className="my-input" ref={this.props.InputRef} />
+        )
+    }
+}
 
-// MyInput.jsx
-<input type="text" ref={this.props.inputRef} />
+class App extends React.Component {
+    componentDidMount() {
+        console.log(this.oInput);
+    }
+    render() {
+        return (
+            <div>
+              {/* 把refs回调函数当做InputRef props传递给子组件 */}
+                <MyInput InputRef={el => this.oInput = el} />
+            </div>
+        )
+    }
+}
 ```
 
 
