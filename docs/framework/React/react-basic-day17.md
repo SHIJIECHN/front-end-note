@@ -44,7 +44,7 @@ class App extends React.Component {
 
 > 函数组件如何使用ref？
 
-使用useEffect。
+使用useRef。
 ```javascript
 function Test2() {
     // 1. 函数组件中使用useRef。声明divRef
