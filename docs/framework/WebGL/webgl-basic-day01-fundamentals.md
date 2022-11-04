@@ -9,12 +9,16 @@ title: WebGL2的基本原理
 WebGL是栅格化（rasterization）引擎。基于代码来画点、线条和三角形。
 
 着色器程序：
-- 点着色器（Vetex Shader）：计算点的位置。
-- 片段着色器（Fragment Shader）：计算当前正在绘制图形的每个像素的颜色。
+- 顶点着色器（Vetex Shader）：计算点的位置，保存在gl_Position中。
+- 片段着色器（Fragment Shader）：计算当前正在绘制图形的每个像素的颜色。保存在gl_FragColor中。
 
 WebGL关注：
-1. 剪辑空间坐标（Clip space coordinates）-- 点着色器提供剪辑空间坐标
+1. 剪辑空间坐标（Clip space coordinates）-- 顶点着色器提供剪辑空间坐标。
 2. 颜色 -- 片段着色器提供颜色
+
+> 什么是剪辑空间坐标？
+
+WebGL使用的缩放空间坐标系。顶点着色器将输入的顶点从原始坐标系转换到剪辑空间坐标系，并将变换后的顶点值保存在特殊变量gl_Position中。每个轴的范围是-1.0~1.0。
 
 
 ## 创建着色器(WebGLShader)对象
@@ -24,6 +28,7 @@ WebGL关注：
 1. 使用createShader()创建着色器
 2. 通过shaderSource()连接GLSL源代码
 3. 通过compileShader()完成着色器编译
+4. 为了检查编译是否成功，将检查着色器参数gl_COMPILE_STATUS状态，通过gl.getShaderParameter()获得它的值，并制定着色器和想要检查的参数的名字。
 
 ```javascript
 /**
@@ -40,7 +45,7 @@ function createShader(gl, type, source) {
   gl.shaderSource(shader, source);
   // 3. 编译一个GLSL着色器，使其成为二进制数据，然后可以被WebGLProgram对象所使用
   gl.compileShader(shader);
-  // 检测是否编译成功
+  // 4. 检测是否编译成功。
   const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
   if (success) {
     return shader;
@@ -86,4 +91,31 @@ function createProgram(gl, vertexShader, fragmentShader) {
   gl.deleteProgram(program);
 }
 ```
+
+
+## 重置画布尺寸
+每个画布有两个尺寸：
+1. drawingbuffer的尺寸：表示画布中有多少个像素
+2. 画布显示的尺寸：CSS决定。
+
+drawingbuffer的尺寸设置方式：
+1. 使用HTML标签插入样式
+2. JavaScript代码设置
+
+如果没有使用CSS影响到画布尺寸，画布显示尺寸则和drawingbuffer尺寸相同。
+
+设置画布尺寸时400x300，drawingbuffer是10x15
+```javascript
+<canvas
+    id="c"
+    width="10"
+    height="15"
+    style="width: 400px; height: 300px;"
+></canvas>
+```
+
+## 如何工作的
+CPU做两部分事情：
+1. 第一部分是如何处理顶点（数据流），变成裁剪空间节点
+2. 第二部分是基于第一部分的结果绘制像素
 
