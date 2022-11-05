@@ -1,10 +1,10 @@
 ---
 autoGroup-2: Hook
 sidebarDepth: 3
-title: todoList事件待办
+title: 案例合集
 ---
 
-## 案例：事件待办
+## 案例1：事件待办
 
 **写法**
 
@@ -36,3 +36,10 @@ title: todoList事件待办
 - Modal模态框插槽的应用
 - useEffect的使用
 
+## 案例2：UI组件封装
+封装三种组件：
+- 按钮
+- 多选框
+- 列表多选框
+  
+<img :src="$withBase('/framework/React/UI.jpg')" alt="" />
