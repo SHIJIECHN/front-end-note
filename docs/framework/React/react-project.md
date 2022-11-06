@@ -4,6 +4,27 @@ sidebarDepth: 3
 title: 项目案例
 ---
 
+## koa + puppeteer
+任务：
+1. 爬取页面数据并上传到MySQL中
+2. 图片资源全部上传七牛，程序自动上传
+3. 利用koa2做服务端将页面做出来
+4. 建立一个后台管理课程和管理爬虫
+5. 爬虫接口管理
+
+### 1. 实现爬虫
+```javascript
+// koa生成器生成项目
+koa crawler
+// 安装依赖
+cd crawler && npm install
+```
+
+爬虫库：puppeteer
+1. puppeteer是NodeJS的一个库，专门提供爬页面的库。利用Chromium来开启一个浏览器，把url地址放到浏览器中进行页面分析，这个过程就是爬取的过程。
+2. 
+
+
 ## React + Koa2打造『JS++官网管理后台』
 
 ### 1. Redis
