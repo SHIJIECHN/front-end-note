@@ -105,3 +105,81 @@ gl.enableVertexAttribArray(colorPostionAttributeLocation);
 - set...方法能够查询uniform的位置值并设置它的值
 
 
+## 纹理
+纹理是一个2D图片，可以用来添加物体的细节。
+
+纹理坐标（Texture Coordinate）：用来标明从纹理图像哪个部分采样，之后在图形的其他片段上进行片段插值（Fragment Interpolation）。范围通常是（0，0）到（1，1）。
+
+采样（Sample）：使用纹理坐标获取纹理颜色叫做采样。
+
+### 1. 纹理环绕方式
+```javascript
+// 设置纹理贴图填充方式(纹理贴图像素尺寸大于顶点绘制区域像素尺寸)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+/**
+ * 参数1：纹理目标。使用2D纹理，因此纹理目标为gl.TEXTURE_2D
+ * 参数2：指定设置的选项和应用的纹理轴
+ * 参数3：环绕方式
+ */
+```
+如果选择环绕方式为gl.CLAMP_TO_BORDER，还需要指定边缘的颜色
+```javascript
+const borderColor = [1, 1, 0, 1];
+gl.textParameterf(gl.TEXTURE_2D, gl.TEXTURE_BORDER_COLOR, borderColor);
+```
+
+### 2. 纹理过滤
+纹理像素（Texture Pixel，也叫Texel）。gl.NEAREST（邻近过滤）和gl.LINEAR（线性过滤）。
+
+注意不要和纹理坐标搞混，纹理坐标是你给模型顶点设置的那个数组，WebGL以这个顶点的纹理坐标数据去查找图像上的像素，然后进行采样提取纹理像素的颜色。
+
+```javascript
+// 为图像放大和缩小指定过滤方式
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+```
+
+### 3. 多级渐远纹理
+距离观察者的距离超过一定的阈值，会使用不同的多级渐远纹理。
+```javascript
+// 多级渐远效果处理函数
+gl.generateMipmap(target)
+
+// 多级渐远纹理层之间过滤方式
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+```
+注意：多级渐远纹理主要是使用在纹理被缩小的情况下，纹理放大不会使用多级渐远纹理。
+
+
+### 4. 加载与纹理创建
+
+```javascript
+// 创建一个纹理对象
+const texture = gl.createTexture();
+// 绑定纹理
+gl.bindTexture(gl.TEXTURE_2D, texture);
+// 为当前绑定的纹理对象设置环绕、过滤方式
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);   
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+// 记载并生成纹理
+
+/**
+ * 将载入图片数据生成一个纹理，通过gl.textImage2D来生成
+ * 参数1：纹理目标。gl.TEXTURE_2D意味着生成与当前绑定的纹理对象在同一个目标上的纹理
+ * 参数2：多级渐远的级别。0就是基本级别。
+ * 参数3：纹理储存为何种方式
+ * 参数4：最终的纹理的宽度
+ * 参数5：最终的纹理的高度
+ * 参数6：总为0.历史遗留问题。
+ * 参数7和参数8：定义源图的格式和数据类型
+ * 参数9：原图数据。
+ */
+gl.textImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+// 执行了gl.textImage2D函数，图像只有基本急别的纹理被加载了
+// 需要使用gl.generateMipmap为当前绑定的纹理自动生成所需要的多渐远纹理
+gl.generateMipmap(gl.TEXTURE_2D);
+```
