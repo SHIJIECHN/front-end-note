@@ -150,14 +150,6 @@ gl.drawArrays(primitiveType, offset, count);
 ```
 
 ### 7. 画布处理
-全屏展示，CSS设置canvas画布大小
-```css
-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
-}
-```
 将像素转换为分辨率
 ```javascript
 const vertexShaderResource = `#version 300 es
@@ -205,10 +197,30 @@ gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 drawingbuffer的尺寸设置方式：
 1. 使用HTML标签插入样式
 2. JavaScript代码设置
+```javascript
+// 方式1： 使用HTML标签插入样式
+<canvas id="c" width="400" height="300"></canvas>
+// 方式2：JavaScript代码设置
+const canvas = document.querySelector('#c')
+canvas.width = 400
+canvas.height = 300
+```
+画布显示的尺寸设置方式：通过css设置
+```css
+canvas {
+  width: 100vw;
+  height: 100vh;
+}
+/* 或者 */
+#c {
+  width: 100vw;
+  height: 100vh;
+}
+```
 
 如果没有使用CSS影响到画布尺寸，画布显示尺寸则和drawingbuffer尺寸相同。
 
-设置画布尺寸时400x300，drawingbuffer是10x15
+设置画布尺寸时400x300，drawingbuffer是10x15。因为浏览器得到10\*15像素的画布，将它拉伸到400\*300像素，然后在拉伸的过程中进行了插值。
 ```javascript
 <canvas
     id="c"
@@ -218,11 +230,175 @@ drawingbuffer的尺寸设置方式：
 ></canvas>
 ```
 
+### 使用CSS使画布充满整个窗口
+要使画布铺满整个窗口，只需要将drawingBuffer的尺寸设置为浏览器拉伸后的画布尺寸。
+
+clientWidth, ClientHeight 返回元素的大小（CSS像素）。
+
+如果不给canvas设置width、height属性，则默认width为300px、height为150px。
+
+使用resizeCanvasToDisplaySize函数调整画布大小
+```js
+// 检查该元素正在显示的大小，然后调整绘图缓冲区大小一匹配
+  function resizeCanvasToDisplaySize(canvas) {
+    // 获取浏览器显示的画布的CSS像素值
+    const displayWidth = canvas.clientWidth,
+      displayHeight = canvas.clientHeight;
+
+    // console.log(displayWidth, displayHeight); // 浏览器可视窗口的宽高 1258 934
+    // console.log(canvas.width, canvas.height); // 300 150
+
+    // 检查画布大小是否相同
+    const needResize = canvas.width !== displayWidth || canvas.height !== displayHeight;
+    if (needResize) {
+      // 使画布大小相同
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+    }
+    return needResize;
+  }
+```
+线没有覆盖整个区域。为什么？
+```javascript
+// 重置画布大小需要告诉WebGL新的视域设置
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+```
+
+
 ## 如何工作的
 CPU做两部分事情：
 1. 第一部分是如何处理顶点（数据流），变成裁剪空间节点
 2. 第二部分是基于第一部分的结果绘制像素
 
+> 缓冲区做什么？
+
+缓冲区是将顶点和将每个顶点数据传给GPU的方法。
+- gl.createBuffer创建一个缓冲区
+- gl.bindBuffer将缓冲区设置为正在处理的缓冲区
+- gl.bufferData将数据赋值到当前缓冲区中
+
+> 属性命令做什么？
+
+数据进入缓冲区后，需要告诉WebGL如何获取数据并将其提供给顶点着色器的属性。
+1. 首先要问WebGL给它分配的属性的位置
+```js
+var positionLocation = gl.getAttribLocation(program, "a_position");
+var colorLocation = gl.getAttribLocation(program, "a_color");
+```
+2. 告诉WebGL我们想要从缓冲区取数据
+```javascript
+gl.enableVertexAttribArray(location);
+```
+3. 告诉WebGL如何读取数据：从最后调用gl.bindBuffer绑定的缓冲区中获取数据
+```javascript
+gl.vertexAttribPointer(
+  location,
+  numComponents,
+  typeOfData,
+  normalizeFlag,
+  strideToNextPieceOfData,
+  offsetIntoBuffer);
+```
+
+每种数据类型使用1个缓冲区，则步长和偏移量都可以始终为0。
+- 步长0表示“使用与类型和大小匹配的步长。
+- 偏移量0表示从缓冲区的开头开始。
+
+## 着色器与GLSL
+
+### 1. 点着色器
+着色器需要的数据来源有三种方式：
+1. 属性（从缓冲区取数据）
+2. Uniform（在单词绘制过程中，它的值对所有顶点都是一样的）
+3. 纹理（来自pixels/texels的数据）
+
+#### 1.1 属性
+点着色器获取数据的最常见方法是通过缓冲区和属性。
+
+属性类型可以是 float, vec2, vec3, vec4, mat2, mat3, mat4, int, ivec2, ivec3, ivec4, uint, uvec2, uvec3, uvec4.
+```javascript
+// 1. 创建缓冲区
+const buffer = gl.createBuffer();
+// 2. 把数据放入缓冲区
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.bind(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+// 3. 在着色器中查找属性的位置
+const positionLoc = gl.getAttribLocation(someShaderProgram, 'a_position');
+// 4. 如何将数据从缓冲区中取出并放入属性中
+gl.enableVertexAttribArray(positionLoc);
+const numComponents = 3; //(x,y,x)
+const type = gl.FLOAT;
+const normalize = false;
+const stride = 0;
+const offset = 0;
+gl.vertexAttribPointer(positionLoc, numComponents, type, normalize, stride, offset);
+```
+
+#### 1.2 uniform
+对于任何顶点来说，在调用着色器的时候，uniform的值都是一样的。
+```javascript
+// 1. 查找uniform的位置
+const offsetLoc = gl.getUniformLocation(someProgram, 'u_offset');
+// 2. 绘制之前给uniform赋值
+gl.uniform4fv(offsetLoc, [1,0,0,0]);
+```
+
+### 2. 片段着色器
+片段着色器任务是给栅格化的像素提供颜色。片段着色器获取数据的三种方式：
+1. Uniform
+2. 纹理
+3. Varyings（来自点着色器的数据或插值的数据）
+
+#### 2.1 纹理
+从着色器的纹理获取值，创建一个sampler2D的Uniform并使用GLSL函数texture从中提取一个值。
+```javascript
+uniform sampler2D u_texture;
+out vec4 outColor;
+
+void main(){
+  vec2 texcoord = vec2(0.5, 0.5);
+  outColor = texture(u_texture, textcoord);
+}
+```
+```javascript
+// 1. 创建数据并放入到纹理中去
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+const level = 0;
+const internalFormat = gl.RGBA;
+const width = 2;
+const height = 1;
+const border = 0; // 必须为0
+const format = gl.RGBA;
+const type = gl.UNSIGNED_BYTE;
+const data = new Unit8Array([255, 0, 0, 255, 0, 255, 0, 255]);
+gl.texImage2D(
+  gl.TEXTURE_2D,
+  level,
+  internalFormat,
+  width,
+  height,
+  border,
+  format,
+  type,
+  data);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+// 2. 在着色器程序中查找uniform的位置
+const someSampleLoc = gl.getUniformLocation(someProgram, 'u_texture');
+// 3. 将纹理绑定到纹理单元（unit）中去
+const unit = 5;
+gl.activeTexture(gl.TEXTURE0 + unit);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+// 4. 告诉着色器要绑定哪个单元（unit）到纹理中去
+gl.uniform1i(someSamplerLoc, unit);
+```
+
+#### 2.2 Varyings
+Varying是一种从点着色器到片段着色器传值的方式。
 
 
+## 图像处理
 
+enableVertexAttribArray: index out of range 错误。首先获取位置属性中，属性变量名是否正确。
+
+bindTexture: invalid target .texParameter: no texture bound to target错误。查看bindTexture(gl.TEXTURE_2D, texture)。两个参数是否正确。
