@@ -231,13 +231,27 @@ canvas {
 ```
 
 ### 使用CSS使画布充满整个窗口
-要使画布铺满整个窗口，只需要将drawingBuffer的尺寸设置为浏览器拉伸后的画布尺寸。
+要使画布铺满整个窗口，只需要将绘图缓冲区(drawingBuffer)的尺寸设置为浏览器拉伸后的画布尺寸。
 
 clientWidth, ClientHeight 返回元素的大小（CSS像素）。
 
 如果不给canvas设置width、height属性，则默认width为300px、height为150px。
 
-使用resizeCanvasToDisplaySize函数调整画布大小
+将画布充满窗口。通过css设置
+```css
+html, body {
+  height: 100%;
+  margin: 0;
+}
+/* 设置画布大小为视域大小 */
+#c {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+```
+
+使用resizeCanvasToDisplaySize函数将绘图缓冲区(drawingBuffer)调整与画布大小相同。
 ```js
 // 检查该元素正在显示的大小，然后调整绘图缓冲区大小一匹配
   function resizeCanvasToDisplaySize(canvas) {
@@ -263,7 +277,6 @@ clientWidth, ClientHeight 返回元素的大小（CSS像素）。
 // 重置画布大小需要告诉WebGL新的视域设置
 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 ```
-
 
 ## 如何工作的
 CPU做两部分事情：
