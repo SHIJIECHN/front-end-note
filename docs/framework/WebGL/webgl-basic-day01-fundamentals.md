@@ -415,3 +415,8 @@ Varying是一种从点着色器到片段着色器传值的方式。
 enableVertexAttribArray: index out of range 错误。首先获取位置属性中，属性变量名是否正确。
 
 bindTexture: invalid target .texParameter: no texture bound to target错误。查看bindTexture(gl.TEXTURE_2D, texture)。两个参数是否正确。
+
+卷积
+
+帧缓冲：给帧缓冲绑定一个纹理后，可以将渲染结果写入那个纹理。
+
