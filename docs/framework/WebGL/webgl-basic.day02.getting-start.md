@@ -108,9 +108,11 @@ gl.enableVertexAttribArray(colorPostionAttributeLocation);
 ## 纹理
 纹理是一个2D图片，可以用来添加物体的细节。
 
-纹理坐标（Texture Coordinate）：用来标明从纹理图像哪个部分采样，之后在图形的其他片段上进行片段插值（Fragment Interpolation）。范围通常是（0，0）到（1，1）。
+纹理坐标（Texture Coordinate）：每个顶点关联一个纹理坐标。用来标明从纹理图像哪个部分采样，之后在图形的其他片段上进行片段插值（Fragment Interpolation）。范围通常是（0，0）到（1，1）。
 
 采样（Sample）：使用纹理坐标获取纹理颜色叫做采样。
+
+> 如何对纹理进行采样？
 
 ### 1. 纹理环绕方式
 ```javascript
@@ -119,7 +121,7 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
 /**
  * 参数1：纹理目标。使用2D纹理，因此纹理目标为gl.TEXTURE_2D
- * 参数2：指定设置的选项和应用的纹理轴
+ * 参数2：指定设置的选项和应用的纹理轴。
  * 参数3：环绕方式
  */
 ```
@@ -130,6 +132,8 @@ gl.textParameterf(gl.TEXTURE_2D, gl.TEXTURE_BORDER_COLOR, borderColor);
 ```
 
 ### 2. 纹理过滤
+> 如何将纹理像素映射到纹理坐标？
+
 纹理像素（Texture Pixel，也叫Texel）。gl.NEAREST（邻近过滤）和gl.LINEAR（线性过滤）。
 
 注意不要和纹理坐标搞混，纹理坐标是你给模型顶点设置的那个数组，WebGL以这个顶点的纹理坐标数据去查找图像上的像素，然后进行采样提取纹理像素的颜色。
@@ -140,13 +144,14 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 ```
 
-### 3. 多级渐远纹理
+### 3. 多级渐远纹理(Mipmap)
 距离观察者的距离超过一定的阈值，会使用不同的多级渐远纹理。
+
 ```javascript
 // 多级渐远效果处理函数
 gl.generateMipmap(target)
 
-// 多级渐远纹理层之间过滤方式
+// 多级渐远纹理层之间过滤方式 gl.LINEAR_MIPMAP_LINEAR
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 ```
@@ -156,17 +161,15 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 ### 4. 加载与纹理创建
 
 ```javascript
-// 创建一个纹理对象
+// 1. 创建一个纹理对象
 const texture = gl.createTexture();
-// 绑定纹理
+// 2. 绑定纹理
 gl.bindTexture(gl.TEXTURE_2D, texture);
 // 为当前绑定的纹理对象设置环绕、过滤方式
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);   
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-// 记载并生成纹理
-
 /**
  * 将载入图片数据生成一个纹理，通过gl.textImage2D来生成
  * 参数1：纹理目标。gl.TEXTURE_2D意味着生成与当前绑定的纹理对象在同一个目标上的纹理
@@ -182,4 +185,34 @@ gl.textImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED
 // 执行了gl.textImage2D函数，图像只有基本急别的纹理被加载了
 // 需要使用gl.generateMipmap为当前绑定的纹理自动生成所需要的多渐远纹理
 gl.generateMipmap(gl.TEXTURE_2D);
+```
+
+注意，如果在缩小中使用过滤方式为gl.LINEAR_MIPMAP_LINEAR多级渐远纹理，则载入图片后一定要使用gl.generateMipmap，否则图片无法展示。如
+```javascript
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.textImage2D(...)
+gl.generateMipmap(gl.TEXTURE_2D);
+```
+
+### 5. 纹理传给片段着色器
+```javascript
+in vec2 TexCoord;
+// 采样器（Sampler）
+uniform sampler2D ourTexture
+
+void main(){
+  // texture函数使用之前设置的纹理参数对应的颜色值进行采样
+  FlagColor = texture(ourTexture, TexCoord);
+}
+```
+
+### 6. 纹理单元
+使用gl.uniform1i，可以给纹理采样器分配一个位置，这样能够在一个片段着色器中设置多个纹理。
+
+一个纹理的位置值通常称为一个纹理单元（Texture unit）。默认纹理单元是0，它是默认的激活纹理单元。
+
+纹理单元的目的让我们在着色器中可以使用多余一个纹理。可以一次绑定多个纹理。只要我们首先激活对应的纹理单元。
+```javascript
+gl.activeTexture(gl.TEXTURE0); // 在绑定之前激活纹理单元
+gl.bindTexture(gl.TEXTURE_2D, texture);
 ```
