@@ -249,7 +249,8 @@ alias: {
   'pages': paths.appSrc + '/pages',
   'components': paths.appSrc + '/components',
   'assets': paths.appSrc + '/assets',
-  'services': path.appSrc + '/services'
+  'services': paths.appSrc + '/services',
+  'utils': paths.appSrc + '/utils'
 },
 ```
 3. 安装react-router-dom
@@ -264,7 +265,6 @@ oneOf: [
     ]
   },
 ]
-
 ```
 
 ## 跨域
@@ -292,3 +292,17 @@ Set-Cookie: txclass.sid.sig=K4Z66auO_XF5-bFnaHJMfo4Cr6Y; path=/; expires=Thu, 24
 当时查看浏览器器Application/Cookies中查看并没有cookie。为什么？
 
 因为前后端分离时，浏览器和后端是不同源的，返回的头部包含Set-Cookie，但是后端不能操作写入Application/Cookies中。
+
+解决：前端axios请求参数配置：withCredentials: true, 请求携带cookie资质。后端也需要设置在不同源的情况下，也有权限设置cookie。
+```javascript
+// 跨域设置
+app.use(cors({
+  ...
+  // 设置credentials
+  credentials: true
+}))
+```
+
+## 接口
+1. /admin/login_action 登录
+2. 验证是否登录：/admin/login_check。只要携带了有效的cookie，就能访问session.userInfo，而不是去匹配cookie是否正确。
