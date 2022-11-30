@@ -258,3 +258,22 @@ gl.bindTexture(gl.TEXTURE_2D, texture);
 正射投影矩阵：直接将坐标映射到2D平面中。
 
 顶点着色器的输出要求所有的顶点都在裁剪空间内，OpenGL然后将裁剪坐标执行透视除法，从而将它们变换为标准化设备坐标。OpenGL会使用gl.viewPort内部的参数来将标准化设备坐标映射到屏幕坐标，每个坐标都关联了一个屏幕上的点（在我们的例子中是一个800x600的屏幕）。这个过程称为视口变换。
+
+
+## 摄像机
+摄像机在世界空间中的位置、观察的方向、一个指向它右侧的向量以及一个指向它上方的向量。
+
+摄像机位置：世界空间中一个指向摄像机位置的向量。
+摄像机方向：摄像机的位置指向原点，与指向Z轴的正向相反。场景远点减去摄像机位置。方向向量与摄像机方向相反。
+右轴：摄像机空间的X轴的正方向。向上向量(0,1,0)与方向向量叉乘。
+上轴：摄像机的正Y轴。右向量和方向向量叉乘。
+```javascript
+let cameraPos: vec3 = [0, 0, 3]; // 摄像机位置
+let cameraTarget: vec3 = [0, 0, 0]; // 场景原点，也就是目标
+let cameraDirection = vec3.normalize(vec3.create(), vec3.sub(vec3.create(), cameraPos, cameraTarget)); // 方向向量。沿着Z轴正向。摄像机空间的Z轴正向
+let up: vec3 = [0, 1, 0]; // 上向量
+let cameraRight = vec3.normalize(vec3.create(), vec3.cross(vec3.create(), up, cameraDirection)); // 右向量。摄像机空间的 X轴正向
+let cameraUp = vec3.cross(vec3.create(), cameraDirection, cameraRight); // 上轴。摄像机空间的Y轴正向
+```
+
+观察矩阵把所有世界坐标变换到观察空间中。mat4.lookAt会创建出一个观察矩阵
