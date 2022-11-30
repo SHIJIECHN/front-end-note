@@ -277,3 +277,77 @@ let cameraUp = vec3.cross(vec3.create(), cameraDirection, cameraRight); // 上�
 ```
 
 观察矩阵把所有世界坐标变换到观察空间中。mat4.lookAt会创建出一个观察矩阵
+
+## 基础光照
+冯氏光照模型（Phong Lighting Model）主要结构由3个分量组成：环境（Ambient）、漫反射（Diffuse）、镜面（Specular）光照。
+
+### 1. 环境光照
+把环境关照添加到物体：用光的颜色乘以一个很小的常量环境因子，再乘以物体的颜色。
+```javascript
+float ambientStrength = 0.1;
+vec3 ambient = ambientStrength * lightColor;
+```
+
+### 2. 漫反射关照
+光线是以声明角度接触到这个片段的。
+
+如果光线垂直于物体表面，这束光对物体影响会最大（最亮）。
+
+计算漫反射光照需要什么？
+
+- 法向量（Normal Vector）：垂直于片段表面的一个向量。
+- 定向的光线：光源的位置与片段的位置之间向量差的方向向量。
+
+由于片段着色器计算是在世界坐标中进行的，所以法向量也转换为空间坐标。
+
+法线矩阵（Normal Matrix）：将法向量转换到世界空间坐标。模型矩阵左上角3x3部分的逆矩阵的转置矩阵。
+
+如果物体有缩放操作，则需要法线矩阵乘以法向量。
+
+```javascript
+// vs
+Normal = mat3(transpose(inverse(model))) * aNormal;
+
+// fs
+vec3 norm = normalize(Normal); // 法线单位向量
+// 光的方向单位向量 = normalize(光源位置 - 片段位置)
+vec3 lightDir = normalize(lightPos - FragPos); 
+// 光源对当前片段实际的漫反射的影响
+float diff = max(dot(norm, lightDir), 0.0); 
+vec3 diffuse = diff * lightColor; // 乘以光的颜色，得到漫反射分量
+```
+
+### 3. 镜面光照
+取决于光的方向向量、物体的法向量、观察方向。
+
+镜面关照最强的地方就是我们看到表面上反射光的地方。
+
+根据法向量翻折入射光的方向来计算反射向量，然后计算反射向量与观察方向的角度差，夹角越小，镜面光的作用越大。
+
+```javascript
+float specularStrength = 0.5; // 镜面强度变量
+vec3 viewDir = normalize(viewPos - FragPos); // 视线的法线向量
+// 沿着法线轴的反射向量。reflect函数要求第一个向量是从光线指向片段位置的向量，lightDir是从片段指向光源。
+vec3 reflectDir = reflect(-lightDir, norm); 
+// 32是高光的反光度。dot(viewDir, reflectDir)视线方向与反射方向的点乘， max确保它不是负值
+float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+vec3 specalar = specularStrength * spec * lightColor; // 镜面分量
+```
+
+在顶点着色器中实现的冯氏光照模型叫做Gouraud着色(Gouraud Shading)，而不是冯氏着色(Phong Shading)。
+
+## 材质
+针对每种表面定义不同材质（Material）属性。
+
+当描述一个表面时，可以分别为三个光照分量定义一个材质颜色（Material Color）：环境光照（Ambient Lighting）、漫反射光照（Diffuse Lighting）、镜面光照（Specular Lighting）。
+```javascript
+#version 330 core
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess; // 反光度
+}; 
+
+uniform Material material;
+```

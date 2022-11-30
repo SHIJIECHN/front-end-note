@@ -303,6 +303,43 @@ app.use(cors({
 }))
 ```
 
+## history
+直接在Route中注册的组件，组件内部可以使用history
+```javascript
+// App.js
+<Router>
+  <Switch>
+    {/* 在组件LoginPage中可以使用history*/}
+    <Route component={LoginPage} path='/login' />
+    <Route component={IndexPage} path="/" />
+  </Switch>
+</Router>
+
+// Login.js
+render() {
+  // 只要在app.js注册过路由的组件，都会有history
+  const { history } = this.props;
+
+  return (
+    <div className='container'>
+      {/* 将history传递给子组件 */}
+      <Login history={history} />
+    </div>
+  )
+}
+```
+
+## 页面
+占整个页面
+```css
+html,
+body,
+#root,
+.container {
+  height: 100%;
+}
+```
+
 ## 接口
 1. /admin/login_action 登录
 2. 验证是否登录：/admin/login_check。只要携带了有效的cookie，就能访问session.userInfo，而不是去匹配cookie是否正确。
