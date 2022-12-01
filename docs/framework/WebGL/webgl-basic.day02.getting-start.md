@@ -341,13 +341,49 @@ vec3 specalar = specularStrength * spec * lightColor; // 镜面分量
 
 当描述一个表面时，可以分别为三个光照分量定义一个材质颜色（Material Color）：环境光照（Ambient Lighting）、漫反射光照（Diffuse Lighting）、镜面光照（Specular Lighting）。
 ```javascript
-#version 330 core
-struct Material {
+// 存储物体的材质属性
+struct Material{
+    vec3 ambient;// 环境关照
+    vec3 diffuse;// 漫反射光照
+    vec3 specular;// 镜面关照
+    float shininess;// 反光度
+};
+
+// 光照属性对各个光照分量的影响
+struct Light{
+    vec3 position;
+    
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-    float shininess; // 反光度
-}; 
-
-uniform Material material;
+};
 ```
+
+## 光照贴图
+漫反射和镜面光贴图（Map）。
+
+漫反射贴图（Diffuse Map）：表现了物体所有的漫反射颜色的纹理图像。
+
+:::tip
+错误： GL_INVALID_OPERATION: Uniform size does not match uniform method。
+
+检查uniform赋值是否正确，或者一个uniform多次赋值。某一次赋值不正确。
+:::
+
+
+## 投光物
+### 1. 定向光（Directional Light）
+光源处于无限远处。所有的光线都有着相同的方向，它与光源的位置没有有关系。
+
+使用一个光线方向向量而不是位置向量来模拟一个定向光。
+
+
+### 2. 点光源（Point Light）
+朝着所有方向发光，但是光线随着距离逐渐衰减。
+
+衰减（Attennuation）
+
+### 3. 聚光（Spotlight）
+位于环境中某个位置的光源，只朝一个特定方向而不是所有方向照射光线。
+
+采用一个世界空间位置、一个方向和一个切光角（Cutoff Angle）来表示。
