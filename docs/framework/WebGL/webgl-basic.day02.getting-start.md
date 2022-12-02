@@ -281,6 +281,8 @@ let cameraUp = vec3.cross(vec3.create(), cameraDirection, cameraRight); // 上�
 ## 基础光照
 冯氏光照模型（Phong Lighting Model）主要结构由3个分量组成：环境（Ambient）、漫反射（Diffuse）、镜面（Specular）光照。
 
+入射光的信息包括入射光的方向和颜色，而物体表面的信息包括表面固有颜色和反射特性。
+
 ### 1. 环境光照
 把环境关照添加到物体：用光的颜色乘以一个很小的常量环境因子，再乘以物体的颜色。
 ```javascript
@@ -316,6 +318,8 @@ vec3 lightDir = normalize(lightPos - FragPos);
 float diff = max(dot(norm, lightDir), 0.0); 
 vec3 diffuse = diff * lightColor; // 乘以光的颜色，得到漫反射分量
 ```
+
+漫反射光的颜色 = 入射光颜色 * 表面基地色 * cos入射角
 
 ### 3. 镜面光照
 取决于光的方向向量、物体的法向量、观察方向。
