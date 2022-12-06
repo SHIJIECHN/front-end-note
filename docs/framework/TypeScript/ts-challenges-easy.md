@@ -358,3 +358,12 @@ type cases = [
   Expect<Equal<MyParameters<typeof baz>, []>>,
 ]
 ```
+
+
+## 总结
+1. 限制A的取值: `A extends keyof B`。显示A的取值是B中的所有key。
+2. 生成一个仅包含A定义Key的类型：`[A in keyof B]: B[A]`。
+3. 范围限定可以放在泛型中，使用extends。
+4. 泛型中给默认值`type MyPick<T, K extends keyof T = keyof T>`,设置默认值`K extends keyof T = keyof T`，在不传入第二个参数时也可以使用。
+5. extends限定符也可以用于判断结果判断：T extends []。
+6. 
