@@ -4,7 +4,7 @@ sidebarDepth: 3
 title: Object Types（对象类型）
 ---
 
-## 1. 对象类型 
+## 对象类型 
 在JavaScript中，对数据进行分组和分发的最基础的方式是通过对象。在TypeScript中，我们通过对象类型（object types）来描述对象。
 
 对象类型可以是匿名的：
@@ -37,10 +37,10 @@ function greet(person: Person){
 ```
 以上三个例子，我们采用对象类型定义函数，对象类型包含属性name（必须是string类型）和age（必须是number）。
 
-## 2. 属性修饰符（Property Modifiers）
+## 属性修饰符（Property Modifiers）
 对象类型的每个属性都能够指定它的类型、属性是否可选、属性是否可读写等信息。
 
-### 2.1 可选属性（Optional Properties）
+### 1. 可选属性（Optional Properties）
 很多时候我们需要自己处理可能包含某个属性的对象。我们可以标记这些属性为可选，通过在属性名后添加（？）。
 ```typescript
 interface PaintOptions {
@@ -100,7 +100,7 @@ function draw({ shape: Shape, xPos: number = 100 /*...*/ }) {
 ```
 在对象解构语法中，shape：Shape表示是把shape的值赋值给局部变量Shape。xPos：number也是一样，会基于xPos创建一个名为number的变量。
 
-### 2.2 readonly属性（readonly Properties）
+### 2. readonly属性（readonly Properties）
 在TypeScript中，属性可以被标记为readonly，这不会改变运行时的任何行为，但是类型检测时，被标记为readonly的属性是不能被写入的。
 ```typescript
 interface SomeType{
@@ -160,7 +160,7 @@ writablePerson.age++;
 console.log(readonlyPerson.age); // 43
 ```
 
-### 2.3 索引签名（Index Signatures）
+### 3. 索引签名（Index Signatures）
 有时候并不能提前知道所有属性的名称，但是知道属性值类型。这种情况下就需要使用索引签名描述可能的值的类型。
 ```typescript
 interface StringArray {
@@ -175,7 +175,7 @@ const secondItem = myArray[1];
 
 一个索引签名的属性类型必须是string或者是number。
 
-虽然TypeScript可以同时支持string和number类型，但数字碎银的返回类型一定要是字符索引返回类型的子类型。因为当使用一个数字进行索引的时候，JavaScript实际上把它转成一个字符串。这就意味着使用数字100进行索引跟使用字符串100索引是一样的。
+虽然TypeScript可以同时支持string和number类型，但数字索引的返回类型一定要是字符索引返回类型的子类型。因为当使用一个数字进行索引的时候，JavaScript实际上把它转成一个字符串。这就意味着使用数字100进行索引跟使用字符串100索引是一样的。
 ```typescript
 interface Animal {
   name: string;
@@ -224,26 +224,7 @@ myArray[2] = 'Mallory';
 // Index signature in type 'ReadonlyStringArray' only permits reading.
 ```
 
-## 3. 属性继承（Extending Types）
-```typescript
-interface BasicAddress {
-  name?: string;
-  street: string;
-  city: string;
-  country: string;
-  postalCode: string;
-}
-
-interface AddressWithUnit {
-  name?: string;
-  unit: string;
-  street: string;
-  city: string;
-  country: string;
-  postCode: string
-}
-```
-
+## 属性继承（Extending Types）
 ```typescript
 interface BasicAddress {
   name?: string;
@@ -257,7 +238,7 @@ interface AddressWithUnit extends BasicAddress {
   unit: string;
 }
 ```
-
+接口可以继承多个类型：
 ```typescript
 interface Colorful {
   color: string;
@@ -275,7 +256,8 @@ const cc: ColorfulCircle = {
 }
 ```
 
-## 4. 交叉类型（intersection Types）
+## 交叉类型（intersection Types）
+交叉类型定义需要用到 & 操作符。
 ```typescript
 interface Colorful {
   color: string;
@@ -288,34 +270,8 @@ interface Circle {
 type ColorfulCircle = Colorful & Circle;
 ```
 
-```typescript
-interface Colorful {
-  color: string;
-}
-
-interface Circle {
-  radius: number;
-}
-
-function draw(circle: Colorful & Circle){
-  console.log(`Color was ${circle.color}`);
-  console.log(`Radius was ${circle.radius}`);
-}
-
-// okay
-draw({color: 'blue', radius: 42});
-
-// oops
-draw({color: 'red', raidius: 42});
-/**
- * Argument of type '{ color: string; raidius: number; }' is not 
- * assignable to parameter of type 'Colorful & Circle'.
-  Object literal may only specify known properties, but 'raidius' 
-  does not exist in type 'Colorful & Circle'. Did you mean to write 'radius'?
- */
-```
-
-## 5. 接口继承于交叉类型（Interface vs Intersection）
+## 接口继承于交叉类型（Interface vs Intersection）
+两种方式在合并类型上看起来很相似，但实际上有很大的不同。最原则性的不同就是在于冲突怎么处理。
 ```typescript
 interface Colorful {
   color: string
@@ -330,7 +286,7 @@ interface ColorfulSub extends Colorful {
  * Type 'number' is not assignable to type 'string'.
  */
 ```
-
+上面继承的方式导致编译错误。但是交叉类型不会。
 ```typescript
 interface Colorful {
   color: string
@@ -340,9 +296,11 @@ type ColorfulSub = Colorful &{
   color: number
 }
 // ColorfulSub: never
+// 意思是取得string和number的交集
 ```
 
-## 6. 泛型对象类型（Generic Object Types）
+## 泛型对象类型（Generic Object Types）
+使用类型断言。
 ```typescript
 interface Box {
   contents: unknown
@@ -358,13 +316,14 @@ if(typeof x.contents === 'string'){
 
 console.log((x.contents as string).toLowerCase());
 ```
-
+创建一个泛型，它声明了一个类型参数（type parameter）：
 ```typescript
 interface Box<Type>{
   content: Type
 }
+// 可以理解为：Box的Type就是contents拥有的类型Type。
 ```
-
+把 Box 想象成一个实际类型的模板，Type 就是一个占位符，可以被替代为具体的类型。当 TypeScript 看到 `Box<string>`，它就会替换为 `Box<Type>` 的 Type 为 string ，最后的结果就会变成 { contents: string }。换句话说，`Box<string>`和 StringBox 是一样的。
 ```typescript
 interface Box<Type>{
   contents: Type
@@ -384,26 +343,7 @@ let boxB: StringBox = {
 }
 boxB.contents; // (property) StringBox.contents: string
 ```
-
-```typescript
-interface Box<Type>{
-  contents: Type
-}
-
-interface Apple {
-  // ...
-}
-
-// Same as '{contents: Apple}'
-type AppleBox = Box<Apple>
-```
-
-```typescript
-function setContents<Type>(box: Box<Type>, newContents: Type){
-  box.contents = newContents
-}
-```
-
+类型别名也是可以使用泛型的。
 ```typescript
 interface Box<Type>{
   contents: Type
@@ -414,7 +354,7 @@ type Box<Type> = {
 }
 ```
 
-## 7. Array类型（The Array Type）
+## Array类型（The Array Type）
 ```typescript
 function doSomething(value: Array<string>){
   // ...
@@ -426,7 +366,30 @@ let myArrary: string[] = ['hello', 'world'];
 doSomething(myArrary);
 doSomething(new Array('hello', 'world'));
 ```
-## 8. ReadonlyArray类型（The ReadonlyArray Type）
+Array本身就是一个泛型
+```typescript
+interface Array<Type>{
+  /**
+   * Gets or sets the length of the array.
+   */
+  length: number;
+ 
+  /**
+   * Removes the last element from an array and returns it.
+   */
+  pop(): Type | undefined;
+ 
+  /**
+   * Appends new elements to an array, and returns the new length of the array.
+   */
+  push(...items: Type[]): number;
+ 
+  // ...
+}
+```
+
+## ReadonlyArray类型（The ReadonlyArray Type）
+可以描述数组不能被改变。
 ```typescript
 function doStuff(values: ReadonlyArray<string>){
   // We can read from 'values'...
@@ -438,9 +401,15 @@ function doStuff(values: ReadonlyArray<string>){
   // Property 'push' does not exist on type 'readonly string[]'
 }
 ```
+ReadonlyArray并不是一个我们可以用的构造器函数，然而我们可以直接把一个常规数组赋值给ReadonlyArray。
+```typescript
+const roArray: ReadonlyArray<string> = ["red", "green", "blue"];
+```
+`ReadonlyArray<Type>` 提供了更简短的写法 `readonly Type[]`.
 
+注意：Arrays 和 ReadonlyArray 并不能双向的赋值。
 
-## 8. 元组类型（Tuple Type）
+## 元组类型（Tuple Type）
 ```typescript
 type StringNumberPair = [string, number];
 
@@ -453,7 +422,6 @@ function doSomething(pair: [string, number]){
   const c = pair[2]; 
   // Tuple type '[string, number]' of length '2' has no element at index '2'.
 }
-
 
 doSomething(['hello', 42]);
 ```
