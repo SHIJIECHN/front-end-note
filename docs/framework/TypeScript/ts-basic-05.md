@@ -1,7 +1,7 @@
 ---
 autoGroup-1: Typescript
 sidebarDepth: 3
-title: 泛型
+title: Generics（泛型）
 ---
 
 ## 泛型初探
@@ -107,7 +107,8 @@ loggingIdentify(3);
 // 需要传入符合约束条件的值
 loggingIdentify({length: 10, value: 3});
 ```
-在泛型约束中使用类型参数（Using Type Parameters in Generic Constraints）
+
+## 在泛型约束中使用类型参数（Using Type Parameters in Generic Constraints）
 
 获取一个对象给定属性名的值
 ```typescript
@@ -123,6 +124,14 @@ let x = {
 getProperty(x, 'a');
 getProperty(x, 'm');
 // Argument of type '"m"' is not assignable to parameter of type '"a" | "b" | "c"'.
+```
+
+## 在泛型中使用类类型（Using Class Types in Generics）
+使用工厂模式创建实例的时候，有必要通过他们的构造函数推断出类的类型。
+```typescript
+function create<Type>(c: {new (): Type}): Type{
+  return new c(); 
+}
 ```
 
 

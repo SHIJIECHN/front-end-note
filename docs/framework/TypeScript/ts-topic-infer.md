@@ -7,14 +7,14 @@ title: infer关键字
 ## infer 
 infer关键字用于条件中的类型推导。
 ```typescript
-type ReturnType<T> = T ectends (...args: any[]) => infer R ? R : any
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any
 ```
-如果T继承了(...args: any[]) => any类型，则返回类型， 否则返回any。其中R被定义在extends (...args: any[]) => infer R 中，即R是熊传入参数类型中推导出来的。
+如果T继承了(...args: any[]) => any类型，则返回类型， 否则返回any。其中R被定义在extends (...args: any[]) => infer R 中，即R是通过传入参数类型中推导出来的。
 
 ## 需求角度理解infer
 场景：实现一个函数，接收一个数组，返回第一项
 ```typescript
-type GetFirstParamType<T> = T extends (...args: infer R) => any ?
+type GetFirstParamType<T> = T extends (...args: infer R) => any ? R[0] : any;
 ```
 
 ## 设计角度理解infer

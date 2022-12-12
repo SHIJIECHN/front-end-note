@@ -5,7 +5,7 @@ title: keyof操作符
 ---
 
 ## keyof操作符
-对一个对象类型使用keyof操作符，会返回该对象属性名组成的一个字符串或者数字字面量的联合。
+对一个**对象类型**使用keyof操作符，会返回该对象属性名组成的一个字符串或者数字字面量的联合。
 ```typescript
 type Point = { x: number; y: number};
 type P = keyof Point; // P 等同于 "x" | "y"
@@ -34,6 +34,7 @@ const NumericObject = {
 
 type result = keyof typeof NumericObject
 
+// 对对象使用typeof返回结果：
 // typeof NumbericObject 的结果为：
 // {
 //   1: string;
@@ -65,12 +66,13 @@ function useKey<T, K extends keyof T>(o: T, k: K){
   // Type 'string | number | symbol' is not assignable to type 'string'.
 }
 
-// 使用Extract
+// 去掉上面报错的方式：
+// 1. 使用Extract：确定只使用字符串类型的属性名
 function useKey<T, K extends Extract< keyof T, string>>(o: T, k: K){
   var name: string = k;
 }
 
-// 修改name的类型
+// 2. 修改name的类型：处理所有的属性名
 function useKey<T, K extends keyof T>(o: T, k: K){
   var name: string | number | symbol = k;
 }
@@ -102,3 +104,7 @@ interface Person {
 type result = keyof Person;
 // type result = "name"
 ```
+
+## 总结
+1. 对对象类型（数字、Symbol、字符串为键值）使用keyof。返回该对象属性名组成的一个字符串或数字字面量的联合
+2. 当对对象使用keyof时，需要先使用typeof，再使用keyof。对type、interface接口、类不需要使用typeof

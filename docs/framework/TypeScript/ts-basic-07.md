@@ -21,6 +21,7 @@ function f(){
 type P = ReturnType<f>;
 // 'f' refers to a value, but is being used as a type here. Did you mean 'typeof f'?
 
+// 值（values）和类型（types）不是一种东西，为了获取值f，也就是函数f的类型，需要使用typeof
 type P = ReturnType<typeof f>;
 // type P = {
 //   x: number;
@@ -29,7 +30,7 @@ type P = ReturnType<typeof f>;
 ```
 
 ## 限制（Linitations）
-在Typescript中，只有对标识符（比如变量名）或者他们的属性使用typeof才是合法的
+在Typescript中，只有对**标识符**（比如变量名）或者他们的**属性**使用typeof才是合法的
 ```typescript
 declare const msgbox: () => boolean
 
@@ -113,3 +114,55 @@ const a:result = {
 type result = keyof typeof UserResponse;
 // type result = "No" | "Yes"
 ```
+
+## const 断言
+使用const断言构造新的字面量表达式时，我们可以向编程语言发出一下信号：
+1. 表达式中的任何字面量类型都不应该被扩展
+2. 对象字面量的属性属性，将使用readonly修饰
+3. 数组字面量将变成readonly元组
+
+```typescript
+let x = "hello" as const;
+type X = typeof x; // type X = "hello"
+
+let y = [10, 20] as const;
+type Y = typeof y; // type Y = readonly [10, 20]
+
+let z = { text: "hello" } as const;
+type Z = typeof z; // let z: { readonly text: "hello"; }
+```
+数组字面量应用const断言后，它将变成readonly元组，之后还可以通过typeof操作符获取元组中元素值的联合类型
+```typescript
+type Data = typeof y[number]; // type Data = 10 | 20
+```
+
+注意事项：
+1. const断言只适用于简单的字面量表达式
+2. const上下文立即将表达式转为为完全不可变
+```typescript
+// 1
+// A 'const' assertions can only be applied to references to enum members, 
+// or string, number, boolean, array, or object literals.
+let a = (Math.random() < 0.5 ? 0 : 1) as const; // error
+let b = Math.random() < 0.5 ? 0 as const :
+    1 as const; // let b: 0 | 1
+
+// 2
+let arr = [1, 2, 3, 4];
+let foo = {
+    name: "foo",
+    contents: arr,
+} as const;
+
+foo.name = "bar";   // error! Cannot assign to 'name' because it is a read-only property
+foo.contents = [];  // error! Cannot assign to 'name' because it is a read-only property
+
+foo.contents.push(5); // ...works!
+```
+
+## 总结
+1. 搭配`ReturnType<T>`使用，获取函数f的类型
+2. 只有标识符或者属性才能使用typeof
+3. 对对象、函数使用typeof，获取对象和函数的类型
+4. 对enum使用typeof，会被编译成对象。一般搭配keyof使用获取属性名的联合字符串
+5. const断言获取元组中元素值的联合类型

@@ -425,3 +425,4 @@ function doSomething(pair: [string, number]){
 
 doSomething(['hello', 42]);
 ```
+

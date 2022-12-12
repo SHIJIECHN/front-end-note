@@ -285,7 +285,7 @@ CPU做两部分事情：
 
 > 缓冲区做什么？
 
-缓冲区是将顶点和将每个顶点数据传给GPU的方法。
+缓冲区是将每个顶点数据传给GPU的方法。
 - gl.createBuffer创建一个缓冲区
 - gl.bindBuffer将缓冲区设置为正在处理的缓冲区
 - gl.bufferData将数据赋值到当前缓冲区中
@@ -298,11 +298,11 @@ CPU做两部分事情：
 var positionLocation = gl.getAttribLocation(program, "a_position");
 var colorLocation = gl.getAttribLocation(program, "a_color");
 ```
-2. 告诉WebGL我们想要从缓冲区取数据
+1. 告诉WebGL我们想要从缓冲区取数据
 ```javascript
 gl.enableVertexAttribArray(location);
 ```
-3. 告诉WebGL如何读取数据：从最后调用gl.bindBuffer绑定的缓冲区中获取数据
+1. 告诉WebGL如何读取数据：从最后调用gl.bindBuffer绑定的缓冲区中获取数据
 ```javascript
 gl.vertexAttribPointer(
   location,
