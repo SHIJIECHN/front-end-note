@@ -106,5 +106,6 @@ type result = keyof Person;
 ```
 
 ## 总结
-1. 对对象类型（数字、Symbol、字符串为键值）使用keyof。返回该对象属性名组成的一个字符串或数字字面量的联合
-2. 当对对象使用keyof时，需要先使用typeof，再使用keyof。对type、interface接口、类不需要使用typeof
+1. 对对象**类型**（数字、Symbol、字符串为键值）使用keyof。返回该对象属性名组成的一个字符串或数字字面量的联合
+2. 当对对象使用keyof时，需要先使用typeof，再使用keyof。
+3. 对type、interface接口、类不需要使用typeof，返回键名

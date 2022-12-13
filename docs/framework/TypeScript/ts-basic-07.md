@@ -163,6 +163,6 @@ foo.contents.push(5); // ...works!
 ## 总结
 1. 搭配`ReturnType<T>`使用，获取函数f的类型
 2. 只有标识符或者属性才能使用typeof
-3. 对对象、函数使用typeof，获取对象和函数的类型
+3. 对对象、函数使用typeof，获取对象和函数的类型；typeof 元组返回元组类型
 4. 对enum使用typeof，会被编译成对象。一般搭配keyof使用获取属性名的联合字符串
 5. const断言获取元组中元素值的联合类型

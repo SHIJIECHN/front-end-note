@@ -358,7 +358,8 @@ type cases = [
   Expect<Equal<MyParameters<typeof baz>, []>>,
 ]
 ```
-
+总结：
+1. T 是一个函数类型。通过infer R占位参数类型，此时R是一个元组
 
 ## 总结
 1. 限制A的取值: `A extends keyof B`。显示A的取值是B中的所有key。
@@ -366,8 +367,23 @@ type cases = [
 3. 范围限定可以放在泛型中，使用extends。
 4. 泛型中给默认值`type MyPick<T, K extends keyof T = keyof T>`,设置默认值`K extends keyof T = keyof T`，在不传入第二个参数时也可以使用。
 5. extends限定符也可以用于判断结果判断：T extends []。
-6. infer R临时变量
+6. infer R临时变量可以用于函数参数的类型、函数的返回值、数组的元素类型等
 7. `T['length']`对元组来说返回的是具体值，而对数组来说返回的是number
-8. 相信TS和JS一样写逻辑，比如扩展运算符使用`[...P]`、支持结构复制的语法、三目运算符递归
+8. 相信TS和JS一样写逻辑，比如扩展运算符使用`[...P]`、支持结构复制的语法、三目运算符递归。对于数组的方法concat、push、unshift等均只用扩展运算符。
 9. TS Equal函数的编写
-10. 
+```typescript
+declare let x: <T>()=> (T extends number ? 1 : 2);
+declare let y: <T>()=> (T extends string ? 1 : 2);
+
+const a = x<string>(); // 'a' is of type '2' because string doesn't extend number
+const b = x<number>(); // 'b' is of type '1'
+
+const c = y<string>(); // 'c' is of type '1' because string extend string
+const d = y<number>(); // 'd' is of type '2'
+
+y = x;  // 只有number和string完全相同才能赋值成功
+// According to type declaration of 'y' we know, that 'e' should be of type '1'
+// But we just assigned x to y, and we know that 'x' returns '2' in this scenario
+// That's not correct
+const e = y<string>(); // 'e' is of type '2'
+```
