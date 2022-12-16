@@ -241,5 +241,14 @@ const promise3 = new Promise<string>((resolve, reject) => {
 const p = PromiseAll([promise1, promise2, promise3] as const)
 ```
 ```typescript
+// 判断是不是Promise，如果是Promise则返回Promise的值类型
+type UnpromisifyType<PromiseType> = PromiseType extends Promise<infer ReturnType> ? ReturnType : PromiseType
 
+declare function PromiseAll<Values extends any[]>(values: readonly [...Values]): Promise<{
+  [Key in keyof Values]: Values[Key] extends Promise<infer PromiseType> ? PromiseType : UnpromisifyType<Values[Key]>
+}>
 ```
+总结：
+1. 获取Promise的返回值类型。
+2. `{ [K in keyof T]: T[K] }` 能同时兼容元组、数组与对象类型.
+

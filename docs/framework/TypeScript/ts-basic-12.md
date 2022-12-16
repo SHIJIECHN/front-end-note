@@ -6,8 +6,14 @@ title: 类
 
 ## 类（Classes）
 strictPropertyInitialization选项控制了类字段是否需要在构造函数里初始化。
+```typescript
+// 
+class GoodGreeter{
+name: string;
+}
+```
 
-构造函数（Constructors）：
+### 1.构造函数（Constructors）：
 ```typescript
 class Point {
   x:number;
@@ -30,7 +36,7 @@ class Point {
 1. 构造函数不能有类型参数
 2. 构造函数不能有返回类型注解，因为总是返回类实例类型
 
-super调用
+### 2.super调用
 ```typescript
 class Base {
   k = 4;
@@ -44,7 +50,7 @@ class Derived extends Base {
 }
 ```
 
-索引签名（Index Signatures）
+### 3.索引签名（Index Signatures）
 ```typescript
 class MyClass{
   [s: string] : boolean | ((s: string) => boolean);

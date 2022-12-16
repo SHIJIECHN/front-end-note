@@ -71,23 +71,45 @@ type User = Concrete<MaybeUser>;
 // }
 ```
 ## 通过as实现键名重新映射（Key Remapping via as）
+利用模板字面量类型，基于之前的属性名创建一个新的属性名
 ```typescript
+type Getters<Type> = {
+    [Property in keyof Type as `get${Capitalize<string & Property>}`]: () => Type[Property]
+};
+ 
+interface Person {
+    name: string;
+    age: number;
+    location: string;
+}
+ 
+type LazyPerson = Getters<Person>;
+
+// type LazyPerson = {
+//    getName: () => string;
+//    getAge: () => number;
+//    getLocation: () => string;
+// }
+```
+也可以利用条件类型返回一个never从而过滤某些属性
+```typescript
+// Remove the 'kind' property
 type RemoveKindField<Type> = {
-  [Property in keyof Type as Exclude<Property, 'kind'>]: Type[Property];
-}
-
+    [Property in keyof Type as Exclude<Property, "kind">]: Type[Property]
+};
+ 
 interface Circle {
-  kind: 'circle';
-  radius: number;
+    kind: "circle";
+    radius: number;
 }
-
+ 
 type KindlessCircle = RemoveKindField<Circle>;
 
 // type KindlessCircle = {
 //    radius: number;
 // }
 ```
-可以遍历任何联合类型，不仅仅是string | number | symbol这种联合类型
+也可以遍历任何联合类型，不仅仅是string | number | symbol这种联合类型
 ```typescript
 type EventConfig<Events extends {kind: string}> = {
   [E in Events as E["kind"]]: (event: E) => void;
