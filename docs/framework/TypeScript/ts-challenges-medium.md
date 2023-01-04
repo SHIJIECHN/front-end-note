@@ -252,3 +252,106 @@ declare function PromiseAll<Values extends any[]>(values: readonly [...Values]):
 1. 获取Promise的返回值类型。
 2. `{ [K in keyof T]: T[K] }` 能同时兼容元组、数组与对象类型.
 
+## Type Lookup
+根据某个属性在联合类型中查找类型。
+
+通过在联合类型Cat | Dog中搜索公共type字段来获取相应的类型。换句话说，在以下示例中，我们期望`LookUp<Dog | Cat, 'dog'>`获得Dog，`LookUp<Dog | Cat, 'cat'>`获得Cat。
+
+```typescript
+type LookUp<U extends { type: any }, T extends U['type']> = U extends { type: T } ? U : never
+
+interface Cat {
+  type: 'cat'
+  breeds: 'Abyssinian' | 'Shorthair' | 'Curl' | 'Bengal'
+}
+
+interface Dog {
+  type: 'dog'
+  breeds: 'Hound' | 'Brittany' | 'Bulldog' | 'Boxer'
+  color: 'brown' | 'white' | 'black'
+}
+
+type MyDog = LookUp<Cat | Dog, 'dog'> // expected to be `Dog`
+```
+总结：
+1. 泛型处使用`U extends { type: any }`和`T extends U['type']`，直接限定传入参数类型
+2. 之前定义的泛型 U 可以直接被后面的新泛型使用
+
+## Trim Left
+实现 `TrimLeft<T>` ，它接收确定的字符串类型并返回一个新的字符串，其中新返回的字符串删除了原字符串开头的空白字符串。
+
+```typescript
+type TrimLeft<T extends string> = T extends `${' ' | '\n' | '\t'}${infer R}` ? TrimLeft<R> : T
+
+type trimed = TrimLeft<'  Hello World  '> // expected to be 'Hello World  '
+```
+
+总结：
+1. 关键是使用infer在字符串内进行推导。
+
+## Trim
+实现Trim<T>，它是一个字符串类型，并返回一个新字符串，其中两端的空白符都已被删除。
+
+```typescript
+// 方法一
+type Trim<S extends string> = TrimLeft<TrimRight<S>>
+type TrimLeft<S extends string> = S extends `${' ' | '\n' | '\t'}${infer R}` ? TrimLeft<R> : S;
+type TrimRight<S extends string> = S extends `${infer R}${' ' | '\n' | '\t'}` ? TrimRight<R> : S;
+
+// 方法二
+type Trim<S extends string> = S extends `${' ' | '\n' | '\t'}${infer R}`|`${infer R}${' ' | '\n' | '\t'}` ? Trim<R> : S;
+```
+总结：
+1. extends后面还可以跟联合类型，这样任意一个匹配都会走到`Trim<R>`递归里
+
+## Captalize
+实现 `Capitalize<T>` 它将字符串的第一个字母转换为大写，其余字母保持原样。
+
+```typescript
+type MyCapitalize<S extends string> = S extends `${infer F}${infer E}` ? `${Uppercase<F>}${E}` : S;
+
+type capitalized = Capitalize<'hello world'> // expected to be 'Hello world'
+```
+总结：
+1. 需要分割字符串、数组时，使用infer
+
+## Replace
+实现 `Replace<S, From, To>` 将字符串 S 中的第一个子字符串 From 替换为 To 。
+
+```typescript
+type Replace<S extends string, From extends string, To extends string> = 
+  From extends '' 
+  ? S 
+  : (S extends `${infer A}${From}${infer B}` ? `${A}${To}${B}` : S);
+
+type replaced = Replace<'types are fun!', 'fun', 'awesome'> // 期望是 'types are awesome!'
+```
+
+## ReplaceAll
+实现 ReplaceAll<S, From, To> 将一个字符串 S 中的所有子字符串 From 替换为 To。
+
+```typescript
+
+type ReplaceAll<S extends string, From extends string, To extends string> = 
+  From extends '' 
+  ? S 
+  :(S extends `${infer A}${From}${infer B}` 
+    ? (From extends '' ? `${A}${To}${B}` : `${A}${To}${ReplaceAll<B, From, To>}`)
+    : S
+  );
+
+type replaced = ReplaceAll<'t y p e s', ' ', ''> // 期望是 'types'
+```
+
+## Append Argument
+实现一个泛型 `AppendArgument<Fn, A>`，对于给定的函数类型 Fn，以及一个任意类型 A，返回一个新的函数 G。G 拥有 Fn 的所有参数并在末尾追加类型为 A 的参数。
+
+```typescript
+type AppendArgument<F, A> = F extends (...args: infer T) => infer R ? (...args: [...T, A]) => R : F;
+
+
+type Fn = (a: number, b: string) => number
+
+type Result = AppendArgument<Fn, boolean> 
+// expected be (a: number, b: string, x: boolean) => number
+```
