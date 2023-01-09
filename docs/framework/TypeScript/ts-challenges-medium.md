@@ -73,6 +73,12 @@ todo.completed = true // OK
 ```
 ```typescript
 type MyReadonly2<T, K extends keyof T = keyof T> = Readonly<Pick<T, K>> & Omit<T, K>;
+-----------或者------------
+type MyReadonly2<T, K extends keyof T = keyof T> = {
+  readonly [P in K]: T[P] 
+} & {
+  [E in Exclude<keyof T, K>]: T[E]
+}
 
 // cases
 interface Todo {
@@ -94,7 +100,7 @@ type todo = MyReadonly2<Todo, 'title' | 'description'>
 ## Deep Readonly
 实现一个通用的`DeepReadonly<T>`，它将对象的每个参数及其子对象递归地设为只读。
 
-您可以假设在此挑战中我们仅处理对象。数组，函数，类等都无需考虑。但是，您仍然可以通过覆盖尽可能多的不同案例来挑战自己。
+假设我们仅处理对象。数组，函数，类等都无需考虑。
 
 例如
 ```ts
@@ -118,11 +124,9 @@ type Todo = DeepReadonly<X> // should be same as `Expected`
 ```
 ```typescript
 type DeepReadonly<T> = {
-  readonly [K in keyof T]: T[K] extends Function
-  ? T[K]
-  : T[K] extends Object
-  ? DeepReadonly<T[K]>
-  : T[K]
+  readonly [P in keyof T]: T[P] extends object 
+    ? (T[P] extends Function? T[P] : DeepReadonly<T[P]>) 
+    : T[P];
 }
 ```
 总结：
@@ -143,7 +147,7 @@ type Test = TupleToUnion<Arr> // expected to be '1' | '2' | '3'
 type TupleToUnion<T extends any[]> = T[number]
 ```
 总结：
-1. 元组类型使用number获取到元素
+1. 元组类型使用number获取到元素。`T[number]`可以访问数组的每一项。
 
 ## Chainable Options
 在 JavaScript 中我们经常会使用可串联（Chainable/Pipeline）的函数构造一个对象，但在 TypeScript 中，你能合理的给它赋上类型吗？
@@ -222,7 +226,7 @@ type re1 = Pop<arr1> // expected to be ['a', 'b', 'c']
 type re2 = Pop<arr2> // expected to be [3, 2]
 ```
 ```typescript
-type Pop<T> = T extends [...infer Q, infer P] ? Q : never
+type Pop<T> = T extends [...infer Q, infer P] ? Q : []
 ```
 总结：
 1. 数组的方法：push、concat、shift、unshift、pop等方法都用这种方法。
@@ -250,7 +254,15 @@ declare function PromiseAll<Values extends any[]>(values: readonly [...Values]):
 ```
 总结：
 1. 获取Promise的返回值类型。
-2. `{ [K in keyof T]: T[K] }` 能同时兼容元组、数组与对象类型.
+2. `{ [K in keyof T]: T[K] }` 能同时兼容元组、数组与对象类型。对于数组使用`[P in keyof T]` P是索引
+```typescript
+const arr = ['a', 'b', 'c', 1];
+type isArr<T> = {
+  [P in keyof T]: T[P]
+}
+type a1 = isArr<typeof arr>; // a1 = (string | number)[]
+// 获得的是数组元素的类型
+```
 
 ## Type Lookup
 根据某个属性在联合类型中查找类型。
@@ -354,4 +366,130 @@ type Fn = (a: number, b: string) => number
 
 type Result = AppendArgument<Fn, boolean> 
 // expected be (a: number, b: string, x: boolean) => number
+```
+
+## Permutation
+实现 Permutation 类型，将联合类型替换为可能的全排列
+
+```typescript
+type perm = Permutation<'A' | 'B' | 'C'>; // ['A', 'B', 'C'] | ['A', 'C', 'B'] | ['B', 'A', 'C'] | ['B', 'C', 'A'] | ['C', 'A', 'B'] | ['C', 'B', 'A']
+
+type Permutation<T, U = T> = [T] extends [never] ? [] : T extends U ? [T, ...Permutation<Exclude<U, T>>] : []
+```
+总结：
+为什么要用 `[T] extends [never]` 而不是 `T extends never` 呢？
+```typescript
+type X = never extends never ? 1 : 0 // 1
+
+type Custom<T> = T extends never ? 1 : 0
+type Y = Custom<never> // never
+```
+为什么用泛型后输出就变成 never 了呢？原因是TS在做T extends never时，会对联合类型进行分配，此时有一个特例，即当T = never时，会跳过分配直接返回T本身，所以三元判断代码实际上没有执行。`[T] extends [never]` 这种写法可以避免 TS 对联合类型进行分配，继而绕过上面的问题。
+
+## Length of String
+计算字符串的长度，类似于 String#length.
+
+```typescript
+type LengthOfString<S, N extends any[] = []> = S extends `${infer F}${infer E}` ? LengthOfString<E, [...N, F]> : N['length'];
+
+type len = LengthOfString<'kumiko'> // 6
+```
+思路就是，每次把字符串第一个字母拿出来放到数组N的第一项，直到字符串被取完，直接拿此时的数组长度。
+
+总结：
+1. TS访问数组类型的`[length]`属性可以拿到长度：`['a', 'b', 'c']['lenght']`为3
+2. infer指代字符串时，第一个指代指向第一个字母，第二个指向其余所有字母
+```typescript
+'abc' extends `${infer S}${infer E}` ? S : never // a
+```
+3. 递归时如果需要存储临时变量，用泛型默认值来存储。
+
+## Flatten
+写一个接受数组的类型，并且返回扁平化的数组类型。
+
+```typescript
+type flatten = Flatten<[1, 2, [3, 4], [[[5]]]]> // [1, 2, 3, 4, 5]
+
+
+type Flatten<T extends any[], Result extends any[] = []> = 
+  T extends [infer Start, ...infer Rest] 
+    ? (Start extends any[] ? Flatten<Rest, [...Result, ...Flatten<Start>]> : Flatten<Rest, [...Result, Start]>)
+    : Result;
+```
+Result存储打平后的结果，每次拿到数组第一个值，如果第一个值不是数组，则直接存进去继续递归，此时T就是剩余的Rest；如果第一个值数数组，则将其打平。关键点是 ...Start 打平后依然可能是数组，所以需要`...Flatten<Start>`。
+
+## Append to object
+实现一个为接口添加一个新字段的类型。该类型接收三个参数，返回带有新字段的接口类型。
+
+```typescript
+type Test = { id: '1' }
+type Result = AppendToObject<Test, 'value', 4> // expected to be { id: '1', value: 4 }
+
+
+type AppendToObject<T, U extends string | number | symbol, V> = {
+  [P in (keyof T) | U]: P extends keyof T ? T[P] : V
+}
+```
+
+
+## Absolute
+实现一个接收string,number或bigInt类型参数的Absolute类型,返回一个正数字符串。
+
+```typescript
+type Test = -100;
+type Result = Absolute<Test>; // expected to be "100"
+
+type Absolute<T extends number | string | bigint> = `${T}` extends `-${infer R}` ? `${R}` : `${T}`
+```
+为什么不用 T extends 来判断呢？因为 T 是数字，这样写无法匹配符号的字符串描述。
+
+## String to Union
+实现一个将接收到的String参数转换为一个字母Union的类型。
+
+```typescript
+type Test = '123';
+type Result = StringToUnion<Test>; // expected to be "1" | "2" | "3"
+
+type StringToUnion<T extends string, P = never> = T extends `${infer F}${infer R}` ? StringToUnion<R, P | F> : P;
+```
+
+## Merge
+将两个类型合并成一个类型，第二个类型的键会覆盖第一个类型的键。
+
+```ts
+type foo = {
+  name: string;
+  age: string;
+}
+
+type coo = {
+  age: number;
+  sex: string
+}
+
+type Result = Merge<foo,coo>; // expected to be {name: string, age: number, sex: string}
+
+type Merge<F extends object, S extends object> = {
+  [P in keyof F | keyof S]: P extends keyof S ? S[P]: (P extends keyof F ? F[P]: never) 
+}
+```
+
+## KebabCase
+FooBarBaz -> foo-bar-baz
+
+```typescript
+type FooBarBaz = KebabCase<"FooBarBaz">;
+const foobarbaz: FooBarBaz = "foo-bar-baz";
+
+type DoNothing = KebabCase<"do-nothing">;
+const doNothing: DoNothing = "do-nothing";
+
+
+type KebabCase<S, U extends string = ''> = S extends `${infer F}${infer R}` ? (
+  Lowercase<F> extends F ? KebabCase<R, `${U}${F}`> : KebabCase<R, `${U}-${Lowercase<F>}`>
+) : RemoveFirstHyphen<U>;
+
+// 把字符串第一个 - 去掉即可
+type RemoveFirstHyphen<S> = S extends `-${infer Rest}` ? Rest extends '' ? S : Rest : S
+// 如果Rest是空字符串，说明S是字符串‘-’，则返回S自身，否则返回Rest
 ```

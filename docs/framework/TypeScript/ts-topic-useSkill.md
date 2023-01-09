@@ -110,7 +110,7 @@ const person: PersonType = {
     girlName: 'Lily'
 }
 ```
-以上代码中，无论是UN特face的 ?: 或type的 |, 都不能解决需要，如何写呢？
+以上代码中，无论是interface的 ?: 或type的 |, 都不能解决需要，如何写呢？
 
 使用泛型约束：
 ```typescript
@@ -149,7 +149,7 @@ interface IPerson{
     }
 }
 ```
-上述代码中，乐意将info单独拿出来定义一个类型，然后再IPerson中使用，代码如下：
+上述代码中，将info单独拿出来定义一个类型，然后在IPerson中使用，代码如下：
 ```typescript
 interface IInfo {
     name: string,
@@ -160,7 +160,7 @@ interface IPerson {
     info: IInfo
 }
 ```
-> 注意，后面的写法虽然也完全乐意使用，但是info的语法提示稍微差一些。上面的写法会直接显示完整的类型结构，但是下面的写法只会显示IPerson.info: IInfo。
+> 注意，后面的写法虽然也完全可以使用，但是info的语法提示稍微差一些。上面的写法会直接显示完整的类型结构，但是下面的写法只会显示`IPerson.info: IInfo`。
 > 建议：如果不是属性数量过多、类型过于复杂，还是采用上面那种方式来定义类型。
 
 ## 类型查找+泛型+keyof
@@ -280,7 +280,7 @@ createPerson({name: 'coder'})
 ```
 
 ## Record
-约束对象属性名和值的类型
+约束对象属性名和值的类型。
 
 Record 是 TypeScript 内置的映射类型之一，将选定属性名(或者由枚举而产生的属性名)对应的值类型全部转化为指定类型，官方定义为：
 ```typescript
@@ -329,9 +329,9 @@ const toArray = <T extends {}>(element: T) => [element]; // 不报错
 ## ClassOf
 参数传入类而非实例，并且可以new该类。
 
-JavaScript 中并不存在真正 面对对象 中的 类，JavaScript 是动态语言，走的是原型链。
+JavaScript 中并不存在真正面对对象中的类，JavaScript 是动态语言，走的是原型链。
 
-在使用 高阶组件 或 工厂类 中，我们有时需要传入类本身，而非类的实例。
+在使用高阶组件或工厂类中，我们有时需要传入类本身，而非类的实例。
 
 ```typescript
 import React from 'react'
