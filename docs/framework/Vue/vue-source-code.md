@@ -83,7 +83,7 @@ function compiler(template, data) {
     let type = childNodes[i].nodeType; // 1 元素，3 文本节点
     if (type === 3) {
       // 文本节点，可以判断里面是否有{{}}插值
-      let txt = childNodes[i].nodeValue; // 该属性只有文本节点才有意义
+      let txt = childNodes[i].nodeValue; // 该属性只有节点才有意义
       // 有没有双花括号
       // replace 只要匹配到文本，后面的function就会执行一次。函数的返回值就是用来替换参数n匹配到的内容。
       // 参数0：匹配到的内容。如{{name}}，{{message}}。
@@ -147,7 +147,7 @@ function JGVue(options) {
   this._el = options.el;
 
   // 准备工作（准备模板）
-  this.$el = this._templateDOM = document.querySelector(this._el);
+  this._templateDOM = document.querySelector(this._el);
   this._parent = this._templateDOM.parentNode; // 父元素。用于update中替换
 
   // 渲染工作
@@ -413,7 +413,94 @@ console.log(vroot)
 2. 涉及模板、虚拟DOM
 
 
+# 函数柯里化
 
+参考资料
+- [函数式编程](https://llh911001.gitbooks.io/mostly-adequate-guide-chinese/content/)
 
-## 将虚拟应用于compiler中
+概念：
 
+1. 柯里化：一个函数原本有多个参数，之前传入**一个**参数，生成一个新函数，有新函数接收剩下的参数来运行得到结果。
+2. 偏函数：一个函数原本有多个参数，之前传入**一部分**参数，生成一个新函数，有新函数接收剩下的参数来运行得到结果。
+3. 高阶函数：一个函数参数是一个函数，该函数对参数这个函数进行加工，得到一个函数，这个加工用的函数就是高阶函数。
+
+为什么要使用柯里化？为了提升性能，使用柯里化可以缓存一部分能力。
+
+使用两个案例来说明：
+
+1. 判断元素
+2. 虚拟DOM的render方法
+
+## 1. 判断元素
+
+Vue 本质上是使用HTML的字符串作为模板的，将字符串的模板转换为AST，再转换为 VNode。
+- 模板 -> AST
+- AST -> VNode
+- VNode -> DOM
+
+哪个阶段最消耗性能？
+
+最消耗性能的是字符串解析（ 模板 -> AST ）
+
+例子： "1 + 2 * (3 + 4 * (5 + 6))"。写一个程序，解析这个表达式，得到结果（一般化）。
+
+我们一般会将这个表达式转换为“波兰式”表达式，然后使用栈结构来运算。
+
+在 Vue 中每一个标签可以是真正的HTML标签，也可以是自定义的组件，问怎么区分？
+
+在 Vue 源码中其实将所有可用的HTML标签已经存起来了，
+
+假设这里只考虑几个标签：
+```js
+let tags = 'div,p,a,img,ul,li'.split(',');
+```
+需要一个函数，判断一个标签名是否为内置的标签
+```javascript
+function isHTMLTag(tagName) {
+  tagName = tagName.toLowerCase();
+  // for (let i = 0; i < ... ) {
+  //   if (tagName === tags[i]) return true;
+  // }
+  if(tags.indexOf(tagName) > -1) return true;
+  return false;
+}
+```
+
+模板是任意编写的，可以写的很简单，也可以写的很复杂，indexOf内部也是要循环的。
+
+如果有6个内置标签，而模板中有10个标签需要判断，那么就需要执行60次循环。
+
+使用柯里化
+```javascript
+let tags = 'div,p,a,img,ul,li'.split(',');
+
+function makeMap(keys) {
+  let set = {}; // 集合，键值对 {div: true, p: true, a: true}
+  keys.forEach(key => set[key] = true);
+
+  return function (tagName) {
+    return !!set[tagName.toLowerCase()]; // !! 转换为boolean值
+  }
+}
+
+let isHTMLTag = makeMap(tags); // 返回的函数
+
+// 10 个标签需要判断，那么还有没有循环存在
+```
+
+## 2. 虚拟DOM的render方法
+
+思考：Vue 项目**模板转换为抽象语法树**需要执行几次？
+
+- 页面一开始需要渲染
+- 每一个属性（响应式）数据在发生变化的时候要渲染
+- watch，computed等等
+
+上面写的JGVue.prototype.compiler，每次需要渲染的时候，模板就会解析一次（注意，这里我们简化了解析方法）
+
+render的作用是将虚拟DOM转换为真正的DOM加到页面中
+
+- 虚拟DOM可以降级理解为抽象语法树（AST）
+- 一个项目运行的时候模板是不会变的，就表示AST是不会变的
+
+我们可以将代码进行优化，将虚拟DOM缓存起来，生成一个函数，函数只需要传入数据就可以得到真正的DOM。
