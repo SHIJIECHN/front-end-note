@@ -406,6 +406,44 @@ console.log(vroot)
 ```
 
 虚拟VNode如何生成真正的DOM？
+```javascript
+// 将VNode转换为真正的DOM
+function parseVNode(vnode) {
+  // 创建真实的 DOM
+  let type = vnode.type;
+  let _node = null;
+
+  if (type === 3) {
+    // 文本节点
+    return document.createTextNode(vnode.value); // 创建文本节点
+  } else if (type === 1) {
+    // 元素
+    _node = document.createElement(vnode.tag);
+
+    // 属性
+    let data = vnode.data; // 现在这个data是键值对
+    Object.keys(data).forEach((key) => {
+      let attrName = key;
+      let attrValue = data[key];
+      _node.setAttribute(attrName, attrValue);
+    })
+
+    // 子元素
+    let children = vnode.children;
+    children.forEach(subvnode => { // subNode是虚拟DOM类型
+      _node.appendChild(parseVNode(subvnode)); // 递归转换子元素（虚拟DOM）
+    })
+
+    return _node;
+  }
+}
+
+// 在真正的Vue中也是使用 递归 + 栈数据 类型
+let dom = parseVNode(vroot);
+
+// 要验证，只要将转换后的DOM打印出来看看与原来的DOM是不是一样
+console.log(dom);
+```
 
 
 总结：
@@ -470,7 +508,7 @@ function isHTMLTag(tagName) {
 
 如果有6个内置标签，而模板中有10个标签需要判断，那么就需要执行60次循环。
 
-使用柯里化
+使用柯里化。
 ```javascript
 let tags = 'div,p,a,img,ul,li'.split(',');
 
@@ -486,6 +524,16 @@ function makeMap(keys) {
 let isHTMLTag = makeMap(tags); // 返回的函数
 
 // 10 个标签需要判断，那么还有没有循环存在
+```
+makeMap(['div', 'p'])需要遍历这个数据生成键值对
+```javascript
+let set = {
+  'div': true,
+  'p': true
+}
+
+set['div']; // true
+set['Navigator']; // undefined -> false
 ```
 
 ## 2. 虚拟DOM的render方法
@@ -504,3 +552,282 @@ render的作用是将虚拟DOM转换为真正的DOM加到页面中
 - 一个项目运行的时候模板是不会变的，就表示AST是不会变的
 
 我们可以将代码进行优化，将虚拟DOM缓存起来，生成一个函数，函数只需要传入数据就可以得到真正的DOM。
+
+### 2.1 构造函数JGVue重写
+
+<img :src="$withBase('/framework/Vue/vue-source-code-01.png')" alt="" />
+
+说明：在真正的Vue中使用了二次提交的设计结构。
+
+1. 页面HTML DOM与虚拟DOM是一一对应的关系
+2. createRenderFn函数就是用来生成render函数的，同时缓存的AST
+3. render函数调用的时候，利用AST和数据结合生成带有数据的VNode
+4. update就是比较新数据VNode和旧VNode（diff），目的是更新旧VNode，从而更新HTML
+
+为什么不用新的VNode直接替换旧的VNode？
+
+因为页面的DOM与虚拟DOM是一一对应的关系，如果将新的VNode直接替换，则对应关系需要重新去处理，涉及到递归遍历的访问，非常消耗性能。虚拟DOM在diff的时候进行了一些优化，目的是减少比较、减少操作。
+
+```javascript
+function JGVue(options) {
+  this._data = options.data;
+  let elm = document.querySelector(options.el); // vue 中是字符串，案例是DOM元素
+  this._template = elm;
+  this._parent = elm.parentNode; // 父元素
+
+  this.mount(); // 挂载
+}
+
+/** 挂载 */
+JGVue.prototype.mount = function () {
+  // 需要提供一个render方法：生成虚拟DOM。render方法就是有缓存功能的
+  this.render = this.createRenderFn(); // 为什么采用这种方式？因为需要缓存虚拟DOM。只要调用render就意味着拿到虚拟DOM
+  // 将虚拟DOM转为真实DOM，并挂载到页面
+  this.mountComponent();
+}
+
+/** 挂载到页面*/
+JGVue.prototype.mountComponent = function () {
+  // 执行mountComponent()函数
+  let mount = () => { // 这里是一个函数，函数的this默认是全局对象，需要修改为JGVue
+    this.update(this.render()); // 渲染到页面上。this.render()执行后就会生成带有数据的虚拟DOM
+  }
+  mount.call(this); // 本质应该交给watcher来调用，但是还没有讲到这里
+
+  // 为什么不直接如下代码写法，而使用mount函数呢？
+  // this.update(this.render())
+  // 因为使用发布订阅模式，渲染和计算的行为应该交给watcher来完成
+}
+
+// 这里是生成render函数，目的是缓存抽象语法树（我们使用虚拟DOM来模拟）
+JGVue.prototype.createRenderFn = function () {
+  // 缓存 AST
+  let ast = getVNode(this._template); // VNode
+  // Vue：将AST+ data => VNode
+  // 案例：带有坑的VNode + data => 含有数据的VNode
+  return function render() {
+    // 将带坑的VNode转换为带数据的VNode
+    let _tmp = combine(ast, this._data);
+    return _tmp;
+  }
+}
+
+// 将虚拟DOM渲染到页面中：diff算法就在这里
+JGVue.prototype.update = function (vnode) {
+  // 简化，直接生成HTML DOM replaceChild 到页面中
+  // 父元素.replaceChild(新元素，旧元素);
+
+  // 新元素：虚拟DOM生成真正的DOM
+  let realDOM = parseVNode(vnode);
+  this._parent.replaceChild(realDOM, document.querySelector('#root'));
+  // 这个算法是不负责任的：
+  // 每次会将页面中的DOM全部替换
+}
+```
+为什么render方法没有写在原型上，而是写在mount中？
+
+因为创建vue实例的时候可以传入render函数，此时就会使用传入的render。它用于用户自定义生成虚拟DOM
+
+### 2.2 辅助函数
+
+1. VNode类用于构造虚拟DOM
+2. getVNode：从真正DOM -> VNode(带有坑)
+3. getValueByPath：访问对象任意层级的属性
+4. combine：带有坑的VNode + data => 有真正数据的VNode
+
+```javascript
+/** 虚拟DOM构造函数*/
+class VNode {
+  constructor(tag, data, value, type) {
+    this.tag = tag && tag.toLowerCase();
+    this.data = data;
+    this.value = value;
+    this.type = type;
+    this.children = [];
+  }
+
+  // 追加子元素
+  appendChild(vnode) {
+    this.children.push(vnode);
+  }
+}
+
+/** 由HTML DOM -> VNode: 将这个函数当作compiler函数，也就是编译成 AST 的函数 */
+function getVNode(node) {
+  let nodeType = node.nodeType; // 文本节点是value有值，元素节点是tag有值。nodeType主要用于区分这两种情况
+  let _vnode = null;
+  if (nodeType === 1) {
+    // 元素
+    let nodeName = node.nodeName; // tag 
+    let attrs = node.attributes; // 返回所有属性构成的伪数组
+    // 将伪数组转换成对象
+    let _attrObj = {};
+    for (let i = 0; i < attrs.length; i++) { // attrs[i] 属性节点（nodeType == 2)，有nodeName和nodeValue
+      _attrObj[attrs[i].nodeName] = attrs[i].nodeValue;
+    }
+
+    // 创建节点
+    _vnode = new VNode(nodeName, _attrObj, undefined, nodeType);
+
+    // 考虑 node（真正的DOM元素）的子元素
+    let childNodes = node.childNodes;
+    for (let i = 0; i < childNodes.length; i++) {
+      _vnode.appendChild(getVNode(childNodes[i])); // 递归
+    }
+
+  } else if (nodeType === 3) {
+    // 文本节点
+    _vnode = new VNode(undefined, undefined, node.nodeValue, nodeType)
+  }
+  // 没有直接使用else是因为实际情况下，还有可能是注释节点
+
+  return _vnode;
+
+}
+
+/** 根据路径访问对象成员 */
+function getValueByPath(obj, path) {
+  let paths = path.split('.'); // [xxx, yyy, zzz]
+  // 先取得obj.xxx, 再取得结果中的yyy，再取得结果中的 zzz
+  let res = obj;
+  let prop;
+  // paths.shift() 就是把它的最前面一项取出来
+  while (prop = paths.shift()) {
+    res = res[prop];
+  }
+  return res;
+}
+/** 将带有坑的vnode与数据data结合，得到填充数据的VNOde： 模拟 AST -> VNode*/
+let rkuohao = /\{\{(.+?)\}\}/g;
+function combine(vnode, data) {
+  let _type = vnode.type,
+    _data = vnode.data,
+    _value = vnode.value,
+    _tag = vnode.tag,
+    _children = vnode.children;
+
+  let _vnode = null;
+
+  if (_type === 3) { // 文本节点
+    // 对文本处理
+    _value = _value.replace(rkuohao, (_, g) => {
+      return getValueByPath(data, g.trim());
+    })
+
+    _vnode = new VNode(_tag, _data, _value, _type);
+
+  } else if (_type === 1) { // 元素节点
+    _vnode = new VNode(_tag, _data, _value, _type);
+    _children.forEach(_subvnode => _vnode.appendChild(combine(_subvnode, data)))
+  }
+  return _vnode;
+}
+// 将VNode转换为真正的DOM
+function parseVNode(vnode) {
+  // 创建真实的 DOM
+  let type = vnode.type;
+  let _node = null;
+
+  if (type === 3) {
+    // 文本节点
+    return document.createTextNode(vnode.value); // 创建文本节点
+  } else if (type === 1) {
+    // 元素
+    _node = document.createElement(vnode.tag);
+
+    // 属性
+    let data = vnode.data; // 现在这个data是键值对
+    Object.keys(data).forEach((key) => {
+      let attrName = key;
+      let attrValue = data[key];
+      _node.setAttribute(attrName, attrValue);
+    })
+
+    // 子元素
+    let children = vnode.children;
+    children.forEach(subvnode => { // subNode是虚拟DOM类型
+      _node.appendChild(parseVNode(subvnode)); // 递归转换子元素（虚拟DOM）
+    })
+
+    return _node;
+  }
+}
+```
+
+### 2.3 验证
+```js
+// 模板
+<div id="root">
+  <div class="c1">
+    <div title="t1" id="id">{{name}}</div>
+    <div title="t2">{{age}}</div>
+    <div title="t3">{{gender}}</div>
+    <ul>
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+    </ul>
+  </div>
+</div>
+
+// 创建应用
+let app = new JGVue({
+  el: '#root',
+  data: {
+    name: 'zhangsan',
+    age: 19,
+    gender: 'male'
+  }
+})
+```
+
+# 响应式原理
+
+- 我们在使用Vue时候，赋值属性获得属性都是直接使用的Vue实例
+- 我们在设置属性值的时候，页面的数据更新
+
+```javascript
+Object.defineProperty(对象，'设置什么属性名', {
+  writable: 
+  configable
+  enumerable // 属性是否可枚举，是不是可以被for-in取出来
+  set(){}  // 赋值触发
+  get(){} // 取值触发
+})
+```
+
+```js
+// 简化后的版本
+// 中间变量就是value，将变量作为函数的参数传入，那么这个参数就相当于是函数作用域中的局部变量
+// 函数相当于闭包的作用，在函数的内部形成了局部作用域
+function defineReactive(target, key, value, enumerable) {
+  // 函数内部就是一个局部作用域，这个value就只在函数内使用的变量（闭包）
+  // 即解决了属性访问安全的问题，又解决多个属性
+  Object.defineProperty(target, key, {
+    configurable: true,
+    enumerable: !!enumerable,
+
+    get() {
+      console.log(`读取o的${key}属性`); // 额外的操作
+      return value;
+    },
+    set(newVal) {
+      console.log(`设置o的${key}属性为：${newVal}`); // 额外的操作
+      value = newVal;
+    }
+  })
+}
+
+// 使用
+let o = {
+  name: 'Jim',
+  age: 19,
+  gender: '男'
+};
+
+// 将对象转换为响应式的
+let keys = Object.keys(o);
+for (let i = 0; i < keys.length; i++) {
+  defineReactive(o, keys[i], o[keys[i]], true);
+}
+```
