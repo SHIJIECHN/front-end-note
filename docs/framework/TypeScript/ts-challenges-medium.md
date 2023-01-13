@@ -339,6 +339,18 @@ type Replace<S extends string, From extends string, To extends string> =
 type replaced = Replace<'types are fun!', 'fun', 'awesome'> // 期望是 'types are awesome!'
 ```
 
+总结：
+1. 字符串分段：`${infer A}${From}${infer B}`
+```typescript
+// 1. S extends `${infer A}${infer B}` A是第一个元素，B是剩余的元素
+type Replace<S extends string, From extends string, To extends string> = S extends `${infer A}${infer B}` ? `${A}`: S;
+type a1 = Replace<'foobar', 'bar', 'foo'>; //  type a1 = 'f'
+
+// 2. S extends `${infer A}${From}${infer B}` A是From字符串前面的部分，B是剩余的后面的部分
+type Replace<S extends string, From extends string, To extends string> = S extends `${infer A}${From}${infer B}` ? `${A}`: S;
+type a2 = ReplaceAll<'foobar', 'bar', 'foo'>; // type a2 = 'foo'
+```
+
 ## ReplaceAll
 实现 ReplaceAll<S, From, To> 将一个字符串 S 中的所有子字符串 From 替换为 To。
 
@@ -418,6 +430,11 @@ type Flatten<T extends any[], Result extends any[] = []> =
 ```
 Result存储打平后的结果，每次拿到数组第一个值，如果第一个值不是数组，则直接存进去继续递归，此时T就是剩余的Rest；如果第一个值数数组，则将其打平。关键点是 ...Start 打平后依然可能是数组，所以需要`...Flatten<Start>`。
 
+```typescript
+(Start extends any[] ? Flatten<Rest, [...U, ...Flatten<Start>]> : Flatten<Rest, [...U, Start]>)
+```
+主要是为了区分Start是不是数组，如果是，则需要使用递归放到结果中，如果不是就直接拼接。
+
 ## Append to object
 实现一个为接口添加一个新字段的类型。该类型接收三个参数，返回带有新字段的接口类型。
 
@@ -431,7 +448,6 @@ type AppendToObject<T, U extends string | number | symbol, V> = {
 }
 ```
 
-
 ## Absolute
 实现一个接收string,number或bigInt类型参数的Absolute类型,返回一个正数字符串。
 
@@ -441,7 +457,10 @@ type Result = Absolute<Test>; // expected to be "100"
 
 type Absolute<T extends number | string | bigint> = `${T}` extends `-${infer R}` ? `${R}` : `${T}`
 ```
-为什么不用 T extends 来判断呢？因为 T 是数字，这样写无法匹配符号的字符串描述。
+
+总结：
+1. 为什么不用 T extends 来判断呢？因为 T 是数字，这样写无法匹配符号的字符串描述。
+2. T为数字转为字符串：T -> `${T}`
 
 ## String to Union
 实现一个将接收到的String参数转换为一个字母Union的类型。
@@ -493,3 +512,89 @@ type KebabCase<S, U extends string = ''> = S extends `${infer F}${infer R}` ? (
 type RemoveFirstHyphen<S> = S extends `-${infer Rest}` ? Rest extends '' ? S : Rest : S
 // 如果Rest是空字符串，说明S是字符串‘-’，则返回S自身，否则返回Rest
 ```
+
+## Diff
+获取两个接口类型中的差值属性。
+
+```typescript
+type Diff<A, B> = {
+  [P in Exclude<keyof A, keyof B> | Exclude<keyof B, keyof A>]:  P extends keyof A ? A[P] : (P extends keyof B ? B[P] : never)
+}
+
+type Foo = {
+  a: string;
+  b: number;
+}
+type Bar = {
+  a: string;
+  c: boolean
+}
+
+type Result1 = Diff<Foo,Bar> // { b: number, c: boolean }
+type Result2 = Diff<Bar,Foo> // { b: number, c: boolean }
+```
+总结：
+1. `Exclude<X, Y>`：存在于X不存在于Y
+
+## AnyOf
+类型接收一个数组，如果数组中任一个元素为真，则返回 true，否则返回 false。如果数组为空，返回 false。
+
+```typescript
+// 假值
+type Falsy = '' | false | undefined | null | 0 | [] | never | Record<PropertyKey, never>
+type AnyOf<T extends readonly any[]> = T extends Falsy[] ? false : true
+
+type Sample1 = AnyOf<[1, '', false, [], {}]> // expected to be true.
+type Sample2 = AnyOf<[0, '', false, [], {}]> // expected to be false.
+```
+总结：
+1. 主要类型空对象的表达方式：`{} -> Record<PropertyKey, never>`
+2. { a: 1 } extends {} 结果为真，因为 {} 并不表示空对象，而是表示所有对象类型
+
+## IsNever
+判断泛型是不是never，如果是就返回true，不是就返回false
+```typescript
+type IsNever<T> = [T] extends [never]? true : false
+
+type A = IsNever<never>  // expected to be true
+type B = IsNever<undefined> // expected to be false
+type C = IsNever<null> // expected to be false
+type D = IsNever<[]> // expected to be false
+type E = IsNever<number> // expected to be false
+```
+
+总结：
+1. never在泛型中不会触发extends判断，而是直接终结，致使判断无效。
+
+## IsUnion
+判断泛型T是否为联合类型，是就返回true，否则返回false。
+
+```typescript
+// 先判断A是不是never，是never返回true，不是never继续执行
+type IsUnion<A, B = A> = 
+  isNever<A> extends true 
+    ? false 
+    : ( A extends A 
+        ? (
+          [B] extends [A] ? false : true
+        )
+        : false
+    );
+
+type case1 = IsUnion<string>  // false
+type case2 = IsUnion<string|number>  // true
+type case3 = IsUnion<[string|number]>  // false
+```
+总结：
+1. 联合类型的两个特征
+   1. 在TS处理泛型为联合类型时进行分发处理，即将联合类型拆解为独立项一一进行判定，最后再用 | 连接
+   2. 用 `[]` 包裹联合类型可以规避分发的特性
+2. 如果泛型进行了分发就可以判断是联合类型，判断是否分发：
+```typescript
+// A 是 1 | 2
+A extends A
+// 分发结果为（1 extends 1 | 2）| （2 extends 1 | 2）
+// 第一个A都是联合类型中的某一项分别为1和2，第二个A一直是 1 | 2。使用 [] 包裹后可以判断与原始值是否相等，匹配不上，就说明产生了分发
+[A] extends [A] ? false : true
+```
+3. `type<X> = T extends ...`中extends前面的T不一定是传入的T，如果是联合类型的话，会分发为单个类型分别处理

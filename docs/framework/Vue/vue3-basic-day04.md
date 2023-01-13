@@ -329,5 +329,35 @@ v-if, v-show
 v-if 与 v-for同时存在于一个元素上的时候，v-if会首先执行
 
 # 列表渲染
+key的作用：当数据项顺序发生改变时，Vue不会随之移动DOM元素的顺序，而是就地更新每个元素，确保它们在原本指定的索引位置上渲。但只适用于列表渲染输出的结果不依赖子组件或者临时DOM状态的情况。为了给Vue一个提示，以便它可以跟踪每个节点的标识，从而重用和重新排序现有的元素，需要为每个元素对应的块提供一个唯一的key。
+
+key主要作为Vue的虚拟DOM算法提示，在比较新旧节点列表时用于识别vnode。
+
+问题：key的作用
+
+数组变化侦测：
+1. Vue能够侦听响应式数组的变更方法包括：push, pop, shift, unshift, splice, sort, reverse
+2. 其他数组方法会返回新的数组
+
+注意：在计算属性中使用reverse()和sort()时，需要先创建一个原数组的副本。
+```js
+return [...numbers].reverse()
+```
+
+# 事件处理
+内联处理器中调用方法
+```js
+// 1. 方法事件处理器会自动接收原生DOM事件并触发执行
+<button @click="greet">Click</button>
+function greet(event){}
+
+// 2. 访问事件参数：向处理器方法传入一个特殊变量 $event 或者使用箭头函数
+<button @click="warn('test', $event)">Submit</button>
+// 或者
+<button @click="(event) => warn('test', event)">Submit</button>
+function warn(message, event){}
+```
+
+事件修饰符：.stop, .prevent, .self, .capture, .once, .passive。注意调用顺序。
 
 

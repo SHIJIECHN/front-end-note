@@ -4,7 +4,6 @@ sidebarDepth: 3
 title: 工具类型
 ---
 
-
 ## 1. Partial\<Type>
 将Type下的所有属性设置为可选属性
 ```typescript
@@ -108,7 +107,7 @@ type StringDogs = {
 }
 
 
-// 使用
+// 使用：
 interface CatInfo {
   age: number;
   breed: string;
@@ -397,3 +396,24 @@ const fiveToHex: OmitThisParameter<typeof toHex> = toHex.bind(5);
 
 console.log(fiveToHex()); // "5"
 ```
+
+## 总结
+1. 修改：Pick、Partial、Required、Readonly、Record、Omit
+    - `Pick<Type, Keys>`: 取一部分
+    - `Partial<Type>`：全部变为可选属性
+    - `Required<Type>`：全部变为必填属性
+    - `Readonly<Type>`: 全部变为只读属性
+    - `Record<Keys, Type>`: 将选定属性名（或者由枚举而产生的属性名）对应的值类型全部转化为指定类型
+    - `Omit<Type, Keys>`: 删除指定属性
+2. 条件分发：Exclude、Extract、NonNullable
+    - `Exclude<UnionType, ExcludedMembers>`: 排除相同的，剩下所有不相同的。`Exclude<X, Y>`存在于X不存在于Y的值
+    - `Extract<Type, Union>`: 前后两者中共同拥有的
+    - `NonNullable<Type>`: 排除所有null或undefined，值保留可用的
+3. 其他获取：ReturnType、Parameter是、ConstructorParameters、InstanceType、ThisParameterType、OmitThisParameter、ThisType
+    - `ReturnType<Type>`：定义函数返回值类型
+    - `Parameters<Type>`：获取所有参数类型。返回值为元组类型type T3 = [args: {...}]
+    - `ConstructorParameters<Type>`：获取构造函数所有参数类型。返回元组类型
+    - `InstanceType<T>`：获取类返回对象的类型
+    - `ThisParameterType<Type>`：获取函数的this参数类型
+    - `OmitThisParameter<Type>`
+    - `ThisType<Type>`
