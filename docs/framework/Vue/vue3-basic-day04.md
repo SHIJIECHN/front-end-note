@@ -360,4 +360,21 @@ function warn(message, event){}
 
 事件修饰符：.stop, .prevent, .self, .capture, .once, .passive。注意调用顺序。
 
+# 表单输入绑定
+
+- 文本类型的`<input>`和`<textarea>`元素绑定 value 属性并侦听 input 事件
+- `<input type="checkbox">` 和 `<input type="radio">` 会绑定 checked 属性并侦听 change 事件
+- `<select>` 会绑定 value 属性并侦听 change 事件
+
+input, textarea, checkbox, radio, select
+
+1. v-model.lazy 在change事件后同步更新而不是input
+2. v-model.number 输入自动转换为数字
+3. v-model.trim 自动去除用户输入内容中两端的空格
+
+# 生命周期
+
+
+# 侦听器 watch
+
 
