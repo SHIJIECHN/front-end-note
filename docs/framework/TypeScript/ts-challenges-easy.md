@@ -387,3 +387,4 @@ y = x;  // 只有number和string完全相同才能赋值成功
 // That's not correct
 const e = y<string>(); // 'e' is of type '2'
 ```
+

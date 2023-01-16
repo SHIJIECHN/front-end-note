@@ -598,3 +598,64 @@ A extends A
 [A] extends [A] ? false : true
 ```
 3. `type<X> = T extends ...`中extends前面的T不一定是传入的T，如果是联合类型的话，会分发为单个类型分别处理
+
+
+## ReplaceKeys
+实现 `ReplaceKeys<Obj, Keys, Targets>` 将 Obj 中每个对象的 `Keys` Key 类型转化为符合 Targets 对象对应 Key 描述的类型，如果无法匹配到 Targets 则类型置为 never：
+
+```typescript
+type ReplaceKeys<Obj, Keys, Targets> = {
+  [K in keyof Obj] : K extends Keys ? (
+    K extends keyof Targets ? Targets[K] : never
+  ) : Obj[K]
+}
+
+type NodeA = {
+  type: 'A'
+  name: string
+  flag: number
+}
+
+type NodeB = {
+  type: 'B'
+  id: number
+  flag: number
+}
+
+type NodeC = {
+  type: 'C'
+  name: string
+  flag: number
+}
+
+
+type Nodes = NodeA | NodeB | NodeC
+
+type ReplacedNodes = ReplaceKeys<Nodes, 'name' | 'flag', {name: number, flag: string}> 
+// {type: 'A', name: number, flag: string} | {type: 'B', id: number, flag: string} | {type: 'C', name: number, flag: string} 
+// would replace name from string to number, replace flag from number to string.
+
+type ReplacedNotExistKeys = ReplaceKeys<Nodes, 'name', {aa: number}> 
+// {type: 'A', name: never, flag: number} | NodeB | {type: 'C', name: never, flag: number} 
+// would replace name to never
+```
+
+## Remove Index Signature
+实现 `RemoveIndexSignature<T>` 把对象 `<T>` 中 Index 下标移除：
+
+```typescript
+type RemoveIndexSignature<T> = {
+  [P in keyof T as P extends `${infer R}` ? R : never]: T[P]
+}
+
+type Foo = {
+  [key: string]: any;
+  foo(): void;
+}
+
+type A = RemoveIndexSignature<Foo>  // expected { foo(): void }
+```
+
+总结：
+1. 如何表示索引下标？也可以转换为如何识别字符串Key。使用`${infer R}`
+

@@ -51,7 +51,7 @@ type UnlockedAccount = CreateMutable<LockedAccount>;
 // }
 ```
 ```typescript
-// 删除属性中的可选属性
+// 删除属性中的可选属性修饰符
 type Concrete<Type> = {
   [Property in keyof Type]-?: Type[Property];
 }

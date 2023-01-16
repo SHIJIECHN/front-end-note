@@ -157,3 +157,25 @@ type ToArrayNonDist<Type> = [Type] extends [any] ? Type[] : never;
 type StrArrOrNumArr = ToArrayNonDist<string | number>;
 // type StrArrOrNumArr = (string | number)[]
 ```
+
+## extends关键字特性
+1. 用于接口，表示继承
+2. 表示条件类型，可用于条件判断
+3. 阻止extends关键字对联合类型的分发特性
+
+- 表示条件类型，可用于条件判断
+表示条件判断，如果前面的条件满足，则返回问好后第一个参数，否则返回第二个。
+```typescript
+type A1 = 'x' extends 'x' ? 1 : 2;
+// type A1 = 1
+
+type A2 = 'x'|'y' extends 'x' ? 1 : 2;
+// type A2 = 2
+
+type P<T> = T extends 'x' ? 1 : 2;
+type A3 = P<'x'|'y'>;
+// type A3 = 1 | 2
+```
+问题：为什么 A2 和 A3的值不一样
+- 如果用于简单的条件判断，则直接判断前面的类型是否可分配给后面的类型
+- 若extends前面的类型时泛型，且泛型传入的是联合类型时，则会依次判断该联合类型的所有子类型是否可分配给extends后面的类型

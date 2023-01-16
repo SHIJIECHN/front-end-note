@@ -13,19 +13,31 @@ type Person = {
   alive: boolean
 }
 
+
 type Age = Person['age'];
 // type Age = number
 
+// T[keyof K] 获取到 T 中的 key且同时存在于 K 时的类型组成的联合类型
 type I1 = Person['age'|'name'];
 // type I1 = string | number
 
+// T[keyof T] 可以获得T所有key的类型组成的联合类型
 type I2 = Person[keyof Person];
 // type I2 = string | number | boolean
 
 type AliveOrName = 'alive' | 'name';
 type I3 = Person[AliveOrName];
 // type I3 = string | boolean
+
+// 如果[]中的key有不存在T中的，则是any
+type I4 = Person['name' | 'gender'];
+// type I4 = any
 ```
+总结：
+1. `T[keyof K]` 获取到 T 中的 key且同时存在于 K 时的类型组成的联合类型
+2. `T[keyof T]` 可以获得T所有key的类型组成的联合类型
+3. 如果`[]`中的key有不存在T中的，则是any
+
 使用number来获取数组元素的类型
 ```typescript
 const MyArray = [

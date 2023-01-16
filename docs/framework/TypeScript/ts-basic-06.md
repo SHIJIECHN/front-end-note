@@ -8,7 +8,7 @@ title: keyof操作符
 对一个**对象类型**使用keyof操作符，会返回该对象属性名组成的一个字符串或者数字字面量的联合。
 ```typescript
 type Point = { x: number; y: number};
-type P = keyof Point; // P 等同于 "x" | "y"
+type P = keyof Point; // P 等同于 "x" | "y" (联合类型)
 
 // type P = keyof Point
 ```
@@ -106,6 +106,7 @@ type result = keyof Person;
 ```
 
 ## 总结
-1. 对对象**类型**（数字、Symbol、字符串为键值）使用keyof。返回该对象属性名组成的一个字符串或数字字面量的联合
-2. 当对对象使用keyof时，需要先使用typeof，再使用keyof。
-3. 对type、interface接口、类不需要使用typeof，返回键名
+1. 对对象**类型**（数字、Symbol、字符串为键值）使用keyof。返回该对象属性名组成的一个字符串或数字字面量的**联合**
+2. 对应任何类型 T， keyof T 的结果为该类型上所有**公有属性**key的联合
+3. 当对对象使用keyof时，需要先使用typeof，再使用keyof。
+4. 对type、interface接口、类不需要使用typeof，返回键名
