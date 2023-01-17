@@ -392,6 +392,14 @@ watch(x, (newV)=>{
     console.log(`x is ${newV}`);
 });
 
+// 响应式对象
+watch(obj, (newValue, oldValue)=>{
+  /**
+    在嵌套的属性变更时触发。注意：newValue 此处和 oldValue是相等的。
+    因为他们是同一个对象
+  */
+})
+
 // getter函数
 watch(
     () => x.value + y.value,
@@ -424,6 +432,7 @@ watch(obj.count, (count)=>{
 ## 1. 深层侦听器
 
 传入响应式对象，会隐式的创建一个深层侦听器，该回调函数在所有嵌套的变更时都会被触发。
+
 ```javascript
 const obj = reactive({count: 0})
 
@@ -470,6 +479,146 @@ watch是懒执行的：仅当数据源变化时才会执行回调。
 
 我们希望在创建侦听器时，立即执行一遍回调。
 
-watchEffect会立即执行一遍回调函数，瑞国这时函数产生了副作用，Vue会自动追踪副作用的依赖关系，自动分析处响应源。
+watchEffect会立即执行一遍回调函数，如果这时函数产生了副作用，Vue会自动追踪副作用的依赖关系，自动分析处响应源。
 
+watchEffect仅会在其同步执行期间，才会追踪依赖。在使用异步回调时，只有在第一个await正常工作前访问到的属性才会被追踪。
+
+watch vs watchEffect：
+
+它们都能响应式的执行有副作用的回调。它们之间的主要区别是追踪响应式依赖方式：
+
+- watch只追踪明确侦听的数据源。仅在数据源确实发生改变时才会触发回调。watch会避免在发生副作用时追踪依赖。
+- watchEffect会在副作用发生期间追踪依赖。它会在同步执行过程中，自动追踪所有能访问到的响应式属性。
+
+## 3. 回调触发的时机
+用户创建的侦听器回调，都会在Vue组件更新**之前**被调用。也就意味着在侦听器回调中访问的DOM将是被Vue更新之前的状态。
+
+如果想要侦听器回调中能访问被Vue更新**之后**的DOM，需要指明flush: 'post'选项：
+```javascript
+watch(source, callback, {
+  flush: 'post'
+})
+
+watchEffect(callback, {
+  flush: 'post'
+})
+```
+后置刷新的watchEffect有一个别名watchPostEffect
+```javascript
+import {watchPostEffect} from 'vue'
+
+watchPostEffect(()=>{
+  // 在Vue更新后执行
+})
+```
+
+## 4. 停止侦听器
+侦听器必须用**同步**语句创建：如果用异步函数创建一个侦听器，那么它不会绑定到当前组件上，必须要手动停止它，以访内存泄漏。
+
+```javascript
+import { watchEffect } from 'vue'
+
+// 它会自动停止
+watchEffect(() => {})
+
+// ...这个则不会！
+setTimeout(() => {
+  watchEffect(() => {})
+}, 100)
+```
+
+要手动停止一个侦听器，需要调用watch或watchEffect返回的函数
+
+```javascript
+const unwatch = watchEffect(() => {})
+
+// ...当该侦听器不再需要时
+unwatch()
+```
+
+# 模板引用
+ref允许在一个特性的DOM元素或子组件实例被挂载后，获得对它的直接引用。
+
+```vue
+<script setup>
+import { ref, onMounted  } from 'vue'
+  
+  // 声明一个 ref 来存放该元素的引用
+// 必须和模板里的ref 同名
+  const input = ref(null)
+  onMounted(() => {
+    input.value.focus()
+  }) 
+</script>
+
+<template>
+  <input ref='input'>
+</template>
+
+```
+注意：只有在**组件挂在后**才能访问模板引用。
+
+## 1. v-for中的模板引用
+ref 中包含的值是一个数组，它将是在元素被挂载后包含对应这个列表的所有元素
+
+```javascript
+// 1. 声明
+const itemRef = ref([]);
+
+// 2. 模板中使用
+<ul>
+  <li v-for="item in list" ref="itemRefs">
+    {{ item }}
+  </li>
+</ul>
+
+// 3. 打印值
+onMounted(() => console.log(itemRefs.value)); // Proxy {0: li, 1: li, 2: li}
+```
+
+## 2. 函数模板引用
+ref可以绑定一个函数，会在每次组件更新时都被调用。
+
+该函数会受到元素引用作为第一个参数。
+
+```js
+<input :ref="(el) => { /**  将 el 赋值给一个数据属性或 ref 变量 */}"/>
+```
+
+## 3. 组件上的ref
+```javascript
+<Child ref="child" />
+// child.value 是<Child/>组件的实例
+```
+`<script setup>`的组件是默认私有的，一个父组件无法访问到一个使用了`<script setup>`的子组件中的任何东西，除非子组件载其中通过defineExpose显示暴露
+
+```javascript
+// 子组件
+import { ref } from 'vue'
+
+const a = 1
+const b = ref(2)
+
+defineExpose({
+  a,
+  b
+})
+
+// 父组件
+```
+
+
+# 组件
+
+## 1. 传递props
+```javascript
+// 子组件接收
+defineProps(['title'])
+
+// defineProps返回一个对象，其中包含了可以传递给组件的所有props
+const props = defineProps(['title']);
+console.log(props.title);
+```
+
+## 2. 监听事件
 
