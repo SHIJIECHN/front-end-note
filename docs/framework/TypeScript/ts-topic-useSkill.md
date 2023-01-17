@@ -52,6 +52,7 @@ const person = {
 
 type PersonType = typeof person;
 ```
+
 > 在TypeScript中，typeof可以获取变量或对象的类型，得到的类型是由TypeScript推导出来的，可以是任何结构形式的类型。在JavaScript中，typeof可以获取变量和对象的类型，只不过得到的类型结果只能是：undefined、string、number、boolean、symbol、object、function。
 
 **特别提醒**
@@ -274,7 +275,7 @@ type PropsType = Omit<IPerson, 'age'>; // 使用 TypeScript 自带的 Omit 泛�
 
 const createPerson: (props: PropsType) => IPerson = (props) => {
     return {...props, 'age': Math.floor(Math.random() * 30)}
-    // // Person 需要的 age 属性值由工厂函数内部随机一个数字
+    // Person 需要的 age 属性值由工厂函数内部随机一个数字
 }
 createPerson({name: 'coder'})
 ```
@@ -403,7 +404,7 @@ class Child extends React.PureComponent<ChildProps> {
 ## Tuple
 约束元组数组初始化时的长度
 
-默认元组书序只能约束元素类型，但是无法约束数组长度，可通过以下定义来实现初次赋值时进行长度限定。
+默认元组顺序只能约束元素类型，但是无法约束数组长度，可通过以下定义来实现初次赋值时进行长度限定。
 ```typescript
 type Tuple<T, N extends number> = [T, ...T[]] & {length: N}
 
@@ -427,6 +428,8 @@ enum LoginFailCode {
     loginDbCode = 12
 }
 
+type p = keyof  typeof LoginFailCode; // "unknowCode" | "authorizationCode" | "loginDbCode"
+
 //以下要定义错误状态码对应的错误提示信息
 
 // 第一种定义方法
@@ -448,12 +451,12 @@ const LoginFailMsg2: Record<keyof typeof LoginFailCode, string> = {
 ## const Xxx = {} as const
 将对象所有键值组成联合类型。
 
-可以通过 keyof typeof 获取 枚举对象的所有键名，并将键名组成联合类型，但是目前来说是没有办法将枚举对象键值组成联合类型。
+可以通过 keyof typeof 获取 枚举对象的所有键名，并将**键名**组成联合类型，但是目前来说是没有办法将枚举对象**键值**组成联合类型。
 
 目前来说，可以通过不使用 enum，改成 const 来实现。
 ```typescript
 const Mycount = {
-    A; 1,
+    A: 1,
     B: 5,
     C: 8
 } as const;
@@ -482,7 +485,7 @@ const bb = EnumB.A
 // EnumA 被编译后是一个对象，而 EnumbB 编译后则会消失
 
 // aa 和 bb 被编译后的区别是什么 ？
-// aa = EnumA.A、bb = 1
+// aa = EnumA.A, bb = 1
 
 /**
   EnumA 被编译后是一个对象，长这个样子：
@@ -658,7 +661,7 @@ type Person  ={
     name: string
 }
 ```
-因此我们即可以把Person当类使用，也可以把Person当借口（interface）或类型别名（type）来使用。
+因此我们即可以把Person当类使用，也可以把Person当接口（interface）或类型别名（type）来使用。
 
 **接口合并**
 ```typescript
@@ -789,7 +792,7 @@ declare module '*.asc';
 1. declare 意思是此处为 “全局定义 ”
 2. module 意思是模块，我们可以把它看做是 “类(class)” 的简写形式
 3. '*.jpg' 意思是代表所有以 xxxx.jpg 形式命名的文件
-4. 
+   
 declare module '*.jpg' 这样代码实际上是以下代码的简写形式：
 ```typescript
 declare '*.jpg' {

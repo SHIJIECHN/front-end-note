@@ -376,5 +376,100 @@ input, textarea, checkbox, radio, select
 
 
 # 侦听器 watch
+watch的第一个参数可以是不同形式的数据源：
+- 单个ref
+- 响应式对象
+- getter函数
+- 多个数据源组成的数组
+
+```javascript
+const x = ref(0);
+const y = ref(0);
+const obj = reactive({count: 0});
+
+// 单个ref
+watch(x, (newV)=>{
+    console.log(`x is ${newV}`);
+});
+
+// getter函数
+watch(
+    () => x.value + y.value,
+    (sum) => {
+        console.log(`sum of x + y is ${sum}`);
+    }
+)
+
+// 多个数据源组成的数组
+watch([x, ()=> y.value], ([newX, newY])=>{
+    console.log(`x is ${newX} and y is ${newY}`);
+})
+```
+
+不能直接侦听响应式对象的属性，需要用一个返回该属性的getter函数。
+```javascript
+ const obj = reactive({count: 0})
+  
+// 错误，因为watch得到的第一个参数是number
+watch(obj.count, (count)=>{
+  console.log(`count is: ${count}`);
+})
+
+// 提供一个getter函数
+watch(obj.count, (count)=>{
+  console.log(`count is: ${count}`)
+})
+```
+
+## 1. 深层侦听器
+
+传入响应式对象，会隐式的创建一个深层侦听器，该回调函数在所有嵌套的变更时都会被触发。
+```javascript
+const obj = reactive({count: 0})
+
+watch(obj, (newValue, oldValue)=>{
+  /**
+    在嵌套的属性变更时触发。注意：newValue 此处和 oldValue是相等的。
+    因为他们是同一个对象
+  */
+  console.log(`newValue is: ${newValue.count}`); // 1
+  console.log(`oldValue is: ${oldValue.count}`); // 1
+})
+
+function handleClick(){
+  obj.count++;
+}
+```
+传入响应式对象
+```javascript
+const state = reactive({
+  someObj: { count: 0}
+})
+
+// 
+watch(
+  () => state.someObj,
+  (newValue, oldValue)=>{
+    // 仅当 state.someObject 被替换时触发
+  }
+)
+
+// 也可以显示加上deep选项，强制转成深层监听器：
+watch(
+  () => state.someObj,
+  (newValue, oldValue)=>{
+    // 注意：`newValue` 此处和 `oldValue` 是相等的
+    // *除非* state.someObject 被整个替换了
+  },
+  {deep: true}
+)
+```
+
+## 2. watchEffect
+watch是懒执行的：仅当数据源变化时才会执行回调。
+
+我们希望在创建侦听器时，立即执行一遍回调。
+
+watchEffect会立即执行一遍回调函数，瑞国这时函数产生了副作用，Vue会自动追踪副作用的依赖关系，自动分析处响应源。
 
 

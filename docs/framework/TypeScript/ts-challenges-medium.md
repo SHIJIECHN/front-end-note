@@ -645,8 +645,17 @@ type ReplacedNotExistKeys = ReplaceKeys<Nodes, 'name', {aa: number}>
 
 ```typescript
 type RemoveIndexSignature<T> = {
-  [P in keyof T as P extends `${infer R}` ? R : never]: T[P]
+  [P in keyof T as typeLiteraOnly<P>]: T[P]
 }
+
+type typeLiteraOnly<T> = 
+  string extends T 
+  ? never 
+  : number extends T
+    ? never
+    : symbol extends T 
+      ? never
+      : T;
 
 type Foo = {
   [key: string]: any;
@@ -657,5 +666,23 @@ type A = RemoveIndexSignature<Foo>  // expected { foo(): void }
 ```
 
 总结：
-1. 如何表示索引下标？也可以转换为如何识别字符串Key。使用`${infer R}`
+1. 如何表示索引下标？索引值的key类型时string 或 number
+```javascript
+type Bar = {[key: number]}
+
+'foo' extends string; // true
+string extends 'foo'; // false
+
+type typeIteraOnly<T> = string extends T ? never : T; // 排除掉了string
+```
+
+
+## Drop Char
+实现 DropChar 从字符串中移除指定字符
+
+```typescript
+type DropChar<S, C extends string> = S extends `${infer F}${C}${infer Rest}` ? `${F}${DropChar<Rest, C>}` : S;
+
+type Butterfly = DropChar<' b u t t e r f l y ! ', ' '> // 'butterfly!'
+```
 
