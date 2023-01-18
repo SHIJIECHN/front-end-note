@@ -686,3 +686,119 @@ type DropChar<S, C extends string> = S extends `${infer F}${C}${infer Rest}` ? `
 type Butterfly = DropChar<' b u t t e r f l y ! ', ' '> // 'butterfly!'
 ```
 
+## MinusOne
+
+给定一个正整数作为类型的参数，要求返回的类型是该数字减 1。
+
+```typescript
+// 答案太复杂
+
+
+type Zero = MinusOne<1> // 0
+type FiftyFour = MinusOne<55> // 54
+```
+
+总结：
+1. 如果获取number类型的泛型值进行运算？涉及到数组，只有一种方法通过`['length']`访问数组长度，几乎所有的计算都是通过它推导出来的
+
+## PickByType
+从泛型T中提取处给定的类型属性
+
+```typescript
+type PickByType<T, U> = {
+  [P in keyof T as (T[P] extends U ? P : never )]: T[P]
+}
+
+type OnlyBoolean = PickByType<{
+  name: string
+  count: number
+  isReadonly: boolean
+  isEnable: boolean
+}, boolean> // { isReadonly: boolean; isEnable: boolean; }
+```
+
+总结：
+1. 使用K in keyof P as xxx来对Key位置进行进一步判断，只要`P[K] extends Q` 就保留，否则返回never即可。
+
+## StartsWith
+实现`StartsWith<T, U>`,接收两个string类型参数,然后判断T是否以U开头,根据结果返回true或false
+
+```typescript
+type StartsWith<T extends string, U extends string> = T extends `${U}${string}` ? true : false
+// 或者
+type StartsWith<T extends string, U extends string> = T extends `${U}${infer X}` ? true : false
+
+type a = StartsWith<'abc', 'ac'> // expected to be false
+type b = StartsWith<'abc', 'ab'> // expected to be true
+type c = StartsWith<'abc', 'abcd'> // expected to be false
+```
+
+总结：
+1. ${string} 匹配任意字符串进行 extends 判定。${string}也可以被${infer X}替代，只是拿到X不需要再用了
+2. 如果要匹配特定的数字类字符串也可以混用 ${number}
+
+## EndsWith
+
+实现EndsWith<T, U>,接收两个string类型参数,然后判断T是否以U结尾,根据结果返回true或false
+
+```typescript
+type EndsWith<T extends string, U extends string> = T extends `${string}${U}` ? true : false
+
+type a = EndsWith<'abc', 'bc'> // expected to be true
+type b = EndsWith<'abc', 'abc'> // expected to be true
+type c = EndsWith<'abc', 'd'> // expected to be false
+```
+
+## PartialByKeys
+实现一个通用的`PartialByKeys<T, K>`，它接收两个类型参数T和K。
+
+K指定应设置为可选的T的属性集。当没有提供K时，它就和普通的`Partial<T>`一样使所有属性都是可选的。
+
+```typescript
+// 功能实现
+type PartialByKeys<T, K = keyof T> =  
+{
+  [Q in keyof T as Q extends K ? Q : never]?: T[Q]
+} & {
+  [Q in keyof T as Q extends K ? never : Q]: T[Q]
+}
+/**
+得到的是两个合并的对象，而结果需要合并成一个对象。
+{
+    name?: string | undefined;
+} & {
+    age: number;
+    address: string;
+}
+ */
+
+// 合并成一个对象
+type Merge<T> = {
+  [K in keyof T]: T[K]
+}
+
+
+type PartialByKeys<T, K = keyof T> =  
+  Merge<{
+    [Q in keyof T as Q extends K ? Q : never]?: T[Q]
+  } & {
+    [Q in keyof T as Q extends K ? never : Q]: T[Q]
+  }>
+
+// 或者
+type PartialByKeys<T, K extends PropertyKey = keyof T> =  Merge<Partial<T> & Omit<T, K>>
+
+interface User {
+  name: string
+  age: number
+  address: string
+}
+
+type UserPartialName = PartialByKeys<User, 'name'> // { name?:string; age:number; address:string }
+```
+
+总结：
+1. 测试用例中包含unknown这种不存在的Key值，所以使用extends PropertyKey处理。PropertyKey 是内置的类型。
+```typescript
+type PropertyKey = number| string | symbol
+```
