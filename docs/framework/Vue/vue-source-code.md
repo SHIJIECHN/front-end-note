@@ -1692,7 +1692,7 @@ var event = (function () {
 
         // 倒着循环数组的序号不会受到影响
         for (let i = 0; i = _events.length; i--) {
-          if (_events[i] === handler) {
+          if (_events[i] === handler) { // 引用类型比较
             _events.splice(i, 1);
           }
         }
@@ -1715,3 +1715,60 @@ var event = (function () {
   }
 }());
 ```
+
+问题：引用类型比较
+
+js 中基本类型是比较值，引用类型比较地址
+引用类型与基本类型，是将引用类型转换为基本类型再比较，如果是 === 严格相等，则不转换比较
+
+```javascript
+var btn = document.querySelector('#btn');
+// 注册
+btn.addEventListener('click', function () {
+  console.log('点击了')
+})
+// 移除
+btn.removeEventListener('click', function(){
+  console.log('点击了');
+})
+
+// 是不是移除了呢？并没有移除
+
+// 如果想要可移除
+function handler() {
+  console.log('一个可移除的事件处理函数');
+}
+btn.addEventListener('click', handler);
+btn.removeEventListener('click', handler);
+// 必须保证移除的是同一个函数
+```
+
+发布订阅模式（形式不局限于函数，形式可以是对象）：
+
+1. 中间的全局的容器，用来**存储**可以被触发的东西（函数， Vue里面是对象）
+2. 需要一个方法，可以往容器中**传入**东西（函数， 对象）
+3. 需要一个方法，可以将容器中的东西取出来**使用**（函数调用，对象的方法调用）
+
+Vue 模型
+
+1. 读取的时候，调用depend方法，将对应watcher（更新方法）存入全局watcher
+   - 模板渲染的时候，虚拟DOM生成的时候会被读取
+2. 设置的时候，调用notify方法，将全局所有的watcher一一触发
+   - 数据变更的时候
+
+
+为什么这么设计？ 
+
+页面中的变更（diff）是以组件为单位的
+
+- 如果页面中只有一个组件（Vue实例），不会有性能损失
+- 但是如果页面中有多个组件（多watcher的一种情况），第一次会有多个组件的watcher存入到全局watcher中。
+  - 如果修改了局部的数据（例如其中一个组件的数据）
+  - 表示只会对该组件进行diff算法，也就是说只会重新生成该组件的抽象语法树
+  - 只会访问该组件的watcher
+  - 也就是表示再次往全局存储的只有该组件的watcher
+  - 页面更新的时候也就只需要更新一部分
+
+强调几个概念：
+1. 读取时，将watcher存入全局容器时，被称为**依赖收集**
+2. 修改时，将全局容器中的watcher取出v胡执行被称为**派发更新**
