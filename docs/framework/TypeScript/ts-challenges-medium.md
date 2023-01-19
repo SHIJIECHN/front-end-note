@@ -802,3 +802,64 @@ type UserPartialName = PartialByKeys<User, 'name'> // { name?:string; age:number
 ```typescript
 type PropertyKey = number| string | symbol
 ```
+
+## RequiredByKeys
+
+实现一个通用的RequiredByKeys<T, K>，它接收两个类型参数T和K。
+
+K指定应设为必选的T的属性集。当没有提供K时，它就和普通的Required<T>一样使所有的属性成为必选的
+
+```typescript
+type Merge<T> = {
+  [K in keyof T]: T[K]
+}
+type RequiredByKeys<T, K extends keyof T = keyof T> = Merge<
+  T & Required<Pick<T, K>>
+>
+
+interface User {
+  name?: string
+  age?: number
+  address?: string
+}
+
+type UserRequiredName = RequiredByKeys<User, 'name'> // { name: string; age?: number; address?: string }
+```
+
+## Mutable
+
+实现一个通用的类型 Mutable<T>，使类型 T 的全部属性可变（非只读）
+
+```typescript
+type Mutable<T> = {
+  - readonly [P in keyof T]: T[P]
+}
+
+interface Todo {
+  readonly title: string
+  readonly description: string
+  readonly completed: boolean
+}
+
+type MutableTodo = Mutable<Todo> // { title: string; description: string; completed: boolean;
+```
+
+## OmitByType
+
+实现 OmitByType<T, U> 根据类型 U 排除 T 中的 Key：
+
+```typescript
+type OmitByType<T, U> = {
+  [P in keyof T as T[P] extends U ? never: P]: T[P]
+}
+
+type OmitBoolean = OmitByType<
+  {
+    name: string
+    count: number
+    isReadonly: boolean
+    isEnable: boolean
+  },
+  boolean
+> // { name: string; count: number }
+```
