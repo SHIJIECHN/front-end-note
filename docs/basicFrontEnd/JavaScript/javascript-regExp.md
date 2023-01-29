@@ -1,16 +1,15 @@
 ---
 autoGroup-4: 正则
 sidebarDepth: 3
-title: 正则基础
+title: 正则
 ---
 
-# 转义
+## 1. 转义字符的使用
 定义：转换意义，改变意义。
 
 - 转义符号：\
 - 转义字符：\字符
-
-## 1. 转义字符的使用
+- 
 ```javascript
 var str = "我是一名'牛逼'的程序员"; // 可以
 var str = '我是一名"牛逼"的程序员'; // 可以
@@ -351,4 +350,285 @@ reg.exec(); // ['ccdd', 'c', 'd'];
 reg.exec(); // ['dddd', 'd', 'd'];
 reg.exec(); // ['ccee', 'c', 'e'];
 reg.exec(); // null;
+```
+
+## 7. 正向预查
+```javascript
+// 正向预查：?=n  ?!n
+var str = '1231231231',
+  reg = /1(?=2)/g; // 匹配的1是后面紧跟着2的1
+var result = str.match(reg);
+console.log(result); // ['1', '1', '1']
+```
+
+## 8. 贪婪模式与非贪婪模式
+
+默认情况下是贪婪模式。
+
+```javascript
+var str = 'abcd{{efg}}abcd{{xyz}}',
+  reg = /{{.*}}/g;
+var result = str.match(reg);
+console.log(result); // ['{{efg}}abcd{{xyz}}'] 贪婪模式
+
+var reg = /{{.*?}}/g; // ? 将贪婪模式变成非贪婪模式
+var result = str.match(reg);
+console.log(result); // ['{{efg}}', '{{xyz}}'
+
+// 贪婪模式
+var str = 'aaaaaa',
+  reg = /\w?/g; // 出现0-1次
+var result = str.match(reg);
+console.log(result); // ['a', 'a', 'a', 'a', 'a', 'a', '']
+
+// 非贪婪模式
+var str = 'aaaaaa',
+  reg = /\w??/g; // 第二个问号 ? 将贪婪模式转为非贪婪模式
+var result = str.match(reg);
+console.log(result); // ['', '', '', '', '', '', '']
+```
+
+## 9. replace
+不具备全局匹配的能力，只能匹配一次。
+
+```javascript
+var str = 'JSplusplus';
+var str1 = str.replace('plus', '+'); // JS+plus 不具备全局匹配能力，只能匹配一次
+
+var reg = /plus/;
+var str1 = str.replace(reg, '+');
+console.log(str1);// JS+plus
+
+var reg = /plus/g; // 加g 并且采用正则的方式replace才能全局匹配
+var str1 = str.replace(reg, '+');
+console.log(str1);// JS++
+
+// xxyy -> yyxx
+var str = 'aabbccdd',
+  reg = /(\w)\1(\w)\2/g;
+console.log(str.match(reg)); // ['aabb', 'ccdd']
+var str2 = str.replace(reg, '$2$2$1$1'); // bbaaddcc 使用$取出子表达式
+console.log(str2);
+
+// 回调函数是JS引擎自己调用的
+var str2 = str.replace(reg, function($, $1, $2){
+  console.log($, $1, $2);  // aabb a b   ccdd c d
+  // $ 当次匹配出来的字符串 $1 当前匹配的key
+  // 形式可以任意，参数顺序是一定的
+  return $2+$2+$1+$1;
+}); 
+console.log(str2); // bbaaddcc
+
+//js-plus-plus  -> jsPlusPlus
+var str = 'js-plus-plus',
+  reg = /-\w/g; 
+// var str3 = str.replace(reg, function($, $1){
+//   console.log($,$1); // -p 2
+//   return $1.toUpperCase(); // $1.toUpperCase is not a function
+// })
+
+reg = /-(\w)/g; // ( ) 子表达式 要有括号 $1 才能引用到
+var str3 = str.replace(reg, function($, $1){
+  console.log($,$1); // -p p
+  return $1.toUpperCase(); // $1.toUpperCase is not a function
+})
+console.log(str3); // jsPlusPlus
+
+// jsPlusPlus -> js_plus_plus
+var str = 'jsPlusPlus',
+  reg = /([A-Z])/g;
+var str4 = str.replace(reg, function($, $1){
+  return '_' + $1.toLowerCase();
+});
+console.log(str4); // js_plus_plus
+
+
+// xxyyzz -> XxYyZz  
+var str = 'xxyyzz',
+  reg = /(\w)\1(\w)\2(\w)\3/g;
+// 回调函数参数的个数不限
+var str4 = str.replace(reg, function($,$1,$2,$3){
+  return $1.toUpperCase()+$1+$2.toUpperCase()+$2+$3.toUpperCase()+$3;
+})
+console.log(str4); // XxYyZz
+
+// aabbcc -> a$b$c$ ->不能使用function
+var str = 'aabbcc',
+  reg = /(\w)\1(\w)\2(\w)\3/g;
+// 一定要使用$时，需要在$之前再加一个$
+var str1 = str.replace(reg, '$1$$$2$$$3$$'); // $1 $$ $2 $$ $3 $$
+console.log(str1); // a$b$c$
+
+
+// 匹配 \ ? * +。语法中存在的字符需要进行转义
+var str = 'aa\\bb\\cc',
+  reg = /\\/g;
+var str1 = str.match(reg); // ['\\', '\\']
+console.log(str1)
+
+var str = 'aa?bb?cc',
+  reg = /\?/g;
+var str1 = str.match(reg); // ['?', '?']
+console.log(str1)
+
+var str = 'aa*bb*cc',
+  reg = /\*/g;
+var str1 = str.match(reg); // ['*', '*']
+console.log(str1)
+
+var str = 'aa+bb+cc',
+  reg = /\+/g;
+var str1 = str.match(reg); // ['+', '+']
+console.log(str1)
+
+
+// aabbcc -> abc
+var str ='aabbcc',
+  reg = /(\w)\1(\w)\2(\w)\3/g;
+var str1 = str.replace(reg, '$1$2$3');
+console.log(str1); // abc
+
+// 个数不相等
+var str ='aaaabbbccccccc',
+  reg = /(\w)\1*/g; // 一个或多个
+console.log(str.match(reg)); // ['aaaa', 'bbb', 'ccccccc']
+var str1 = str.replace(reg, '$1');
+console.log(str1); // abc
+
+// 100000000000 -> 100,000,000,000
+var str = '100000000000',
+  reg = /(\d{3})\B/g; // \B 非单词边界，否则最后也会有一个逗号
+console.log(str.match(reg)); // ['100', '000', '000', '000']
+var str1 = str.replace(reg, '$1'+',');
+console.log(str1); // 100,000,000,000
+
+// 上面方法具有局限性：数字位数不是3的倍数时会有缺陷。
+
+var str = '10000000000000', 
+  reg = /(?=(\B)(\d{3})+$)/g; // 以空为主体，后面紧接着三位数字，并且不是单词边界。
+var str1 = str.replace(reg, ',');
+console.log(str1); // 10,000,000,000,000
+
+var str = 'abcdefghijklmnopqrstuvwxyz',
+  reg = /(?=(\B)(\w{4})+$)/g;
+  var str1 = str.replace(reg, '-');
+console.log(str1); // ab-cdef-ghij-klmn-opqr-stuv-wxyz
+
+// 双大括号替换值{{}}
+var str = 'My name is {{name}}, I\'m {{age}} years old.',
+  reg = /{{(.*?)}}/g;
+console.log(str.match(reg));// ['{{name}}', '{{age}}']
+var str1 = str.replace(reg, function(node, key){
+  console.log(node, key); // {{name}} name  {{age}} age
+  // var obj = {
+  //   name: 'Jone',
+  //   age: 32
+  // }
+  // console.log(obj[key])
+  // // 等同于
+  // var obj = {
+  //   name: 'Jone',
+  //   age: 32
+  // }[key]
+
+  return {
+    name: 'Jone',
+    age: 12
+  }[key]
+});
+console.log(str1); // My name is Jone, I'm 12 years old.
+```
+
+模板匹配测试
+```javascript
+<div class="artical"></div>
+<script type="html" id="tpl">
+  <h1>{{title}}</h1>
+  <div>{{author}}</div>
+  <p>{{content}}</p>
+</script>
+<script>
+  var tpl = document.getElementById('tpl').innerHTML,
+    oArtical = document.getElementsByClassName('artical')[0],
+    reg = /{{(.*?)}}/g;
+  oArtical.innerHTML = tpl.replace(reg, function(node, key){
+    return{
+      title: '这是一个模板测试',
+      author: 'Jone',
+      content: '这是我的模板测试，很重要的内容。'
+    }[key]
+  })
+</script>
+```
+
+## 10. 实战
+```javascript
+// 去掉输入框空格
+var reg = /\s/; // 空格
+
+// 省份证号验证
+// 22050219960430003X
+var reg = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[1-9Xx]$/, // 以1-9开头，出现5个数字，年月日
+
+// 密码强度
+// 密码至少6位 包含一个大写 一个小写 一个数字 1个特殊字符
+// 有多个包含或者包含时，要想到正向预查（正向断言）
+var reg = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!~@#$%^&*?]).*$/ 
+// 以任意字符开头,出现0-n次，至少包含6次：?=.{6,}。每次满足一个条件都需要正向预查。以任意字符结尾
+
+//  验证图片文件名
+var reg = /(.jpg|.gif|.png|.jpeg)/;
+
+// 检验e-mail
+// xxxxxxx@xxxx.com.cn
+var reg = /^([A-z0-9_-])+\@([A-z0-9_\-\.]+\.([A-z]{2,4}))/;
+// 注意：[A-z0-9_\-\.]+ 这个地方的写法 \. 。给163后面提供点，这样可以写ww@163.com.cn，在@和.cn中间可以出现任意的字母字符
+
+// 座机号
+// +86、086-028-43829385-133
+var reg = /^(([0\+]\d{2,3}-)?(0\d{2,3})-)(\d{7,8})(-(\d{3,}))?$/;
+
+// 手机号码
+// 130 1 2 3 4 5 6 7 8 9
+// 145 7
+// 150 1 2 3 5 6 7 8 9
+// 170 6 7 8
+// 180 1 2 3 4 5 6 7 8 9 
+var reg = /^(\(\+86\))?(13[0-9]|14[57]|15[012356789]|17[678]|18[0-9])\d{8}$/;
+
+// 校验日期
+// 1990-12-01 1990/12/01 1991.12.01
+var reg = /^(19|20)\d\d([-/.])(0[1-9]|1[0-2])\2(0[1-9]|[12][0-9]|3[01])/;
+
+// 十六进制的颜色
+// # A-F 0-9
+var reg = /^#(([A-Fa-f0-9]){6}|([A-Fa-f0-9]){3})/;
+
+// QQ 号
+var reg = /^[1-9][0-9]{4,9}/;
+
+// 微信号 6-20位
+// 只能是字母开头 可以包含数字 - _
+var reg = /^[A-z]([A-z0-9_-]{5,19})+$/;
+
+// 车牌号
+var reg = /[京津冀沪渝豫云辽黑湘皖新鲁苏浙赣鄂桂甘晋蒙陕吉闵贵粤青藏川宁琼]{1}[A-Z]{1}[A-z0-9]{5}$/;
+```
+
+?: 不捕获分组。前提是正则不使用g。
+```javascript
+// 正向预查
+// ?=n  ?!n
+// ?: 不捕获分组
+var str = 'abcabc',
+  reg = /(b)(c)/; // 子表达式，不仅能匹配子表达式中的b和c字母，还能匹配子表达式bc合在一起的字符
+console.log(str.match(reg)); // ['bc', 'b', 'c']
+
+var str = 'abcabc',
+  reg = /(a)(b)(c)/;
+console.log(str.match(reg));// ['abc', 'a', 'b', 'c']
+
+reg = /(?:a)(b)(c)/;
+console.log(str.match(reg)); // ['abc', 'b', 'c']
+// 没有匹配子表达式a。?: 目的是不让它捕获该表达式
 ```

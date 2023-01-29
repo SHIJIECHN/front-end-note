@@ -4,9 +4,9 @@ sidebarDepth: 3
 title: 源码
 ---
 
-# 数据驱动
+## 数据驱动
 
-## Vue 与模板
+### 1. Vue 与模板
 使用步骤
 
 1. 编写页面模板
@@ -17,7 +17,7 @@ title: 源码
    1. 在 Vue 的构造函数中提供：data，methods，computed， watcher，props, ...
 3. 将 Vue 挂载到页面中（mount）
 
-## 数据驱动模型
+### 2. 数据驱动模型
 Vue 的执行流程
 
 1. 获得模板：模板中有 “坑”

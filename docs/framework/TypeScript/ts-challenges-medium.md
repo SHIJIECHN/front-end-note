@@ -863,3 +863,34 @@ type OmitBoolean = OmitByType<
   boolean
 > // { name: string; count: number }
 ```
+
+## ObjectEntries
+
+实现Object.entries
+
+```typescript
+
+
+interface Model {
+  name: string;
+  age: number;
+  locations: string[] | null;
+}
+type modelEntries = ObjectEntries<Model> // ['name', string] | ['age', number] | ['locations', string[] | null];
+```
+
+总结：
+1. 如何将对象转换成联合类型？对象或者数组转换成联合类型思路是一样的
+```typescript
+// 一个数组转联合类型用[number]作为下标
+['1', '2', '3'][number]; // '1' | '2' | '3'
+// 对象使用[keyof T]作为下标
+type ObjectToUnion<T> = T[keyof T]
+
+interface Model{
+  name: string
+  age: number
+  locations: string[] | null
+}
+type a = ObjectEntries<Model>; // string | number | string[] | null
+```
