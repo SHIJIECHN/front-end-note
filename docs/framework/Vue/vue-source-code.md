@@ -1,7 +1,7 @@
 ---
 autoGroup-3: 源码专题
 sidebarDepth: 3
-title: 源码
+title: Vue源码分析（珠峰）
 ---
 
 ## 数据驱动
@@ -47,7 +47,8 @@ let app = new Vue({
 // 第三步 挂载：这种用法的挂载在 vue.js 中帮我们实现了
 ```
 
-我们怎么实现？
+### 3. 手动实现
+
 ```javascript
 // 第一步写模板
 <div id="root">
@@ -91,7 +92,7 @@ function compiler(template, data) {
       txt = txt.replace(rkuohao, function (_, g) {
         let key = g.trim(); // 写在双花括号里面的东西
         let value = data[key];
-        // 将 {{ xxx }} 用这个值替换
+        // 将 {{ xxx }} 用这个 value 值替换
         return value
       });
       // 注意：txt现在和DOM元素是没有关系
@@ -126,8 +127,14 @@ root.parentNode.replaceChild(generateNode, root);
 // 3. 代码没有整合（ Vue 使用的是一个构造函数 ）
 ```
 
-### 1. 代码整合
+<img :src="$withBase('/framework/Vue/vue-source-code.png')" alt="" />
+
+模板与数据结合，将模板中的“坑”填写需要的数据，得到已填写好数据的真正的DOM，再进行页面渲染。
+
+### 4. 代码整合
+
 抽取JGVue构造函数
+
 ```javascript
 // 写模板
 //-----------------------------------------------------------------
@@ -215,7 +222,7 @@ let app = new JGVue({
 })
 ```
 
-### 2. 多层级属性
+### 5. 多层级属性
 我们要解决一个问题，使用 'xxx.yyy.zzz'可以访问某一个属性。就是用字符串路径来访问对象的成员。
 ```js
 /**
@@ -257,7 +264,7 @@ const o = {
 let res = getValueByPath(o, 'a.b.c.d.e'); // 正确了
 res = getValueByPath(o, 'a.b.c') // d: { e: '正确了'}
 ```
-通常模板是不会变的，数据是常常在变化的。Vue 利用函数柯里化技巧。
+通常模板是不会变的，数据是常常在变化的。Vue 利用函数柯里化技巧，缓存模板。
 ```javascript
 // 这个函数是在 Vue 编译模板的时候就生成了
 function createGetValueByPath(path) {
@@ -315,7 +322,7 @@ let app = new JGVue({
 })
 ```
 
-### 3. 虚拟DOM
+### 6. 虚拟DOM
 目标：
 
 1. 怎么将真正的DOM转换为虚拟DOM
@@ -326,7 +333,7 @@ let app = new JGVue({
 为什么要使用虚拟DOM？提供性能。因为页面不断的更新，操作DOM有可能带来页面的刷新和页面内存的控制，会很消耗内存。使用虚拟DOM，所有操作都在内存中完成，只要更新到页面上。
 ```js
 // 有哪些标签节点类型
-// 1. <div /> => { tag: 'div'}
+// 1. 空标签 <div /> => { tag: 'div'}
 // 2. 文本节点 => { tag: undefined, value: '文本节点'}
 // 3. 有属性<div title="1" class="c" /> => {tag: 'div', data: { title: '1', class: 'c'}}
 // 4. 有子节点<div><div /></div> => {tag: 'div', children: [ {tag: 'div'}]}
@@ -347,7 +354,9 @@ class VNode {
   }
 }
 ```
-真正DOM如何生成VNode？
+
+**真正DOM如何生成VNode？**
+
 ```javascript
 /**
  * 使用递归来遍历DOM元素，生成虚拟DOM
@@ -405,7 +414,8 @@ let vroot = getVNode(root);
 console.log(vroot)
 ```
 
-虚拟VNode如何生成真正的DOM？
+**虚拟VNode如何生成真正的DOM？**
+
 ```javascript
 // 将VNode转换为真正的DOM
 function parseVNode(vnode) {
@@ -451,7 +461,7 @@ console.log(dom);
 2. 涉及模板、虚拟DOM
 
 
-# 函数柯里化
+## 函数柯里化
 
 参考资料
 - [函数式编程](https://llh911001.gitbooks.io/mostly-adequate-guide-chinese/content/)
@@ -469,7 +479,7 @@ console.log(dom);
 1. 判断元素
 2. 虚拟DOM的render方法
 
-## 1. 判断元素
+### 1. 判断元素
 
 Vue 本质上是使用HTML的字符串作为模板的，将字符串的模板转换为AST，再转换为 VNode。
 - 模板 -> AST
@@ -536,7 +546,7 @@ set['div']; // true
 set['Navigator']; // undefined -> false
 ```
 
-## 2. 虚拟DOM的render方法
+### 2. 虚拟DOM的render方法
 
 思考：Vue 项目**模板转换为抽象语法树**需要执行几次？
 
@@ -553,7 +563,7 @@ render的作用是将虚拟DOM转换为真正的DOM加到页面中
 
 我们可以将代码进行优化，将虚拟DOM缓存起来，生成一个函数，函数只需要传入数据就可以得到真正的DOM。
 
-### 2.1 构造函数JGVue重写
+#### 2.1 构造函数JGVue重写
 
 <img :src="$withBase('/framework/Vue/vue-source-code-01.png')" alt="" />
 
@@ -599,6 +609,14 @@ JGVue.prototype.mountComponent = function () {
   // 因为使用发布订阅模式，渲染和计算的行为应该交给watcher来完成
 }
 
+/**
+在真正的Vue中使用了二次提交的设计结构。
+1. 页面HTML DOM与虚拟DOM是一一对应的关系
+2. createRenderFn函数就是用来生成render函数的，同时缓存的AST
+3. render函数调用的时候，利用AST和数据结合生成带有数据的VNode
+4. update就是比较新数据VNode和旧VNode（diff），目的是更新旧VNode，从而更新HTML
+ */
+
 // 这里是生成render函数，目的是缓存抽象语法树（我们使用虚拟DOM来模拟）
 JGVue.prototype.createRenderFn = function () {
   // 缓存 AST
@@ -628,7 +646,7 @@ JGVue.prototype.update = function (vnode) {
 
 因为创建vue实例的时候可以传入render函数，此时就会使用传入的render。它用于用户自定义生成虚拟DOM
 
-### 2.2 辅助函数
+#### 2.2 辅助函数
 
 1. VNode类用于构造虚拟DOM
 2. getVNode：从真正DOM -> VNode(带有坑)
@@ -754,7 +772,7 @@ function parseVNode(vnode) {
 }
 ```
 
-### 2.3 验证
+#### 2.3 验证
 ```js
 // 模板
 <div id="root">
@@ -781,14 +799,15 @@ let app = new JGVue({
 })
 ```
 
-# 响应式原理
+## 响应式原理
 
-- 我们在使用Vue时候，赋值属性获得属性都是直接使用的Vue实例
+- 我们在使用Vue时候，获得属性值都是直接使用的Vue实例
 - 我们在设置属性值的时候，页面的数据更新
+- 
 
 ```javascript
 Object.defineProperty(对象，'设置什么属性名', {
-  writable: 
+  writable 
   configurable
   enumerable // 属性是否可枚举，是不是可以被for-in取出来
   set(){}  // 赋值触发
@@ -796,6 +815,44 @@ Object.defineProperty(对象，'设置什么属性名', {
 })
 ```
 
+### 1. 响应式原理
+```javascript
+var o = {};
+
+// 给o提供属性
+o.name = 'zhangsan';
+
+// 等价于
+Object.defineProperty(o, 'age', {
+  configurable: true,
+  writable: true,
+  enumerable: !!true, // 可枚举
+  value: 19
+})
+
+// get 和 set 上
+// 要响应式就表示在赋值和读取的收，附带的要做一些事请
+let _gender;
+Object.defineProperty(o, 'gender', {
+  configurable: true,
+  enumerable: true, // 可枚举
+  get(){ // 如果使用 o.gender 来访问数据，就会调用 get 方法（getter，读取器）
+    return _gender;
+  },
+  set(newVal){ // 如果 o.gender = 'xxx'，那么就会调用这个set方法，并设置的值会作为参数传入set
+  console.log('赋值的新值为：', newVal); 
+  _gender = newVal;
+  }
+})
+
+// 如果同时使用 get 和 set 需要一个中间变量存储真正的数据
+
+// 问题：这个_gender 被暴露在全局作用域。
+
+// Vue中使用defineReative(target, key, value, enumerable)
+```
+
+### 2. 将对象转换成响应式
 ```js
 // 简化后的版本
 // 中间变量就是value，将变量作为函数的参数传入，那么这个参数就相当于是函数作用域中的局部变量
@@ -832,12 +889,14 @@ for (let i = 0; i < keys.length; i++) {
 }
 ```
 
-只有一层循环，实际开发中对象一般是有多级的
+### 3. 对象响应式化
+
+实际开发中对象一般是有多级的
 
 ```javascript
 let o = {
     list: [
-        { }
+      { }
     ],
     ads: [],
     user: {},
@@ -847,7 +906,18 @@ let o = {
 怎么处理呢？递归。还可以使用队列（深度优先转换为广度优先）
 
 ```javascript
+let data = {
+  name: '张三',
+  age: 19,
+  course: [
+    {name: '语文'},
+    {name: '数学'},
+    {name: '英语'},
+  ]
+};
+
 function defineReactive(target, key, value, enumerable){
+  // 对象里面的成员进行响应式化
   if(typeof value === 'object' && value !== null && !Array.isArray(value)){
     // 非数组的引用类型
     reactify(value);
@@ -876,6 +946,7 @@ function reactify(o){
     // 判断这个属性值是不是引用类型，判断是不是数组类型
     // 如果是数组，就需要循环数组，将数组里面的元素循环进行响应式化
     // 如果是引用类型就需要递归，如果不是就不用递归(递归写在哪里？写在defineReactive)
+
       // 如果不是引用类型，需要使用defineReactive将其变成响应式的
       // 如果是引用类型，还是需要调用defineReactive
     if(Array.isArray(value)){
@@ -890,20 +961,17 @@ function reactify(o){
   }
 }
 
-// 验证
-let data = {
-  name: '张三',
-  age: 19,
-  course: [
-    {name: '语文'},
-    {name: '数学'},
-    {name: '英语'},
-  ]
-};
 
 reactify(data);
-// 缺陷：数组push后，新增的数据没有变成响应式的。
+// 问题：数组push后，新增的数据没有变成响应式的。
+
 ```
+
+总结：
+1. 首先要对对象的本身进行响应式化
+2. 其次还需要对对象的各个成员进行响应式化
+
+对于数组的情况，在reactify中递归，其他引用类型在defineReactive中递归。数组本身没有进行响应式化，而数组中项如果是对象的话，需要进行响应式化。
 
 对于对象可以使用递归来响应式化，但是数组我们也需要处理
 
@@ -917,12 +985,11 @@ reactify(data);
 
 要做什么事情呢？
 
-1. 在改变数组的数据的时候，要发出通知
+1. 在改变数组的数据的时候，要发出通知（拦截数组的方法）
   - Vue2中的缺陷，数组发生变化，设置length没法通知（Vue3总使用Proxy语法解决了这个问题）
-2. 加入的元素应该变成响应式的
+1. 加入的元素应该变成响应式的（处理数组响应式化的问题）
 
-**1. 在改变数组的数据的时候，要发出通知**
-修改原型。
+### 4. 扩展函数功能
 
 技巧：如果一个函数已经定义了，但是我们需要拓展其功能，我们一般的处理方法
 
@@ -951,6 +1018,8 @@ func = function (){
 func(); // 功能：1. 打印出 原始的功能； 2. 打印出 新的扩展功能
 ```
 
+### 5. 拦截数组的方法
+
 扩展数组的push和pop怎么处理？
 
 - 直接修改prototype（**不行**。所有的数组方法都会修改）
@@ -975,8 +1044,10 @@ let array_methods = Object.create(Array.prototype);
 
 ARRAY_METHOD.forEach(method=>{
   array_methods[method] = function(){
+    // 将数组进行响应式化   
+
     // 调用原来的方法
-    console.log('调用的是拦截的 '+ method + '方法')
+    console.log('调用的是拦截的 '+ method + '方法') 
     let res = Array.prototype[method].apply(this, arguments); // 为什么用apply呢？因为需要改变实例的this指向，并且需要带参数
     return res;
   }
@@ -989,9 +1060,9 @@ arr.__proto__ = array_methods;
 // 如果不支持，Vue使用的是混入法
 ```
 
-**2. 加入的元素应该变成响应式的**
+### 6. 处理数组响应式化的问题
 
-在数组拦截方法中调用reactify
+在数组拦截方法中调用reactify。
 
 ```javascript
 let ARRAY_METHOD = [
@@ -1000,12 +1071,13 @@ let ARRAY_METHOD = [
 let array_methods = Object.create(Array.prototype);
 ARRAY_METHOD.forEach(method=>{
   array_methods[method] = function(){
-    console.log('调用的是拦截的 '+ method + '方法')
-
     // 将数据进行响应式化
     for(let i = 0; i < arguments.length; i++){
       reactify(arguments[i]);
     }
+
+    // 调用原来的方法
+    console.log('调用的是拦截的 '+ method + '方法')
 
     let res = Array.prototype[method].apply(this, arguments); 
     return res;
@@ -1039,7 +1111,8 @@ function reactify(o){
     let value = o[key];
     if(Array.isArray(value)){
       // 数组
-      value.__proto__ = array_methods; // 数组响应式了
+      value.__proto__ = array_methods; // 通过以上7种方法改变数据成员，数组成员响应式化
+      // 数组原本的数据进行响应式化
       for(let j = 0; j < value.length; j++){
         reactify(value[j]);
       }
@@ -1050,6 +1123,9 @@ function reactify(o){
   }
 }
 ```
+
+### 7. 对象属性赋值响应式化
+
 已经将对象改成响应式的了，但是如果直接给对象赋值，赋值另一个对象，那么就不是响应式的了，那么怎么办？
 
 问题：
@@ -1084,7 +1160,12 @@ function defineReactive(target, key, value, enumerable){
     }
   })
 }
+
+// 问题：数组类型属性重新赋值，此时新值就不是响应式的.
+// 这是Vue 2的缺陷。因此一般情况下，数组不会采用直接赋值的方式，而是采用拦截方法中的方法进行数组修改。
 ```
+
+### 8. JGVue reactive
 
 目前完整代码
 
@@ -1316,13 +1397,17 @@ let app = new JGVue({
     ]
   }
 })
+
+// 问题：修改数据的时候，模板要刷新？？
+
+// Observer，Watcher，Dep...
 ```
 
 总结：
 1. 响应式原理Object.defineProperty
-2. 方法的扩展
-3. 数组方法响应式处理
-4. 数组添加新成员，新成员也变成响应式
+2. 对象响应式化
+3. 数组方法的拦截与添加成员响应式处理
+4. 直接给对象赋值，新值也是响应式的
 ```javascript
 function defineReactive(target, key, value, enumerable) {
   let that = this;
@@ -1347,19 +1432,17 @@ function defineReactive(target, key, value, enumerable) {
 }
 ```
 
-问题：数组类型属性重新赋值，此时新值就不是响应式的.
-
-Vue 2的缺陷。
 
 
-# 发布订阅模式
+## 发布订阅模式
 
 - 代理方法(app.name, app._data.name)
 - 事件模型(node: event 模块)
 - 发布订阅模式：Vue中Observe 与 watcher、Dep
 
+### 1. 代理方法
 
-代理方法，就是要将app._data中的成员给映射到app上。
+代理方法，就是要将app._data中的成员给映射到app上。如app._data.name -> app.name。
 
 由于需要在更新数据时候，更新页面的内容，所以app._data访问的成员 与 app 访问的成员应该是同一个成员。
 
@@ -1368,13 +1451,12 @@ Vue 2的缺陷。
 例如：
 
 ```javascript
-// app.name 转换为 app._data.name
-// app.xxx 转化为 app._data.xxx
+app.name 转换为 app._data.name
+app.xxx 转化为 app._data.xxx
 ```
 
 引入了一个函数 proxy(target, src, prop)。将target（app） 的操作映射到 src（app._data) 上。这里是因为当时没有Proxy语法（ES6语法）。
 
-我们之前处理的reactify方法已经不行了，需要一个新的方法来处理。
 ```javascript
 function reactify(o, vm) {
   let keys = Object.keys(o);
@@ -1395,7 +1477,9 @@ function reactify(o, vm) {
     // 所以后面name: 'jim'会覆盖name: 'jack'。
   }
 ```
-提供一个Observe的方法，在这个方法中对属性进行处理
+我们之前处理的reactify方法已经不行了，需要一个新的方法来处理。
+
+提供一个Observe的方法，在这个方法中对属性进行处理。
 
 也可以将这个方法封装到initData方法中
 ```js
@@ -1405,6 +1489,65 @@ function JGVue(options) {
   this.mount(); // 挂载
 }
 
+JGVue.prototype.initData = function(){
+  //做两件事情：
+  // 1. 遍历this._data的成员，将属性转换为响应式，
+  // 2. 将直接属性代理到实例上
+  
+  // 1. 遍历this._data的成员，将属性转换为响应式
+  let keys = Object.keys(this._data);
+  // 响应式化
+  for(let i = 0; i < keys.length; i++){
+    // 这里将对象 this._data[keys[i]] 变成响应式的
+  }
+
+  // 2. 代理
+  for(let i = 0; i < keys.length; i++){
+    // 将this._data[keys[i]] 映射到 this._data[keys[i]]
+  }
+}
+```
+
+实现
+```javascript
+JGVue.prototype.initData = function(){
+  //做两件事情：
+  // 1. 遍历this._data的成员，将属性转换为响应式，
+  // 2. 将直接属性代理到实例上
+
+  // 1. 遍历this._data的成员，将属性转换为响应式
+  let keys = Object.keys(this._data);
+  // 响应式化
+  for(let i = 0; i < keys.length; i++){
+    // 这里将对象 this._data[keys[i]] 变成响应式的
+  }
+
+  // 2. 代理
+  for(let i = 0; i < keys.length; i++){
+    // 将this._data[keys[i]] 映射到 this._data[keys[i]]
+    // 就是要让this提供keys[i]这个属性
+    // 在访问这个属性的时候相当于在访问this._data的这个属性
+    Object.defineProperty(this, keys[i], {
+      enumerable: true,
+      configurable: true,
+      get(){ 
+        return this._data[keys[i]];
+      },
+      set(newVal){
+        this._data[keys[i]] = newVal;
+      }
+    })
+    // 好处：
+    // 1. 访问的this.xxx上的成员实际上是访问this._data.xxx上的成员
+    // 2. 维护的对象只有一个
+  }
+}
+
+// 问题：安全问题。这里代理for循环中使用let，而vue源码中使用var。
+```
+
+优化
+```js
 GVue.prototype.initData = function () {
   // 遍历 this._data 的成员，将属性转换为响应式的，将直接属性（非递归属性）代理到实例上
   let keys = Object.keys(this._data);
@@ -1417,41 +1560,27 @@ GVue.prototype.initData = function () {
 
   // 代理
   for (let i = 0; i < keys.length; i++) {
-    // 将this._data[keys[i]]映射到this[keys[i]]上
-    // 就是要让this提供keys[i]这个属性
-    // 在访问这个属性的时候，相当于在访问this._data的这个属性
-    // Object.defineProperty(this, keys[i], {
-    //   configurable: true,
-    //   enumerable: true,
-    //   get() {
-    //     return this._data[keys[i]];
-    //   },
-    //   set(newVal) {
-    //     this._data[keys[i]] = newVal;
-    //   }
-    // })
     proxy(this, '_data', keys[i]);
   }
-
 }
 
-/*将某一个对象的访问映射到对象的某一个属性成员上*/
+/* 将某一个对象的访问映射到对象的某一个属性成员上 */
 // 把对象target访问key，映射到target对象prop属性的key
 function proxy(target, prop, key) {
   Object.defineProperty(target, key, {
     configurable: true,
     enumerable: true,
     get() {
-      return target[prop][keys[i]];
+      return target[prop][key];
     },
     set(newVal) {
-      target[prop][keys[i]] = newVal;
+      target[prop][key] = newVal;
     }
   })
 }
 ```
 
-## 解释 proxy
+### 2. 解释 proxy
 
 ```javascript
 // Vue 默认所有的属性都挂载到_data
@@ -1463,7 +1592,7 @@ app._data.name
 app.name
 // 将对 _data.xxx 的访问将给了实例
 
-// 重点：访问app 的 xxx 就是在访问 app._data.xxx
+// 重点：访问app.xxx 就是在访问 app._data.xxx
 ```
 
 假设：
@@ -1471,14 +1600,14 @@ app.name
 ```javascript
 let o1 = { name: '张三'};
 // 要有一个对象o2，在访问o2.name的时候想要访问的是o1.name
-Object.defineProperty(o, 'name', {
+Object.defineProperty(o2, 'name', {
     get(){
         return o1.name;
     }
 });
 ```
 
-问app 的 xxx 就是在访问 app._data.xxx
+现在需要访问app.xxx 就是在访问 app._data.xxx
 
 ```javascript
 Object.defineProperty(app, 'name', {
@@ -1529,9 +1658,9 @@ proxy(实例, '_data', 属性名);
 proxy(实例, '_properties', 属性名)
 ```
 
-# 发布订阅模式
+### 3. 事件模型
 
-目标：解耦，让各个模块之间没有紧密的联系。
+发布订阅模式目标：解耦，让各个模块之间没有紧密的联系。
 
 现在的处理办法是属性在更新的时候，调用mountComponent方法。
 
@@ -1558,6 +1687,8 @@ proxy(实例, '_properties', 属性名)
 2. 我可以根据需求订阅我要的商品（老板要记录下，谁定了什么东西，在数组中存储某些东西）
 3. 等待，可以做其他的事情
 4. 当货品来到的时候，老板就查看账簿，挨个的打电话（遍历数组，取出数组里面的元素来使用）
+
+#### 3.1 Event对象
 
 实际上就是事件模型：
 
@@ -1603,7 +1734,7 @@ var event = (function () {
 }());
 ```
 
-on的实现
+#### 3.2 on的实现
 
 ```javascript
 on: function (type, handler) {
@@ -1613,7 +1744,7 @@ on: function (type, handler) {
 },
 ```
 
-off实现
+#### 3.3 off实现
 
 ```javascript
 /* 移除事件：
@@ -1633,8 +1764,8 @@ off: function (type, handler) {
     }
 
     // 倒着循环 数组的序号不会受到影响
-    for (let i = 0; i = _events.length; i--) {
-      if (_events[i] === handler) {
+    for (let i = _events.length - 1; i = _events.length; i--) {
+      if (_events[i] === handler) { // 引用值比较
         _events.splice(i, 1);
       }
     }
@@ -1642,7 +1773,8 @@ off: function (type, handler) {
 }
 ```
 
-emit实现
+
+#### 3.4 emit实现
 
 ```javascript
 /* 发射事件，触发事件。包装参数传递给事件处理函数**/
@@ -1654,13 +1786,43 @@ emit: function (type) {
   if(!_events) return;
 
   for(let i =0; i < _events.length; i++){
-    // 如果要绑定上下文就需要使用call, apply
+    // 如果要绑定上下文就需要使用call 或 apply
     _events[i].apply(null, args);
   }
 }
 ```
 
-完整的事件模型
+
+#### 3.5 事件的移除问题
+
+问题：引用类型比较
+
+js 中基本类型是比较值，引用类型比较地址
+引用类型与基本类型，是将引用类型转换为基本类型再比较，如果是 === 严格相等，则不转换比较
+
+```javascript
+var btn = document.querySelector('#btn');
+// 注册
+btn.addEventListener('click', function () {
+  console.log('点击了')
+})
+// 移除
+btn.removeEventListener('click', function(){
+  console.log('点击了');
+})
+
+// 是不是移除了呢？并没有移除
+
+// 如果想要可移除
+function handler() {
+  console.log('一个可移除的事件处理函数');
+}
+btn.addEventListener('click', handler);
+btn.removeEventListener('click', handler);
+// 必须保证移除的是同一个函数
+```
+
+#### 3.6 完整的事件模型
 
 ```javascript
 var event = (function () {
@@ -1691,7 +1853,7 @@ var event = (function () {
         }
 
         // 倒着循环数组的序号不会受到影响
-        for (let i = 0; i = _events.length; i--) {
+        for (let i = _events.length - 1; i = _events.length; i--) {
           if (_events[i] === handler) { // 引用类型比较
             _events.splice(i, 1);
           }
@@ -1716,45 +1878,28 @@ var event = (function () {
 }());
 ```
 
-问题：引用类型比较
-
-js 中基本类型是比较值，引用类型比较地址
-引用类型与基本类型，是将引用类型转换为基本类型再比较，如果是 === 严格相等，则不转换比较
-
-```javascript
-var btn = document.querySelector('#btn');
-// 注册
-btn.addEventListener('click', function () {
-  console.log('点击了')
-})
-// 移除
-btn.removeEventListener('click', function(){
-  console.log('点击了');
-})
-
-// 是不是移除了呢？并没有移除
-
-// 如果想要可移除
-function handler() {
-  console.log('一个可移除的事件处理函数');
-}
-btn.addEventListener('click', handler);
-btn.removeEventListener('click', handler);
-// 必须保证移除的是同一个函数
-```
+#### 3.7 Vue模型
 
 发布订阅模式（形式不局限于函数，形式可以是对象）：
 
-1. 中间的全局的容器，用来**存储**可以被触发的东西（函数， Vue里面是对象）
-2. 需要一个方法，可以往容器中**传入**东西（函数， 对象）
+1. 中间的全局的容器（Vue中是Target），用来**存储**可以被触发(刷新页面)的东西（函数， Vue里面是对象Watcher）
+2. 需要一个方法（Vue中是Dep），可以往容器中**传入**东西（函数， 对象）
 3. 需要一个方法，可以将容器中的东西取出来**使用**（函数调用，对象的方法调用）
+
 
 Vue 模型
 
-1. 读取的时候，调用depend方法，将对应watcher（更新方法）存入全局watcher
-   - 模板渲染的时候，虚拟DOM生成的时候会被读取
-2. 设置的时候，调用notify方法，将全局所有的watcher一一触发
-   - 数据变更的时候
+<img :src="$withBase('/framework/Vue/vue-source-code-01.jpg')" alt="" />
+
+更新了虚拟DOM就相当于更新了页面。如何触发DOM的更新呢？
+1. 有一个全局的结构，用来存储Watcher，是一个数组结构
+2. 虚拟DOM是以组件为单位，所以虚拟DOM中可以存在许多组件，但是只有一个根组件（相当于Vue实例），其他组件相当于页面中使用的组件。每个组件绑定一个data，每个组件需要更新意味着每个组件包含着类似于this.update(this.render())方法，每个组件对应一套watcher。watcher就是更新方法。watcher中有update方法，如果被触发就会更新data，也就相当于更新了组件。
+3. data是响应式的，也就是在读取和设置data时，会进行一些额外的操作。
+   1. 读取的时候，调用depend方法，将对应watcher（更新方法）存入全局watcher（什么时候会读取？）
+      - 模板渲染的时候，虚拟DOM生成的时候会被读取
+   2. 设置的时候，调用notify方法，将全局所有的watcher一一触发（什么时候触发？）
+      - 数据变更的时候
+4. 内存中可以有多个watcher，但是至少有一个watcher
 
 
 为什么这么设计？ 
@@ -1771,4 +1916,4 @@ Vue 模型
 
 强调几个概念：
 1. 读取时，将watcher存入全局容器时，被称为**依赖收集**
-2. 修改时，将全局容器中的watcher取出v胡执行被称为**派发更新**
+2. 修改时，将全局容器中的watcher取出执行被称为**派发更新**
