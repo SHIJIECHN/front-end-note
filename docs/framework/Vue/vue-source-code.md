@@ -1917,3 +1917,187 @@ Vue 模型
 强调几个概念：
 1. 读取时，将watcher存入全局容器时，被称为**依赖收集**
 2. 修改时，将全局容器中的watcher取出执行被称为**派发更新**
+
+
+#### 3.8 改写observe函数
+
+缺陷：
+
+- 无法处理数组。如 `reactify(arguments[i])` 需要传入实例
+- 响应式无法在中间集成Watcher处理
+- 我们实现的reactify需要和实例紧紧的绑定在一起，需要分离
+
+没有对 reactify 中的 o 本身进行响应式处理，是对 o 的成员进行响应式处理
+
+```javascript
+/** 将对象 obj 变成响应式的，vm 就是 Vue 实例，为了调用时处理上下文 */
+function observe(obj, vm){
+  // 之前没有对 obj 本身进行操作, 这一次就直接对 obj 进行判断
+  if (Array.isArray(obj)) {
+    // 对其每一个元素处理
+    obj.__proto__ = array_methods;
+    for (let i = 0; i < obj.length; i++) {
+      observe(obj[i], vm); // 递归处理每一个数组元素
+    }
+  } else {
+    // 对其成员进行处理
+    let keys = Object.keys(obj);
+    for (let i = 0; i < keys.length; i++) {
+      let prop = keys[i]; // 属性名
+      defineReactive(vm, obj, prop, obj[prop], true);
+    }
+  }
+}
+```
+
+observe没有返回值，所以需要修改defineReactive中 set 方法进行修改
+```javascript
+set(newVal){
+  // 目的
+  // 将重新赋值的数据变成响应式的, 因此如果传入的是对象类型, 那么就需要使用 observe 将其转换为响应式
+  if (typeof newVal === 'object' && newVal != null) {
+    observe(newVal);
+  }
+
+  value = newVal;
+}
+```
+
+#### 3.9 引入Watcher
+问题：
+- this的问题
+
+实现：
+
+分成两步：
+
+1. 只考虑修改后刷新（响应式核心算法）
+2. 再考虑依赖收集（优化）
+
+在 Vue 中提供一个构造函数 Watcher，Watcher会有一些方法：
+
+- get() 用来进行**计算**（watch，computed）和**执行**处理函数
+- update() 公共的外部方法，该方法会触发内部的run方法
+- run() 用来判断内部是使用异步运行还是同步运行等，这个方法最终会调用内部的get方法
+- clearupDep() 简单理解为清空队列
+
+我们的页面渲染是上面哪一个方法执行的呢？ get方法
+
+我们的Watcher实例有一个属性vm，表示的就是当前的 Vue 实例
+
+```javascript
+/** Watcher 观察者，用于发射更新的行为 */
+class Watcher {
+  /**
+   * 
+   * @param {Object} vm JGVue 实例
+   * @param {String|Function} expOrfn 如果是渲染watcher，传入的就是渲染函数，如果是计算watcher传入的就是路径表达式，暂时只考虑expOrfn为函数的情况
+   */
+  constructor(vm, expOrfn) {
+    this.vm = vm;
+    this.getter = expOrfn;
+
+    this.dep = []; // 依赖项
+    this.depIds = {}; // 是一个Set类型，用于保证依赖项的唯一性（简化的代码暂时不识闲这一块）
+
+    // 一开始需要渲染：真实 vue 中：this.lazy ? undefined : this.get()
+    this.get();
+  }
+
+  /** 计算，触发getter  */
+  get() {
+    this.getter.call(this.vm, this.vm); // 上下文的问题就解决了
+  }
+
+  /**
+   * 执行，并判断是懒加载，还是同步执行，还是异步执行：
+   * 我们现在只考虑异步执行（简化的是同步执行）
+   */
+  run() {
+    this.get();
+    // 在真正的 vue 中是调用queueWatcher，来触发nextTick进行异步的执行
+  }
+
+  /** 对外公开的函数，用于在属性发生变化时触发的接口 */
+  update() { }
+
+  /** 清空依赖队列 */
+  clearupDep() { }
+}
+```
+
+#### 3.10 引入Dep对象
+
+该对象提供 依赖收集（depend）的功能 和 派发更新（notify）的功能
+
+在notify中去调用watcher的update功能
+
+```javascript
+class Dep {
+  constructor() {
+    this.sub = []; // 存储的是玉 当前 Dep关联的 watcher
+  }
+
+  /** 添加一个watcher */
+  addSub(sub) { }
+
+  /** 移除 */
+  removeSub(sub) { }
+
+  /** 将当前Dep与当前的watcher（暂时渲染watcher）关联 */
+  depend() { }
+
+  /** 触发与之关联的watcher的update方法，起到更新的作用 */
+  notify() {
+    // 在真实的 Vue 中是依次触发 this.subs 中的watcher的update方法
+    if (Dep.target) {
+      Dep.target.update();
+    }
+  }
+}
+
+// 全局的容器存储渲染Watcher
+// let globalWatcher
+// 学 Vue 的实现
+Dep.target = null; // 这就是全局的Watcher
+```
+
+#### 3.11 Watcher 与 Dep
+
+之前将渲染 Watcher放在全局作用域上，这样处理是有问题的
+
+- Vue 项目中包含很多的组件，各个组件是**自治**
+  - watcher可能会有多个
+  - 每一个watcher用于描述一个渲染行为 或 计算行为
+    - 子组件发生数据的更新，页面需要重新渲染（真正的Vue中是局部渲染）
+    - 例如 vue 中推荐使用计算属性代替复杂的插值表达式。计算属性是会伴随其使用的属性的变化而变化的
+      - `name: () => this.firstName + this.lastName` 
+      - 计算属性依赖于firstName和lastName
+      - 只要被依赖的属性发生变换，就会促使计算属性**重新计算**（来watcher完成）
+- 依赖收集和派发更新是怎么运行起来的
+
+我们在访问的时候就会进行收集，在修改的时候，那么收集什么就更新什么
+
+所谓的依赖收集 实际上就是告诉当前的watcher什么属性被访问了
+
+那么在这个watcher计算的时候或渲染页面的时候就会将这些收集到的属性进行更新
+
+如何将属性与当前watcher关联起来？
+
+- 在全局准备一个targetStack(watcher栈，简单的理解为watcher数组，把一个操作中需要使用的watcher都存储起来)
+- 在watcher调用 get 方法的时候，将当前watcher方法放到全局，在 get 执行结束之后，将这个全局的watcher移除。提供：pushTarget，popTarget
+- 在每一个属性中都有一个Dep对象
+
+我们在访问对象属性的时候（get），此时渲染watcher就在全局中。将属性和watcher相关联，其实就是将当前渲染的watcher存储到属性相关的dep中，同时将dep也存储到当前全局的watcher中（互相引用的关系）
+
+- 属性引用了当前的渲染watcher，属性知道谁渲染它
+- 当前渲染watcher引用了访问的属性（Dep），当前的watcher知道渲染了什么属性
+
+我们的dep有一个方法
+
+```javascript
+// 1. vue.js 修改defineReactive函数的getter
+get: function reactiveGetter(){
+  console.log( `>>> getter: ${ key }, 收集了 属性 ${ key }` );
+}
+```
