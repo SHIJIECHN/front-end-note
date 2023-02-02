@@ -1919,7 +1919,7 @@ Vue 模型
 2. 修改时，将全局容器中的watcher取出执行被称为**派发更新**
 
 
-#### 3.8 改写observe函数
+#### 3.8 observe函数
 
 缺陷：
 
@@ -1927,7 +1927,9 @@ Vue 模型
 - 响应式无法在中间集成Watcher处理
 - 我们实现的reactify需要和实例紧紧的绑定在一起，需要分离
 
-没有对 reactify 中的 o 本身进行响应式处理，是对 o 的成员进行响应式处理
+没有对 reactify 中的 o 本身进行响应式处理，只对 o 的成员进行响应式处理。
+
+observe作用将对象 obj 变成响应式的
 
 ```javascript
 /** 将对象 obj 变成响应式的，vm 就是 Vue 实例，为了调用时处理上下文 */
@@ -1951,6 +1953,7 @@ function observe(obj, vm){
 ```
 
 observe没有返回值，所以需要修改defineReactive中 set 方法进行修改
+
 ```javascript
 set(newVal){
   // 目的
@@ -1967,7 +1970,7 @@ set(newVal){
 问题：
 - this的问题
 
-实现：
+实现：数据发生变化的事情，通知页面刷新，也就是通知watcher；访问数据的时候，通知全局Watcher保存watcher。
 
 分成两步：
 
@@ -1976,7 +1979,7 @@ set(newVal){
 
 在 Vue 中提供一个构造函数 Watcher，Watcher会有一些方法：
 
-- get() 用来进行**计算**（watch，computed）和**执行**处理函数
+- get() 用来进行**计算**（watch或computed @watcher）和**执行**处理函数（render@watcher）
 - update() 公共的外部方法，该方法会触发内部的run方法
 - run() 用来判断内部是使用异步运行还是同步运行等，这个方法最终会调用内部的get方法
 - clearupDep() 简单理解为清空队列
@@ -1984,6 +1987,9 @@ set(newVal){
 我们的页面渲染是上面哪一个方法执行的呢？ get方法
 
 我们的Watcher实例有一个属性vm，表示的就是当前的 Vue 实例
+
+Watcher类里做的事情，主要为：
+1. 传入组件实例、观察者函数、回调函数、选项
 
 ```javascript
 /** Watcher 观察者，用于发射更新的行为 */
@@ -1998,7 +2004,7 @@ class Watcher {
     this.getter = expOrfn;
 
     this.dep = []; // 依赖项
-    this.depIds = {}; // 是一个Set类型，用于保证依赖项的唯一性（简化的代码暂时不识闲这一块）
+    this.depIds = {}; // 是一个Set类型，用于保证依赖项的唯一性（简化的代码暂时不识别这一块）
 
     // 一开始需要渲染：真实 vue 中：this.lazy ? undefined : this.get()
     this.get();
@@ -2025,6 +2031,8 @@ class Watcher {
   clearupDep() { }
 }
 ```
+
+
 
 #### 3.10 引入Dep对象
 
@@ -2067,16 +2075,20 @@ Dep.target = null; // 这就是全局的Watcher
 之前将渲染 Watcher放在全局作用域上，这样处理是有问题的
 
 - Vue 项目中包含很多的组件，各个组件是**自治**
-  - watcher可能会有多个
-  - 每一个watcher用于描述一个渲染行为 或 计算行为
+  - 每个组件可能有多个watcher实例
+    - 模板渲染watcher：this._watcher = new Watcher(this, render, this._update)
+    - 计算属性watcher：new Watcher(this,function name(){...}, callback)
+  - 每一个watcher用于描述一个渲染行为（render@watcher） 或 计算行为（computed@watcher，）
     - 子组件发生数据的更新，页面需要重新渲染（真正的Vue中是局部渲染）
     - 例如 vue 中推荐使用计算属性代替复杂的插值表达式。计算属性是会伴随其使用的属性的变化而变化的
       - `name: () => this.firstName + this.lastName` 
       - 计算属性依赖于firstName和lastName
-      - 只要被依赖的属性发生变换，就会促使计算属性**重新计算**（来watcher完成）
+      - 只要被依赖的属性发生变换，就会促使计算属性**重新计算**
 - 依赖收集和派发更新是怎么运行起来的
 
-我们在访问的时候就会进行收集，在修改的时候，那么收集什么就更新什么
+
+
+我们在访问的时候就会进行收集，在修改的时候，收集什么就更新什么
 
 所谓的依赖收集 实际上就是告诉当前的watcher什么属性被访问了
 
@@ -2086,18 +2098,15 @@ Dep.target = null; // 这就是全局的Watcher
 
 - 在全局准备一个targetStack(watcher栈，简单的理解为watcher数组，把一个操作中需要使用的watcher都存储起来)
 - 在watcher调用 get 方法的时候，将当前watcher方法放到全局，在 get 执行结束之后，将这个全局的watcher移除。提供：pushTarget，popTarget
-- 在每一个属性中都有一个Dep对象
+- 每一个属性中都有一个Dep对象
 
-我们在访问对象属性的时候（get），此时渲染watcher就在全局中。将属性和watcher相关联，其实就是将当前渲染的watcher存储到属性相关的dep中，同时将dep也存储到当前全局的watcher中（互相引用的关系）
+我们在渲染访问对象属性的时候（就是在调用Watcher 的 get时候），此时渲染watcher就在全局中。将属性和watcher相关联，其实就是将当前渲染的watcher存储到属性相关的dep中，同时将dep也存储到当前全局的watcher中（互相引用的关系）
 
 - 属性引用了当前的渲染watcher，属性知道谁渲染它
-- 当前渲染watcher引用了访问的属性（Dep），当前的watcher知道渲染了什么属性
+- 当前渲染watcher引用了(访问的)属性（Dep），当前的watcher知道渲染了什么属性
 
-我们的dep有一个方法
+关联起来的好处：我们的dep还有一个方法notify()。其内部就是将dep中的subs取出来依次调用其update方法（subs里面存储的知道要渲染什么属性的watcher）
 
-```javascript
-// 1. vue.js 修改defineReactive函数的getter
-get: function reactiveGetter(){
-  console.log( `>>> getter: ${ key }, 收集了 属性 ${ key }` );
-}
-```
+#### 3.12 梳理Watcher、Dep、属性的关系
+
+假设：有三个属性
