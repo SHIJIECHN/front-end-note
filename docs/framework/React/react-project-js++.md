@@ -266,24 +266,91 @@ oneOf: [
   },
 ]
 ```
+5. react组件创建
+```javascript
+import React, {Component} from 'react'
+
+export default class IndexPage extends Component{
+    constructor(props){
+        super(props);
+        this.state = {...}
+    }
+    
+    render(){
+        return (...)
+    }
+}
+```
+6. 路由创建
+```javascript
+// 安装react-router  react-router-dom
+npm i react-router react-router-dom
+
+// 路由表
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+
+<Router>
+  <Switch>
+    {/* /login 放在上面 */}
+    <Route component={LoginPage} path='/login' />
+    {/* <Route component={IndexPage} path='/' /> */}
+    {/* 子路由的写法 */}
+    <Route path="/" render={props => (
+      <IndexPage history={props.history}>
+        <Switch>
+          <Route component={CollectionPage} path='/collection' />
+          <Route component={RecomCoursePage} path='/recom_course' />
+          <Route component={CoursePage} path='/course' />
+          <Route component={SliderPage} path='/slider' />
+          <Route component={StudentPage} path='/student' />
+          <Route component={TeacherPage} path='/teacher' />
+          <Route component={CrawlerPage} path='/crawler' />
+        </Switch>
+      </IndexPage>
+    )} />
+  </Switch>
+</Router>
+// 路由中，一级路由都需要放到上面，需要匹配二级路由的放在下面
+```
 
 ## 跨域
 ```javascript
 // 1. 服务端安装：koa2-cors
 yarn add koa2-cors@2.0.6
 
-// 2. 引入
+// 2. app.js 引入
 const cors = require('koa2-cors');
 
 // 3. 跨域配置
 app.use(cors({
+  // 设置源
   origin: function (ctx) {
     return 'http://localhost:3001'; // 允许http://localhost:3001的接口请求
   }
 }))
+
+// 4. config/env_config.js 设置不同环境判断
+const ENV = process.env.NODE_ENV;
+module.exports = {
+  // 用于对数据库的连接使用什么密码
+  isDev: ENV === 'dev', // true 是开发环境
+  isPrd: ENV === 'production', // true 是正式环境
+}
+
+// 5. config/config.js
+corsOrigin: isPrd ? 'http://admin.jsplusplus.com' : 'http://localhost:3001'
+
+// 6. app.js
+app.use(cors({
+  // 设置源
+  origin: function (ctx) {
+    return corsOrigin
+  }
+}))
 ```
 
-## 登录接口
+## 登录验证
+
 登录成功之后，返回的响应头部中有两条set-Cookie:
 
 Set-Cookie: txclass.sid=Ds1kqi526UNihCKamBq3ZCOZM1XEyQXB; path=/; expires=Thu, 24 Nov 2022 16:12:58 GMT; httponly    

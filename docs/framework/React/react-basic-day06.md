@@ -8,7 +8,7 @@ title: 事件处理函数绑定与事件对象
 `React`元素也是采用了类似于`DOM0`标准中的事件属性定义的方法
 ```javascript
 // JSX 写法
-// onClic小驼峰
+// onClick小驼峰
 <button  onClick={ this.doSth }>Click</button>
 ```
 ```javascript
@@ -21,7 +21,9 @@ React.createElement(
   'click'
 )
 ```
+
 不能通过`false`阻止默认行为，需要使用`preventDefault`
+
 ```javascript
 class App extends React.Component {
   doSth(e) {
@@ -43,6 +45,7 @@ class App extends React.Component {
 ```
 
 ## React事件对象
+
 ```js
 console.log(e);
 /**
@@ -51,6 +54,7 @@ console.log(e);
  * 这个对象遵守W3C事件对象的规范，不存在任何的浏览器兼容性问题
  */
 ```
+
 `SyntheticEvent`是浏览器的原生事件的跨浏览器包装器，可解决所有浏览器兼容问题，还拥有浏览器原生事件相同的接口。
 
 > 为什么`React`要将事件处理直接在`React`元素上绑定？ 
@@ -79,7 +83,7 @@ class App extends React.Component {
     console.log(this); // undefined
   }
 
-  // 3. class field
+  // 4. class field
   doSth = () => {
     //...
   }

@@ -5,7 +5,7 @@ title: 渲染元素ReactDOM.render
 ---
 
 ## 渲染
-html中的div容器叫根节点。
+`html`中的`div`容器叫根节点。
 
 根节点内的所有内容都是由`ReactDOM`进行管理，一个`React`应用只有一个根节点。
 

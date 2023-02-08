@@ -154,6 +154,7 @@ setTimeout(() => {
 2. 更新`UI`
 
 > 如何更新那些依赖于当前state的state呢？
+
 给setState传递一个函数，而不是一个对象，可以确保每次的调用都是使用最新版的state。
 
 关于`setState`方法的推荐调用方法：
@@ -171,9 +172,10 @@ setState((state, props) => {
 
 > 给setState传递一个对象与传递一个函数的区别是什么？
 
-传递一个函数可以让你在函数内访问当前的state的值。因为seState的调用是分批的，所以你可以链式地进行更新，并确保它们是一个简历在另一个之上的。
+传递一个函数可以让你在函数内访问当前的state的值。因为seState的调用是分批的，所以你可以链式地进行更新，并确保它们是一个建立在另一个之上的。
 
 关于`setState`方法的第二个参数：在状态更新后（页面完成重新渲染）立即执行某个操作。通常建立使用componentDidUpdate()来替代此方式。
+
 ```javascript
 this.setState(
   (state, props) => {},

@@ -2107,6 +2107,43 @@ Dep.target = null; // 这就是全局的Watcher
 
 关联起来的好处：我们的dep还有一个方法notify()。其内部就是将dep中的subs取出来依次调用其update方法（subs里面存储的知道要渲染什么属性的watcher）
 
-#### 3.12 梳理Watcher、Dep、属性的关系
 
-假设：有三个属性
+## Vue 源码解读
+
+1. 各个文件夹的作用
+2. Vue的初始化流程
+
+### 1. 各个文件夹的作用
+
+1. compiler 编译用的
+   - vue使用**字符串**作为模板
+   - 在编译文件夹中存放对模板字符串解析的算法，抽象语法树，优化等
+2. core 核心，vue 构造函数，以及生命周期等方法部分
+3. platforms 平台
+   - 针对运行环境（设备），有不同的实现
+   - 也是vue的入口
+4. server 服务端，主要是将vue用在服务端的处理代码（略）
+5. sfc 单文件组件（略）
+6. shared 公共工具（方法）
+
+### 2. Observer
+文件夹中各个文件的作用：
+
+- array.js 创建含有重写数组方法的数组，让所有的响应式数据继承自该数组
+- dep.js Dep类
+- index.js Observer类，observe的工厂函数
+- schedule.js vue中任务调度的工具，watcher执行的核心
+- traverse.js 递归遍历响应式数据，目的是触发依赖收集
+- watcher.js Watcher类
+
+面试题：对数组去重
+```javascript
+let arr = [1,1,1,1,2,2,2,3,3,3]; // [1,2,3]
+
+let _set = {};
+let _newArr = [];
+arr.forEach(v => _set[v] || (_set[v] = true, _newArr.push(v))); // 减少赋值行为
+
+// 问题：如何“判同”
+
+```

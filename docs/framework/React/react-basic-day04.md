@@ -62,7 +62,7 @@ ReactDOM.render(
 )
 ```
 
-```typescript
+```js
 // 函数组件
 // 利用hooks来做
 function Test(props) {
