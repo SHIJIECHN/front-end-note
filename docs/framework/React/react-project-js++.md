@@ -239,7 +239,16 @@ class Index {
 
 
 ## react项目配置
-1. 安装node-sass
+
+```javascript
+// 创建项目
+npx create-app-react txclass_manager
+// 进入项目并启动
+cd txclass_manager
+npm run start
+```
+
+1. 安装node-sass。如果安装失败，需要npm uninstall node-sass，调整之后再重新安装。
 2. 别名配置：
 ```javascript
 // node_modules/react-scripts/config/webpack.config.js
@@ -358,7 +367,7 @@ Set-Cookie: txclass.sid.sig=K4Z66auO_XF5-bFnaHJMfo4Cr6Y; path=/; expires=Thu, 24
 
 当时查看浏览器器Application/Cookies中查看并没有cookie。为什么？
 
-因为前后端分离时，浏览器和后端是不同源的，返回的头部包含Set-Cookie，但是后端不能操作写入Application/Cookies中。
+因为前后端分离时，浏览器（3001端口）和后端（3000端口）是不同源的，后端返回的头部包含Set-Cookie，但是后端只是让你Set-Cookie，而浏览器与后端不同源没法做。
 
 解决：前端axios请求参数配置：withCredentials: true, 请求携带cookie资质。后端也需要设置在不同源的情况下，也有权限设置cookie。
 ```javascript
@@ -370,6 +379,23 @@ app.use(cors({
 }))
 ```
 
+Cookie的验证：
+```javascript
+async loginCheck(ctx, next) {
+  // 不会去比对session是否正确，因为携带了Cookie（ctx.session），
+  // 访问ctx.session.userInfo的时候才能获取到值，不存在就无法获取到
+  // 只要能访问到说明传进来的都是有效的
+  if (ctx.session && ctx.session.userInfo) {
+    // 登录状态
+    ctx.body = returnInfo(LOGIN.LOGIN_STATUS);
+    return;
+  }
+  // 非登录状态
+  ctx.body = returnInfo(LOGIN.NOT_LOGIN_STATUS);
+}
+```
+
+
 ## history
 直接在Route中注册的组件，组件内部可以使用history
 ```javascript
@@ -378,7 +404,19 @@ app.use(cors({
   <Switch>
     {/* 在组件LoginPage中可以使用history*/}
     <Route component={LoginPage} path='/login' />
-    <Route component={IndexPage} path="/" />
+    <Route path="/" render={props => (
+      <IndexPage history={props.history}>
+        <Switch>
+          <Route component={CollectionPage} path='/collection' />
+          <Route component={RecomCoursePage} path='/recom_course' />
+          <Route component={CoursePage} path='/course' />
+          <Route component={SliderPage} path='/slider' />
+          <Route component={StudentPage} path='/student' />
+          <Route component={TeacherPage} path='/teacher' />
+          <Route component={CrawlerPage} path='/crawler' />
+        </Switch>
+      </IndexPage>
+        )} />
   </Switch>
 </Router>
 
@@ -406,6 +444,9 @@ body,
   height: 100%;
 }
 ```
+
+## 侧边栏
+
 
 ## 接口
 1. /admin/login_action 登录

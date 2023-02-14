@@ -17,7 +17,7 @@ title: 组件与props
 
 组件一般是内部管理数据集合（state），外部传入配置集合（props）
 
-```JSX
+```js
 // 类组件
 class Test extends React.Component {
     // 接收外部传入的属性配置在props里保存

@@ -26,6 +26,7 @@ React主观意愿是什么？
 对比React只关注视图，逻辑的写法偏向纵向，可以容易拆分，也可以结合各种设计思想进行模块之间的设计编写，开发者思想清晰时可以对组件更加好的拆分，代码非常的干净，方法可以单独封装后进行组件内部使用，事件传递和数据传递也简单，也更加好的管理和维护，场景上更加复杂的应用场景，后台系统，开发社区也较为成熟。
 
 ## 使用React
+
 > 怎么负责视图渲染？
 
 ```javascript
@@ -60,7 +61,9 @@ class MyButton extends React.Component {
 2. ReactDOM：从render函数到虚拟DOM节点到真实DOM节点需要用的库
 
 ### 1. React.createElement
+
 React.createElement 方法可以手动创建一个React元素
+
 ```javascript
 /**
  * React.createElement 手动创建一个React元素
@@ -72,7 +75,9 @@ React.createElement('div', {
 'data-tag': 'div'
 }, 'This is my first React experience')
 ```
+
 React.render方法将react元素变成虚拟节点，然后变成真实节点
+
 ```javascript
 /**
  * ReactDOM.render(){}
@@ -93,10 +98,12 @@ ReactDOM.render(
     <div data-tag="div">This is my first React experience</div>
 </div>
 ```
+
 手动新增子节点的写法
 1. 新增子节点
 2. class写法是className
 3. 子节点插入到[]
+   
 ```javascript
 // 1. 新增子节点
 var span = React.createElement('span', {
@@ -119,7 +126,9 @@ ReactDOM.render(
     </div>
 </div>
 ```
+
 React.createElement方法也可以接受**React类组件**作为参数去创建一个真实节点
+
 ```javascript
 ReactDOM.render(
     React.createElement(MyButton),
