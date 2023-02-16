@@ -9,13 +9,15 @@ title: 组件与props
 
 在前端，组件是视图的片段，组件包含视图标记、事件、数据、逻辑、外部的设置。
 
-> props的作用是什么？
+> `props`的作用是什么？
 
-组件是封闭的，要接收外部数据通过props来实现，props接收传递给组件的数据。
+组件是封闭的，要接收外部数据通过`props`来实现，`props`接收传递给组件的数据。
 
 > 数据是什么？
 
-组件一般是内部管理数据集合（state），外部传入配置集合（props）
+组件一般是内部管理数据集合（`state`），外部传入配置集合（`props`）
+
+### 1. 类组件
 
 ```js
 // 类组件
@@ -32,7 +34,7 @@ class Test extends React.Component {
 
     // 内部数据
     state = {
-        title: this.props.title
+        title: this.props.title // 访问外部传入的值 this.props
     }
 
     // 事件处理函数
@@ -48,7 +50,8 @@ class Test extends React.Component {
         return (
             <div>
                 <h1>{this.state.title}</h1>
-                {/* 事件 */}
+                {/* 事件。handleBtnClick内部的this默认是指向button的，但是在handleBtnClick我们需要处理this.setState，
+                    此时this是组件实例，所以需要修改this指向 */}
                 <button onClick={this.handleBtnClick.bind(this)}>Click</button>
             </div>
         )
@@ -57,10 +60,13 @@ class Test extends React.Component {
 }
 
 ReactDOM.render(
+    // 外部传入 title
     <Test title="This is a Class Component." />,
     document.getElementById('app')
 )
 ```
+
+### 2. 函数组件
 
 ```js
 // 函数组件
@@ -72,7 +78,8 @@ function Test(props) {
     return (
         <div>
             <h1>{title}</h1>
-            {/* 事件 */}
+            {/* 事件。
+                执行setTitle。() => setTitle('This is my Component') 相当于 function (){ setTitle('This is my Component')} */}
             <button onClick={() => setTitle('This is my Component')}>Click</button>
         </div>
     )
@@ -87,7 +94,8 @@ ReactDOM.render(
 ## 渲染组件 
 
 组件渲染的过程：
-1. React主动调用组件
+
+1. React主动调用组件。
 2. 将属性集合转换成对象 `props => { title: 'This is a class Component.'}`
 3. 将对象作为`props`传入组件
 4. 替换`JSX`中的`props`或者`state`中的变量
@@ -98,11 +106,13 @@ ReactDOM.render(
 :::
 
 组件调用规范：
+
 - 视图标记时HTML标签 `<div></div>`
 - 大驼峰写法作为一个React元素 `<Title />`组件 -> JSX -> React元素。`<Test title="This is a Class Component." />`
 - 组件转换`React`元素 `React.createElement(Title, {...})`
 
 ## 组合组件
+
 几个子组件放入到父组件里（返回的视图中组合）
 ```javascript
 /**
@@ -171,7 +181,9 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
+
 组件嵌套
+
 ```javascript
 /**
  * title
@@ -250,50 +262,16 @@ ReactDOM.render(
 )
 ```
 
-## props的只读性 
-组件props可以传递什么类型的数据？
-```jsx
-<List
-  //字符串
-  name="rose"
-  //数值
-  age={19}
-  //数组
-  colors={['red', 'green', 'blue']}
-  //返回结果的函数
-  fn={() => consolo.log('this is a fn')}
-  //React元素
-  tag={<p>this is a p.</p>}
-/>
-```
-
 属性props和数据状态state的区别：
+
 1. state叫数据池对象，组件内部的管理数据的容器，可写读
 2. props叫配置池对象，外部使用（调用）组件时传入的属性集合，组件内部只读
-
-为什么属性props对象可不写？
-
-组件内部是不应该有权限修改组件外部的数据
-```javascript
-// props的只读性
-
-// 函数组件一定要是一个纯函数。
-// 纯函数能保证绝对的复用性
-// 相同的入参保证相同的结果
-// 纯函数不可以修改入参
-function test(a, b){
-    return a + b
-}
-// 从设计上讲，在函数内部更改入参
-// 其实是在组件运行时更改了外部的设置
-// 该配置是使用者希望通过该配置达到对应的结果。
-```
 
 ```javascript
 /**
  * state与props结合
  * 
- * content = props => outer => 外部配置
+ * content => props => outer => 外部配置
  * state => content => default => props.content
  */
 
@@ -304,7 +282,7 @@ class App extends React.Component {
     }
 
     state = {
-        content: this.props.content
+        content: this.props.content // 将外部值赋给state
     }
 
     handleBtnClick() {
@@ -329,6 +307,44 @@ ReactDOM.render(
     <App content="This is my content." />,
     document.getElementById('app')
 )
+```
+
+## props的只读性
+
+> 为什么属性props对象不可写？
+
+组件内部是不应该有权限修改组件外部的数据
+
+```javascript
+// props的只读性
+
+// 函数组件一定要是一个纯函数。
+// 纯函数能保证绝对的复用性
+// 相同的入参保证相同的结果
+// 纯函数不可以修改入参
+function test(a, b){
+    return a + b
+}
+// 从设计上讲，在函数内部更改入参
+// 其实是在组件运行时更改了外部的设置
+// 该配置是使用者希望通过该配置达到对应的结果。
+```
+
+组件props可以传递什么类型的数据？
+
+```jsx
+<List
+  //字符串
+  name="rose"
+  //数值
+  age={19}
+  //数组
+  colors={['red', 'green', 'blue']}
+  //返回结果的函数
+  fn={() => consolo.log('this is a fn')}
+  //React元素
+  tag={<p>this is a p.</p>}
+/>
 ```
 
 

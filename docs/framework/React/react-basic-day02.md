@@ -4,14 +4,32 @@ sidebarDepth: 3
 title: JSX（一）
 ---
 
+## 环境搭建
+
+```javascript
+// 初始化package.json
+npm init -y
+// 安装vite
+npm install vite 
+// 修改package.json
+"scripts": {
+    "dev": "vite"
+}
+// index.html引入的文件需要加type="module"
+<script src="1.index/App.jsx" type="module"></script>
+// 启动项目
+npm run dev
+```
+
 ## JSX是什么
 1. 一种标签语法、在JS上进行的语法扩展
 2. 不是字符串、不是HTML标签
-3. 描述UI呈现与交互的直观的表现形式
+3. 描述UI呈现与交互的**直观的表现形式**，针对开发者。
 4. 生成React元素
-
+   
 
 ## createElement与JSX对比
+
 ```javascript
 // JSX
 const rEl1 = <h1 className="title">This is my first JSX experience.</h1>
@@ -50,6 +68,7 @@ rEl1编译以后会转化成rEl2，JSX实际上是React.createElement的上层�
 
 ## 插值表达式
 一切有效的（符合JS编程逻辑的）表达式都写在 { } 里面。JSX有编译的过程，被编译以后转化为React元素，实际上是一个普通的对象。
+
 ```javascript
 class MyButton extends React.Component {
     constructor(props) {
@@ -75,10 +94,11 @@ class MyButton extends React.Component {
             <div className="wrapper">
                 <p className="text">
                     { /**插值表达式 */ }
-                    { this.state.openStatus ? '打开状态' : '关闭状态'}
+                    { this.state.openStatus ? '打开状态' : '关闭状态' }
                 </p>
+                {/* statusChange默认的this指向是指向button的，需要将statusChange指向当前类的实例的话，需要修改this指向 */}
                 <button onClick={this.statusChange.bind(this)}>
-                    {this.state.openStatus ? '关闭' : '打开'}
+                    { this.state.openStatus ? '关闭' : '打开' }
                 </button>
             </div>
         )
@@ -97,19 +117,11 @@ ReactDOM.render(
 > 为什么React不把视图标记和逻辑分开呢？
 
 1. 渲染和UI标记是有逻辑耦合
-2. 即使是这样的耦合也能实现关注点分离
+2. 即使是这样的耦合也能实现关注点分离。因为单独在render函数中返回视图标记。
 
-```javascript
-render(){
-    return (
-        <button onClick={this.statusChange.bind(this)}>
-            {this.state.openStatus ? '关闭' : '打开'}
-        </button>
-    )
-}
-```
 
 ## 渲染一个列表
+
 ```javascript
 var arr = [
     {
@@ -151,7 +163,10 @@ ReactDOM.render(
 ```javascript
 const rEl = <img src="" />
 ```
+> render之前React做了什么？
+
 ReactDOM在渲染之前所有JSX内容都会转成字符串，所有输入的内容都会进行转义，可以有效防止XSS（cross-site-scripting，跨站脚本）攻击。
+
 
 ## 总结
 1. JSX是什么
