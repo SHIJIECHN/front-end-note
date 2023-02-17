@@ -259,7 +259,8 @@ alias: {
   'components': paths.appSrc + '/components',
   'assets': paths.appSrc + '/assets',
   'services': paths.appSrc + '/services',
-  'utils': paths.appSrc + '/utils'
+  'utils': paths.appSrc + '/utils',
+  'config': paths.appSrc + '/config'
 },
 ```
 3. 安装react-router-dom
