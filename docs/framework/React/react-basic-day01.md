@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 简单认识React
+title: 1. 简单认识React
 ---
 
 ## React

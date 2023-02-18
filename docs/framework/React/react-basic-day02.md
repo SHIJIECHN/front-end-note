@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: JSX（一）
+title: 2. JSX（一）
 ---
 
 ## 环境搭建

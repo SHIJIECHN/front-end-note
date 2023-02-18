@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 渲染元素ReactDOM.render
+title: 3. 渲染元素ReactDOM.render
 ---
 
 ## 渲染

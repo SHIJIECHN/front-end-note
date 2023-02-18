@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 组件与props
+title: 4. 组件与props
 ---
 
 ## 组件

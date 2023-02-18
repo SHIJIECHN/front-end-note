@@ -1,12 +1,19 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: state
+title: 5. state与setState、单向数据流
 ---
 
 ## state
+
 `state`是`React`的核心，是一个组件私有的状态数据池。
+
 ```javascript
+/**
+Board
+    Title 标题组件
+    DateTime 时钟组件
+*/
 class Title extends React.Component {
     constructor(props) {
         super(props)
@@ -24,14 +31,15 @@ class DateTime extends React.Component {
     constructor(props) {
         super(props)
     }
-
+    // 数据池：管理组件内部数据状态。
     state = {
-        dateTime: new Date().toString()
+        dateTime: new Date().toString() // 组件内部可以自己更新，所以不需要外界传入
     }
 
-    // 组件已经被渲染到DOM中以后运行
+    // 组件已经被渲染到DOM中，以后运行
     // 组件已经被挂载到了真实DOM中后，运行的函数
     componentDidMount() {
+        // 每一秒钟重新设置一次 dateTime。组件内部可以修改state数据池
         this.t = setInterval(() => {
             this.setState({
                 dateTime: new Date().toString()
@@ -39,13 +47,15 @@ class DateTime extends React.Component {
         }, 1000)
     }
 
-    // 组件即将被卸载时运行
+    // 组件即将被卸载时运行。组件如何卸载？React提供了卸载组件的方法
     componentWillUnmount() {
+        // 清除定时器
         clearInterval(this.t);
         this.t = null;
         console.log('Over')
     }
 
+    // 视图
     render() {
         return (
             <h2 id="dateTime">It's NOW {this.state.dateTime}</h2>
@@ -69,6 +79,7 @@ ReactDOM.render(
     document.getElementById('app')
 )
 
+// 5秒后卸载组件
 setTimeout(() => {
     // 卸载组件
     ReactDOM.unmountComponentAtNode(
@@ -76,68 +87,82 @@ setTimeout(() => {
     )
 }, 5000)
 ```
+
 总结：
+
 1. 如果想使用组件的时候，传入数据`props`组件配置
 2. 如果是组件使用的数据，使用私有数据状态`state`
 
 :::tip
-1. 必须使用`setState`方法来修改`state`
-2. 多个`setState`是会合并调用
-3. `props`和`state`更新数据需谨慎，避免直接依赖它们，它们俩很可能是在异步程序中更新的
+state的使用注意事项：
+
+1. 必须使用`setState`方法来修改`state`。
+2. 多个`setState`是会合并调用。
+3. `props`和`state`更新数据需谨慎，避免直接依赖它们，它们俩很可能是在异步程序中更新的。
+   
    ```javascript
-   // 不可以使用
+   // 不可以使用。因为result和content有可能是异步更新的
    this.setState({
         result: this.state.result + this.props.content
    })
 
    // 解决方案：使用回调函数
    this.setState((state, props) => {
-        // state是上一个state
-        // props是此次更新时被使用的props
+        // state是上一个state，更新之前的state
+        // props是此次更新时被使用的props，当前的props
         result: state.result + props.content
     })
    ```
 4. `setState`操作合并的原理是浅合并
    ```javascript
-    constructor(props) {
-        super(props);
-        this.state = {
-            posts: [],
-            comments: []
-        }
+    this.state = {
+        obj: {},
+        arr: []
     }
 
-    // 更新posts、comments
-    componentDidMount() {
-        fetchPostes().then(response => {
-            this.setState({
-                posts: response.posts
-            })
-        });
-
-        fetchComments().then(response => {
-            this.setState({
-                comments: response.comments
-            })
+    $.ajax().then(()=>{
+        this.setState({
+            obj: res.obj
         })
-    }
-    // this.setState({comments})完整保留了this.state.posts，
-    // 但完全替换了this.state.comments
+    })
+
+    $.ajax().then(()=>{
+        this.setState({
+            arr: res.arr // 完全替换arr，保证obj是原来的引用
+        })
+    })
+
+    
    ```
 :::
 
+组件无论如何都是不知道其他组件是否有状态的，组件也并不关系其他组件是函数组件还是类组件。
+
 关于组件中的`state`：
+
 1. `state`是组件特有的数据封装
-2. 其他组件是无法读写修改该组件的`state`
+2. 其他组件是**无法读写修改**该组件的`state`
 3. 组件可以通过其他组件调用的时候传入属性来传递`state`的值
+   ```javascript
+    // app.js
+    this.state = {
+        title: 'This is a title.'
+    }
+   <Title title={this.state.title} /> 
+
+    // Title
+    <h1>{this.props.title}</h1>
+   ```
 4. `props`虽然是响应式的，但是在组件内部是只读的，所以仍然无法修改其他组件的`state`
 5. 安全影响范围：`state`只能传递给自己的子组件，说明`state`只能影响当前组件的`UI`的内部的`UI`
 6. 组件可以没有状态，是否有状态，组件间都不受嵌套影响，有无状态是可切换的
 
 ## 单向数据流（One-Way Data Flow）
-从父组件到子组件由上而下的传递流动的数据状态，叫单向数据流。
+
+这种数据（状态）从父组件到子组件，由上而下的传递流动的数据状态，叫单向数据流。
 
 ## state和props区别
+
 相同点：
 1. `props`和`state`都是普通的`JS`对象，都是用来保存信息的
 2. props和state改变都会引起组件重新渲染
