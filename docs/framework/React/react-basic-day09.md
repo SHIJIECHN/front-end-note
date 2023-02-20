@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 父子组件通信和状态提升
+title: 9. 父子组件通信和状态提升
 ---
 
 ## 状态提升
@@ -28,20 +28,48 @@ class UserNameInput extentds React.Component {
   // 使用了组件1
   render(){
     return (
-      <Info />
+      <Info username={ this.props.username } num={ this.props.inputNum }/>
+      <input 
+        type="text" 
+        value={ this.props.value }
+        onChange={ (e)=> this.props.changeUsername(e) } />
     );
   }
 }
 
 //父组件
 class App extends React.Component { 
+  state = {
+    name: 'Zhange'
+  }
+
+  changeUsername(e){
+    this.setState({
+      username: e.target.value
+    })
+  }
+
   //使用了两次组件2
   render(){
     return (
-      // 向各自的子组件传值
-      // 这样传值结果是：两个组件的state状态数据是不同步的，相互独立的
-      <UserNameInput inputNum={ 1 }/>
-      <UserNameInput inputNum={ 1 }/>
+      <div>
+          {/* 
+            向各自的子组件传值
+            这样传值结果是：两个组件的state状态数据是不同步的，相互独立的
+
+            将状态提升到父组件中，就可以使子组件状态同步
+          */}
+          <UserNameInput 
+            username={this.state.username} 
+            inputNum={ 1 }
+            changeUsername={this.changeUsername.bind(this)}
+          />
+          <UserNameInput 
+            username={this.state.username} 
+            inputNum={ 1 }
+            changeUsername={this.changeUsername.bind(this)}
+          />
+      </div>
     );
   }
 }
@@ -64,9 +92,11 @@ ReactDOM.render(
 
 ### 2. 子传父
 利用回调函数，父组件提供回调，子组件调用，将要传递的数据作为回调函数的参数
+
 1. 父组件提供一个回调函数（用于接收数据）
 2. 将该函数作为属性的值，传递给子组件
 3. 子组件通过props调用回调函数
+
 ```javascript
 class Father extends React.Component{
   //1.定义父组件的回调函数方法

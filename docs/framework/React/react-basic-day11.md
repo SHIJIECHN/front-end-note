@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 代码分割
+title: 11. 代码分割
 ---
 
 ## 代码分割
@@ -15,7 +15,7 @@ title: 代码分割
 ## import
 `import`导入模块：`import`是一个`ES6`的模块化关键字，不是一个函数，它分为静态的导入（`static import`）`import xxx from 'xxx'`和动态导入（`dynamic import`）`import('xxx')`。
 
-`import`是可以被调用的，但是它和普通的函数时不一样的，`import`不是一个对象，它是一个关键字`import xxx/ import(xxx)`类似`typeof(xxx)/ typeof xxx`
+`import`是可以被调用的，但是它和普通的函数是不一样的，`import`不是一个对象，它是一个关键字`import xxx/ import(xxx)`类似`typeof(xxx)/ typeof xxx`
 
 区别：
 - `static import` 是模块的静态导入，特点是导入并加载时，导入的模块会被编译，不是按需编译
@@ -26,7 +26,7 @@ title: 代码分割
 2. 模块的导入占用了大量的系统内存
 3. 模块需要异步获取
 4. 导入模块时需要动态的构建路径（说明符） 
-5. 动态说明符：`import ('./' + a + b + '.js')`
+5. 动态说明符：`import ('./' + a + b + '.js')`。路径前面一定要加 './'。
 6. 静态说明符：`static import`只支持静态说明符。不支持`import xxx from './'+ a + b + '.js`
 7. 模块中的代码需要程序触发了某些条件才能运行的
 

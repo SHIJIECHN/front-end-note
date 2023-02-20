@@ -1,11 +1,13 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 组合继承、CSS Module
+title: 10. 组合继承、CSS Module
 ---
 
 ## 包含组合
+
 `children`属性：表示组件标签的子节点，当组件标签有子节点时，`props`就会有`props.children`属性。
+
 ```javascript
 //1.如果Container内部有内容, React会在props内部增加children属性
 //2.如果Container内部有非元素内容, children: 非元素内容
@@ -37,26 +39,29 @@ class App extends React.Component {
   }
 }
 ```
+
+props可以传递任何东西，包括JSX。
+
 ```javascript
 // 多个元素节点
 class Container extends React.Component {
   render(){
     console.log(this.props);
+
+    return (
+      <div className="container">
+        <div className="header">
+          { this.props.header }
+        </div>
+          <div className="sidebar">
+          { this.props.sidebar }
+        </div>
+          <div className="main">
+          { this.props.main }
+        </div>
+      </div>
+    );
   }
-  
-  return (
-    <div className="container">
-      <div className="header">
-        { this.props.header }
-      </div>
-        <div className="sidebar">
-        { this.props.sidebar }
-      </div>
-        <div className="main">
-        { this.props.main }
-      </div>
-    </div>
-  );
 }
 
 class Header extends React.Conponent {...}
@@ -76,11 +81,12 @@ class App extends React.Component {
 }
 ```
 
-> 为什么JSX还可以通过`props`传递视图`React`元素？
+> 为什么JSX可以通过`props`传递视图`React`元素？
 
 `JSX`本质上都会转成`React`元素（`Object`对象），视图通过`props`传递比较像`vue`的插槽，但是`React`没有插槽概念的定义，`React`本身就允许`props`传递任何类型的数据到子组件
 
 ## 多层组合
+
 ```javascript
 //给Header组件底下的Select组件组合属性和方法
 //仅仅传给Header组件就能实现多层嵌套组件传值
@@ -100,6 +106,16 @@ render(){
     </div>
   );
 }
+
+class Header extends React.Component{
+    render(){
+        return(
+            <div>
+                {this.props.citySelector}
+            </div>
+        )
+    }
+}
 ```
 
 > 组件如何做继承关系？
@@ -117,6 +133,7 @@ CSS模块化：将`css`当成模块传递到组件内部用`JS`逻辑去调用�
 > 如何调用
 
 ```javascript
+// 命名规则：必须是 xxx.module.css
 // index.module.css -> vite 
 
 // 引入模块
