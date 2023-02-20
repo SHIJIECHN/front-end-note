@@ -1,11 +1,13 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 条件渲染与列表渲染
+title: 7. 条件渲染与列表渲染
 ---
 
 ## 条件渲染
-登录状态和非登录状态
+
+登录状态和非登录状态。根据logged的值来渲染不同的组件。
+
 ```javascript
 // APP
 //   LoginForm
@@ -14,6 +16,7 @@ title: 条件渲染与列表渲染
 
 // 登录页面
 class LoginForm extends React.Component {
+    // 数据
     state = {
         username: '', // 用户名
         password: '' // 密码
@@ -25,11 +28,11 @@ class LoginForm extends React.Component {
         if (!username.length || !password.length) {
             alert('用户名或密码不能为空！')
         }
-        // 登录操作
+        // 登录操作。父组件传入的login方法
         this.props.login(username, password);
 
     }
-    // 用户名输入框发生改变
+    // 用户名输入框发生改变。获取输入框的值：事件对象
     handleUserNameChange = (e) => {
         // 用户名。e.target.value当前输入框的值
         this.setState({
@@ -103,7 +106,7 @@ class Tip extends React.Component {
 
 class App extends React.Component {
     state = {
-        logged: false,
+        logged: false, // 记录登录状态
         count: 0,
         tipShow: false
     }
@@ -169,9 +172,9 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
-根据logged的值来渲染不同的组件。
 
-### 阻止组件渲染
+## 阻止组件渲染
+
 如果你希望隐藏组件，可以让render方法直接返回null，而不进行任何渲染
 
 根据props的值进行条件渲染，如果tipShow的值是false，那么组件则不会渲染。
@@ -192,15 +195,21 @@ class Tip extends React.Component {
 ```
 在组件的render方法中返回null并不会影响组件的生命周期。
 
+
+总结：
+
+1. 与运算符：判断表达式一定是布尔false，null，undefined的时候，才不会被渲染。0（数字0）、''（空字符串）会渲染出来的。
+2. 如果render函数返回null，不会进行任何渲染。
+
+
 ## 列表渲染
 
 关于`key`值：
-- 列表中的每个子元素都必须唯一的`key`属性
+- 列表中的每个子元素都必需有唯一的`key`属性
 - `key`是`React`查看元素是否改变的唯一标识
 - `key`必须在兄弟节点中唯一，确定的（兄弟结构是在同一列表中的兄弟元素）
-- 不建议使用`index`作为`key`值（禁止），建立在列表顺序改变，元素增删的情况下
-- 列表项增删或顺序改变，`index`的对应项就会改变，`key`对应的项还是之前列表情况的对应元素的值
-- 导致状态混乱，查找元素性能会变差
+- 不建议使用`index`作为`key`值（禁止），建立在**列表顺序改变，元素增删**的情况下
+- 列表项增删或顺序改变，`index`的对应项就会改变，`key`对应的项还是之前列表情况的对应元素的值，导致状态混乱，查找元素性能会变差
 
 解决方法：
 - 如果列表是静态不可操作的，可以选择`index`作为`key`，也不推荐，有可能这个列表在以后维护的时候有可能变更为可操作的列表
@@ -236,6 +245,7 @@ class App extends React.Component {
     render() {
         return (
             <table border="1">
+                {/* table中需要有thead、tbody */}
                 <thead>
                     <tr>
                         <th>KEY</th>
@@ -246,7 +256,7 @@ class App extends React.Component {
                 <tbody>
                     {
                         this.state.arr.map(item => {
-                            const key = nanoid()
+                            const key = nanoid(); // 生成key
                             return (
                                 <tr key={key}>
                                     <td>{key}</td>
@@ -256,7 +266,6 @@ class App extends React.Component {
                             )
                         })
                     }
-
                 </tbody>
             </table>
         )
@@ -321,6 +330,8 @@ class ListTable extends React.Component {
                             /**
                              * key是不会作为属性传递给子组件的，必须显示传递key值，为什么？
                              * 防止开发者在逻辑中对key值进行操作
+                             *
+                             * 使用的时候再写key={sid}。多层map渲染推荐分别提出子组件再进行操作
                             */
                             return (
                                 <ListItem

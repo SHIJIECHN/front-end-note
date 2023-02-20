@@ -7,6 +7,7 @@ title: 6. 事件处理函数绑定与事件对象
 ## 事件的认识
 
 `DOM`事件处理采用`addEventListener`或`onclick=function(){...}`。
+
 ```javascript
 <button onclick="this.doSth"></button> // onclick 纯小写
 ```

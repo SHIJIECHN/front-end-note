@@ -1,10 +1,11 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 受控组件与非受控组件
+title: 8. 受控组件与非受控组件
 ---
 
 ## 受控组件
+
 在`react`有两种表单处理方式：
 - 受控组件
 - 非受控组件
@@ -36,6 +37,7 @@ title: 受控组件与非受控组件
 
 表单操作：通过修改页面的内容从而更改`state`数据，事件绑定`e.target.value/e.target.checked`
 
+案例：用户信息提交表单
 ```javascript
 class App extends React.Component {
     constructor() {
@@ -142,10 +144,9 @@ this.handleChange = (e) => {
   - 控制表单操作并且同步`state`
 - 非受控组件：视图表单数据是只读的
 
-案例：用户信息提交表单
-
 
 ## 非受控组件
+
 不受控于`state`，使用`React`中的`ref`从`DOM`节点中获取表单数据得到的组件。
 
 ### ref使用的两种方式
@@ -161,7 +162,8 @@ this.handleChange = (e) => {
 console.log(this.refs.usernameRef.value)
 ```
 
-也可以创建引用挂载到试图上React.createRef()
+也可以创建引用挂载到视图上React.createRef()
+
 ```javascript
 //1.调用React.createRef()方法创建一个ref对象
 constructor(){
@@ -238,6 +240,7 @@ class App extends React.Component {
                     </select>
                 </p>
                 <p>
+                    {/* 上传 */}
                     <input type="file" ref={this.fileRef} />
                 </p>
                 <p>
@@ -255,3 +258,4 @@ ReactDOM.render(
     document.getElementById('app')
 )
 ```
+
