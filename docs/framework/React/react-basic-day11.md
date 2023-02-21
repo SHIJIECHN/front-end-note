@@ -41,11 +41,13 @@ title: 11. 代码分割
 
 
 ## lazy
+
 `React.lazy`方法，`Suspense`是`React`内置组件，挂载到`React`。
 
 > `lazy`是什么？
 
 `lazy`是`React`提供给开发者的懒（动态）加载组件的方法`React.lazy`（参数：函数必须接收一个支持`Promise`的动态导入组件），好处是减少打包体积，对初次渲染不适用的组件延迟加载，它依赖一个内置组件Suspense，给lazy加上loading提示组件的一个容器组件。
+
 ```javascript
 // loading.jsx
 class Loading extends React.Component {
@@ -71,9 +73,9 @@ export default Main;
 import Loading from './loading.jsx';
 //lazy接收一个动态导入组件的函数
 //该函数返回一个Promise
-//Promise会resolve一个默认导出的React组件如export default xxx;
+//Promise会resolve一个默认导出的React组件。export default xxx;
 //Suspense目前只和lazy配合实现组件等待加载指示器的功能
-//服务端渲染不支持,改用loadable Components
+//服务端渲染不支持, 改用loadable Components
 const MainComponent = React.lazy(() => import('./main.jsx'));
 
 class App extends React.Component { 
@@ -147,7 +149,9 @@ class App extends Component {
 
 
 ## 命名导出
+
 `lazy`只支持默认导出(`default exports`)。如果想被引用的模块使用命名导出（`named exports`），可以创建一个中间模块，来重新导出为默认模块。
+
 ```javascript
 export {
     Test1

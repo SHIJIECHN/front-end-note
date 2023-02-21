@@ -1,11 +1,14 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 错误边界
+title: 12. 错误边界
 ---
 
 ## 错误边界
-`React16`增加的，是防止某个组件的`UI`渲染错误导致整个应用崩溃。子组件发生了`JS`的错误，有备用的渲染`UI`。错误边界是一个组件，这个组件只能用class组件来写
+`React16`增加的，是防止某个组件的`UI`渲染错误导致整个应用崩溃。子组件发生了`JS`的错误，有备用的渲染`UI`。
+
+错误边界是一个组件，这个组件只能用class组件来写。
+
 ```javascript
 /**
  * static getDerivedStateFromError(error) 是一个生命周期函数.获取捕获错误状态，修改错误状态
@@ -24,15 +27,25 @@ title: 错误边界
  */
 
 class ErrorBoundary extends React.Component{
+  constructor(props) {
+    super(props);
+    // componentDidCatch有冒泡机制，会冒泡到window上面。window.onerror 可以监听到error触发的。注意：生产环境下不可以
+    window.onerror = function (err) {
+      console.log(err);
+    }
+  }
+
   state = {
     hasError: false
   }
   
+  // 渲染时
   static getDerivedStateFromError(error){
     //返回一个新的状态
     return { hasError: true }
   }
   
+  // 生命周期函数中
   componentDidCatch(error, info) {
     // 处理副作用
     console.log(error, info)
@@ -50,12 +63,45 @@ class ErrorBoundary extends React.Component{
     }
   }
 }
+
+// 内部由错误的组件
+class Test extends Component {
+  render() {
+    return (
+      <div>{data.title}</div>
+    );
+  }
+}
+
+// 没有错误的组件
+class Sub extends Component {
+  render() {
+    return (
+      <p>This is content</p>
+    )
+  }
+}
+
+// 使用
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <ErrorBoundary>
+          {/* Sub组件正确展示，Test组件出现错误会展示错误边界组件中'This is something wrong.' */}
+          <Sub />
+          <Test />
+        </ErrorBoundary>
+      </div>
+    )
+  }
+}
 ```
 
 有一些无法捕获的场景：
 1. 事件处理函数。没办法在渲染的时候直接捕获事件处理函数内部的错误，必须执行了才可以
 2. 异步代码。`setTimeout`、`ajax`
-3. 服务端渲染
+3. 服务端渲染。
 4. 错误边界组件内部有错误。**错误边界组件仅可以捕获其子组件的错误**，无法捕获其自身的错误。
 
 错误边界组件捕获错误的时机有哪些
@@ -63,7 +109,7 @@ class ErrorBoundary extends React.Component{
 - 生命周期函数中：`componentDidCatch`
 - 组件树的构造函数中：`window.onerror`
 
-如果多个嵌套错误边界组件，则从最里层错误出发，向上冒泡触发捕获。
+如果多个嵌套错误边界组件，则从最里层错误出发，向上**冒泡**触发捕获。
 
 ## 懒加载与错误边界的使用
 ```javascript
@@ -74,8 +120,8 @@ class ErrorBoundary extends React.Component{
   </React.Suspense>
 </ErrorBoundary>
 ```
-懒加载组件内部发生错误，错误边界组件会捕获到。
 
+懒加载组件内部发生错误，错误边界组件会捕获到。
 
 ## 总结
 1. 错误边界组件使用`static getDerivedStateFromError()`渲染备用`UI`，使用`componentDidCatch()`打印错误信息
