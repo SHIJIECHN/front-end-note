@@ -1,16 +1,19 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: Refs（一）
+title: 16. Refs（一）
 ---
 
 ## Refs的应用
+
 Refs提供了一种方式允许我们访问真实DOM。
 
 React的数据流是通过props来实现父子组件的交互，在特殊情况下，Refs允许我们用于强制修改子组件。
 
 ### 1. 管理Input的聚焦、内容选择
+
 通过一个按钮，清空input value，然后input聚焦
+
 ```js
 class MyInput extends React.Component{
   constructor(props){
@@ -42,7 +45,9 @@ class MyInput extends React.Component{
 ```
 
 ### 2. 视频媒体播放
-按钮控制媒体的播放和暂停
+
+按钮控制媒体的播放和暂停。
+
 ```javascript
 class MyVideo extends React.Component{
   constructor(props){
@@ -52,8 +57,12 @@ class MyVideo extends React.Component{
   }
 
   videoPlay(){
-    // 3. 通过ref获取节点
+    // 3. 通过ref获取节点。播放
     this.videoRef.current.play();
+  }
+
+  videoPause(){
+    this.videoRef.current.pause(); // 暂停
   }
   
   render(){
@@ -66,12 +75,16 @@ class MyVideo extends React.Component{
               // ...              
           />
           <button onClick={this.videoPlay.bind(this)}>Play</button>
+          <button onClick={this.videoPause.bind(this)}>Pause</button>
       </div>
     )
   }
 }
 ```
 ### 3. JS强制动画与集成第三方DOM库JQuery
+
+通过操作DOM操作动画。
+
 通过按钮控制div大小展示，并引入JQuery库。
 
 ```javascript
@@ -84,7 +97,7 @@ class MyBox extends React.Component{
   boxExtends(){
     // 3. 获取节点
     const oBox = this.boxRef.current;
-    // 使用JQuery
+    // 使用JQuery获取节点
     const $box = $(this.boxRef.current)
   }
 
@@ -95,6 +108,7 @@ class MyBox extends React.Component{
           ref={this.boxRef}
           // ...
         />
+        {/* 点击按钮扩大div大小 */}
         <button onClick={this.boxExtends.bind(this)}>Extend</button>
       </>
     )
@@ -109,7 +123,7 @@ class MyBox extends React.Component{
 ## 控制模态框
 采用ref的方式控制模态框
 ```javascript
-// Modal.jsx
+
 class Modal extends React.Component {
     constructor(props) {
         super(props);
@@ -148,12 +162,11 @@ class Modal extends React.Component {
     }
 }
 
-// App.jsx
 class App extends React.Component{
   modalOpen(){
     switch (status) {
     case 'open':
-      // 实例调用组件内的open方法
+      // 实例调用Modal组件内的open方法
         this.modal.open();
         break;
     case 'close':
@@ -225,6 +238,7 @@ class App extends React.Component {
 
 }
 ```
+
 避免使用refs来做任何可以通过声明式实现来完成的事请。
 
 ### 总结

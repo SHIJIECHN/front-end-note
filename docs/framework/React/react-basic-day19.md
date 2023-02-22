@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: 生命周期
+title: 19. 生命周期
 ---
 
 ## 生命周期

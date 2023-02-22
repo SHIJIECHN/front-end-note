@@ -1,24 +1,26 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: JSX（二）
+title: 18. JSX（二）
 ---
 
-
 ## JSX
-JSX其实是React.createElement函数调用的语法糖。React会把JSX编译为React.createElement调用形式。
 
-> 什么是React的元素类型
+`JSX`其实是`React.createElement`函数调用的语法糖。`React`会把`JSX`编译为`React.createElement`调用形式。
 
-一个类组件或者函数组件就是React元素，并且它是一种React的元素类型，组件里面用了JSX的形式，这个组件必须存在当前的模块作用域中。
+> 什么是`React`的元素类型
 
-React会编译JSX变成React.createElement的调用形式，所以必须要让React库存在当前的模块作用域中，如`import React from 'react'`，生产环境下`<script>`引入CDN。
+一个类组件或者函数组件就是`React`元素，并且它是一种`React`的元素类型，组件里面用了`JSX`的形式，这个组件必须存在当前的模块作用域中。
+
+`React`会编译`JSX`变成`React.createElement`的调用形式，所以必须要让`React`库存在当前的模块作用域中，如`import React from 'react'`，生产环境下`<script>`引入`CDN`。
 
 
 ## 点语法
-> 如何在JSX中使用点语法（对象访问的语法obj.a)
 
-在一个模块中定义多个React组件时，会很方便。
+> 如何在`JSX`中使用点语法（对象访问的语法`obj.a`)
+
+在一个模块中定义多个`React`组件时，会很方便。
+
 ```javascript
 // 定义
 const MyUI = {
@@ -39,13 +41,14 @@ const MyUI = {
  <MyUI.Button type="danger">Click</MyUI.Button>
 ```
 
-React书写规范：
-1. 小写字母开头代表HTML的内置组件，如`<div>、<h1>`，将标签转换为字符串'div','h1',作为React.createElement第一个参数。
+`React`书写规范：
+1. 小写字母开头代表`HTML`的内置组件，如`<div>、<h1>`，将标签转换为字符串'div','h1',作为`React.createElement`第一个参数。
 2. 大写字母开头的自定义组件`<MyButton>`，直接编译成`React.createElement(MyButton)`.
 
-> 运行时选择React类型
+> 运行时选择`React`类型
 
-在运行组件的过程中，临时通过props去决定到底渲染哪一个组件。
+在运行组件的过程中，临时通过`props`去决定到底渲染哪一个组件。
+
 ```javascript
 class LoginBtnGroup extends React.Component {
     render() {
@@ -92,25 +95,15 @@ class Header extends React.Component {
 ## JSX中的props
 
 ### 1. JS表达式作为props
-在JSX中的{}，它里面可以传入任何JS表达式，不包括语句if、for、switch、function，如果非要表达式，可以在JSX外面使用。
 
-案例：通过一个state来管理到底显示主标题还是子标题
+在`JSX`中的{}，它里面可以传入任何`JS`表达式，不包括语句`if`、`for`、`switch`、`function`，如果非要表达式，可以在`JSX`外面使用。
+
+案例：通过一个`state`来管理到底显示主标题还是子标题
 1. 使用if表达式
 2. 使用switch表达式
 3. 使用三元运算符
+   
 ```js
-function MyTitle(props) {
-    const { title, author } = props;
-
-    return (
-        <div>
-            <h1>{title}</h1>
-            <p>{author}</p>
-        </div>
-    )
-}
-```
-```javascript
 class App extends React.Component {
     state = {
         mainTitle: "This is a MainTitle",
@@ -160,9 +153,10 @@ class App extends React.Component {
     }
 }
 ```
-任何地方都可以写JSX，如render中，不一定都写在return里面，只要最后把JSX return出去就可以。
+任何地方都可以写`JSX`，如`render`中，不一定都写在`return`里面，只要最后把`JSX return`出去就可以。
 
 ### 2. props的赋值方式
+
 两种赋值方式：
 1. 字符串字面量：`title="这是一个标题"`
 2. 表达式：`title={'这是一个标题'}`
@@ -177,7 +171,19 @@ class App extends React.Component {
 
 
 ### 3. props的布尔表达
+
 ```javascript
+function MyTitle(props) {
+    const { title, author } = props;
+
+    return (
+        <div>
+            <h1>{title}</h1>
+            <p>{author}</p>
+        </div>
+    )
+}
+
 <MyTitle
     title="This is a Title"
     author="Xiaye"
@@ -197,6 +203,7 @@ class App extends React.Component {
 ```
 
 ### 4. props使用展开操作符
+
 ```javascript
 const { title,author,authorShow } = this.props;
 <MyTitle 
@@ -222,6 +229,7 @@ const { abc, ...others } = this.props;
 ## JSX的子元素
 
 ### 1. 字符串字面量
+
 字符串字面量作为子元素的特点：是被转义的。
 1. 去掉首位空格、换行
 2. 字符串之间的多个空格压缩为一个空格，可以通过字符实体`&nbsp;`多个空格
@@ -250,7 +258,7 @@ class ListItems extends React.Component {
 ```
 
 ### 3. unll, undefined, bool
-null undefined bool都是可以作为JSX的子元素，这些子元素是会被忽略不会渲染的，标签是会渲染的。
+`null`、`undefined`、`bool`都是可以作为`JSX`的子元素，这些子元素是会被忽略不会渲染的，标签是会渲染的。
 
 为什么不会渲染呢？ 为解决条件渲染的问题。
 
@@ -290,9 +298,10 @@ return (
 ```
 
 ### 4. 函数作为子元素
-函数作为子元素即props.children是函数。
 
-JSX的props.children根props本身是有一致的特性，props.children就可以传递任何类型的子元素。
+函数作为子元素即`props.children`是函数。
+
+`JSX`的`props.children`根`props`本身是有一致的特性，`props.children`就可以传递任何类型的子元素。
 
 ```javascript
 // 定义一个Repeat组件专门来循环子项并打印出来且每次的index都不同
@@ -387,4 +396,5 @@ class App extends React.Component{
   }
 }
 ```
+
 以上专门定义的组件可以节省其他逻辑专门处理数据请求等，把视图的工作交给app组件，把逻辑和视图需要的前期逻辑都交给定义的组件去做。

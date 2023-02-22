@@ -1,7 +1,7 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: Fragment
+title: 14. Fragment
 ---
 
 ## Fragment
@@ -11,10 +11,9 @@ Fragment是在React下的一个组件，文档碎片不会占用真实节点，�
 
 > React.Fragment 创建一个文档碎片。
 
-
 也可以简写使用短语法`<>...</>`声明一个React.Fragment碎片。
 
-**注意：短语法不支持key**
+**注意：短语法不支持key，React.Fragment只支持key**
 
 ```javascript
 // Fragment除了key属性，不支持其他任何属性

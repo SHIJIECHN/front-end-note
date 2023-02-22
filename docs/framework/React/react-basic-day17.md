@@ -1,24 +1,26 @@
 ---
 autoGroup-1: React
 sidebarDepth: 3
-title: Refs（二）
+title: 17. Refs（二）
 ---
 
 ## React.createRef()用法分析
-通过React.createRef()方法创建ref容器。使用ref：
-1. 通过createRef可以创建一个ref对象
-2. 通过元素的ref属性可以附加到React元素上
-3. 一般通过构造器中给this上的属性赋值ref，方便整个组件使用
-4. ref只要传递React元素中，就可以利用current属性访问到真实DOM节点。
 
-> ref在什么时候更新？
+通过`React.createRef()`方法创建`ref`容器。使用`ref`：
+1. 通过`createRef`可以创建一个ref对象
+2. 通过元素的`ref`属性可以附加到`React`元素上
+3. 一般通过构造器中给`this`上的属性赋值`ref`，方便整个组件使用
+4. `ref`只要传递`React`元素中，就可以利用`current`属性访问到真实`DOM`节点。
 
-ref在componentDidMount和componentDidUpdate触发前更新，也就是说可以在这两个生命周期函数内访问到ref最终的值。
+> `ref`在什么时候更新？
 
-ref三种不同的使用方式：
-1. ref放在html元素上，current就是真实DOM节点
-2. ref放在class组件上，current指向组件的实例
-3. ref放在函数组件上，函数组件没有实例，createRef附加不到组件上，不能使用（如何使用？）
+`ref`在`componentDidMount`和`componentDidUpdate`触发前更新，也就是说可以在这两个生命周期函数内访问到`ref`最终的值。
+
+`ref`三种不同的使用方式：
+1. `ref`放在`html`元素上，`current`就是真实`DOM`节点
+2. `ref`放在`class`组件上，`current`指向组件的实例
+3. `ref`放在函数组件上，函数组件没有实例，`createRef`附加不到组件上，不能使用（如何使用？）
+  
 ```javascript
 // refs放在class组件上
 class App extends React.Component {
@@ -39,12 +41,15 @@ class App extends React.Component {
     }
 }
 ```
+
 组件的实例：
+
 <img :src="$withBase('/framework/React/Refs.jpg')" alt="Refs" />
 
-> 函数组件如何使用ref？
+> 函数组件如何使用`ref`？
 
-使用useRef。
+使用`useRef`。
+
 ```javascript
 function Test2() {
     // 1. 函数组件中使用useRef。声明divRef
@@ -63,13 +68,14 @@ function Test2() {
 ```
 
 ## Refs转发到DOM组件机制
-在父组件中将子组件元素节点input清空并聚焦，需要获得子组件中input的DOM，因此需要将ref传递。
 
-> 如何将子节点的ref暴露给父组件？
+在父组件中将子组件元素节点`input`清空并聚焦，需要获得子组件中`input`的`DOM`，因此需要将`ref`传递。
 
-React 16.3以上通过Refs转发。
+> 如何将子节点的`ref`暴露给父组件？
 
-将ref自动的通过组件传递，普通的定义一个类组件是无法满足的，主要使用`React.forwardRef((props, ref) => {return React元素})`
+React 16.3以上通过`Refs`转发。
+
+将`ref`自动的通过组件传递，普通的定义一个类组件是无法满足的，主要使用`React.forwardRef((props, ref) => {return React元素})`
 
 ```javascript
 // 1. 创建ref对象
@@ -89,6 +95,8 @@ componentDidMount() {
   console.log(this.myInputRef);
 }
 ```
+
+步骤：
 1. 在父组件中通过调用React.createRef创建ref对象。
 2. 子组件使用ref属性，并将值关联到创建的ref对象中，将其向下传递`<MyInput ref={ref} />`。
 3. 通过React.forwardRef转发ref属性值，forwardRef内函数(props, ref) => ...，作为其第二个参数。
@@ -135,8 +143,10 @@ function InputHoc(WrapperComponent) {
 
 ## 将DOM Refs暴露给父组件
 
-### 1. 使用refs转发机制
-React 16.2及以下Refs转发。
+### 1. 使用`refs`转发机制
+
+React 16.2及以下`Refs`转发。
+
 ```javascript
 // 1. 创建ref对象
 this.inputRef = React.createRef();
@@ -154,8 +164,10 @@ class MyInput extends React.Component {
 }
 ```
 
-### 2. 回调Refs方式一
-使用ref回调函数，在实例的属性中存储对DOM节点的引用。在组建挂载时，会调用ref回调函数并传入DOM元素。在componentDidMount或componentDidUpdate触发前，保证refs一定是最新的。
+### 2. 回调Refs方式一(本组件操作)
+
+使用`ref`回调函数，在实例的属性中存储对`DOM`节点的引用。在组建挂载时，会调用`ref`回调函数并传入`DOM`元素。在`componentDidMount`或`componentDidUpdate`触发前，保证`refs`一定是最新的。
+
 ```javascript
 class MyInput extends React.Component{
   constructor(props){
@@ -182,8 +194,10 @@ class MyInput extends React.Component{
 }
 ```
 
-### 3. 回调方式二
-在父组件中设置回调函数，父组件通过props的方式将ref传进去。
+### 3. 回调方式二(父组件操作)
+
+在父组件中设置回调函数，父组件通过`props`的方式将`ref`传进去。
+
 ```javascript
 class MyInput extends React.Component {
     render() {
@@ -223,6 +237,7 @@ class MyInput extends React.Component{
   }
 }
 ```
+
 这种方式的缺点：
-1. string Refs依赖于当前组件实例下面的refs集合里的ref，需要React保持追踪当前正在渲染的组件，如果当前组件没有加载完成，this是没法确定的，导致React在获取ref的时候可能回比较慢。
-2. 不能在render中工作。不能组合，只能有一个ref。
+1. `string Refs`依赖于当前组件实例下面的`refs`集合里的`ref`，需要`React`保持追踪当前正在渲染的组件，如果当前组件没有加载完成，`this`是没法确定的，导致`React`在获取`ref`的时候可能回比较慢。
+2. 不能在`render`中工作。不能组合，只能有一个`ref`。

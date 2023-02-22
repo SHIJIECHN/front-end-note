@@ -61,7 +61,7 @@ module_x.js文件里面声明的变量在于全局作用域中，而且很难保
 
 ## 传统模块化
 立即执行函数，有独立的作用域
-```html
+
 ```html
 <!--index.html-->
 <script src="js/module_a.js"></script>
@@ -69,7 +69,9 @@ module_x.js文件里面声明的变量在于全局作用域中，而且很难保
 <script src="js/module_c.js"></script>
 <script src="js/index.js"></script>
 ```
+
 js文件
+
 ```js
 // module_a.js
 var moduleA = (function() {
