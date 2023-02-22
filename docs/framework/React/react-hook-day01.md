@@ -5,11 +5,12 @@ title: Hook动机与useState
 ---
 
 ## 动机
-> 使用Hook的原因
 
-1. 解决在组件之间复用状态逻辑很难的问题。Hook提供在无需修改组件结构的情况下复用状态逻辑。
-2. 将组件中相互关联的部分拆分成更小的函数，解决复杂中难以理解的逻辑。
-3. class组件中this指向的问题
+> 使用`Hook`的原因
+
+1. 解决在组件之间复用状态逻辑很难的问题。`Hook`提供在无需修改组件结构的情况下复用状态逻辑。
+2. 将组件中相互关联的部分拆分成更小的函数，解决复杂组件中难以理解的逻辑。
+3. `Class`组件中`this`指向的问题
 
 > Hook是什么？
 
@@ -18,10 +19,11 @@ title: Hook动机与useState
 ## setState()
 
 ```javascript
+// 函数组件
 function App() {
-  const [count, setCount] = useState(0);
+  // 声明一个叫 count 的 state变量
+  const [count, setCount] = useState(0); // 返回一个数组
   console.log(useState(1)); // [1, f] 一个数值1 和函数f
-
 
   return (
     <div className="App">
@@ -32,7 +34,7 @@ function App() {
 }
 ```
 
-### 1。 声明State变量
+### 1. 声明State变量
 ```javascript
 import {setState} from 'react'
 // 声明count的state变量
@@ -46,6 +48,7 @@ const [count, setCount] = setState(0);
 > useState方法的返回值
 
 返回值为数组，包括：当前state以及更新state的函数。需要成对的获取它们。
+
 ```javascript
 console.log(useState(1)); // [1, f] 一个数值1 和函数f
 ```
@@ -60,6 +63,7 @@ console.log(useState(1)); // [1, f] 一个数值1 和函数f
 ```
 
 ### 3. 使用多个state
+
 ```javascript
 function App() {
   const [count1, setCount1] = useState(0);
