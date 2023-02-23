@@ -173,6 +173,7 @@ function App() {
 
 如果新的count需要通过使用先前的count计算得出，那么可以将函数传递给setCount。该函数将接收先前的count，并返回一个更新后的值。
 ```javascript
+console.log('render')
 const handleClick = () => {
   setCount(count => count + 1);
   setCount(count => {
@@ -182,6 +183,7 @@ const handleClick = () => {
   });
   console.log('handleClick: ' + count);
 }
+console.log(count);
 /**
  * handleClick : 0
  * setCount: 1
@@ -189,6 +191,7 @@ const handleClick = () => {
  * 2
  */
 ```
+
 5. 多次使用setCount函数会合并只会加载一次app组件
 ```javascript
 function App() {
@@ -196,6 +199,7 @@ function App() {
   console.log('render');
 
   const handleClick = () => {
+    // 两次setCount会合并执行，就相当于 setCount(count + 1)
     setCount(count + 1);
     setCount(count + 1);
     console.log('handleClick: ' + count);
@@ -219,6 +223,7 @@ function App() {
 ```
 
 6. 类组件state合并，函数组件中state不会合并对象
+
 ```javascript
 // 函数组件
 function App() {
@@ -233,6 +238,15 @@ function App() {
     </div>
   )
 }
+/**
+  首次渲染输出：
+  render
+  {count: 1}
+  
+  点击后渲染：
+  render
+  {count1: 2}
+ */
 
 // 类组件
 class App extends Component {
@@ -240,12 +254,17 @@ class App extends Component {
     count: 1
   }
   render() {
+    console.log(this.state);
     return (
       // 点击按钮state对象会新增一个属性count1，state= {count: 1, count1: 2}
       <button onClick={() => this.setState({ count1: 2 })}>Click</button>
     )
   }
 }
+/**
+首次渲染输出：{count: 1}
+点击后渲染：{count: 1, count1: 2}
+ */
 ```
 
 ## 总结
