@@ -30,7 +30,73 @@ title: React
 
 + 脚手架：基于它创建项目，默认就把webpack的打包规则已经处理好了。把项目需要的基本文件也创建好了。
 
+1. create-react-app基于运用
+```javascript
+npx create-react-app my-app
+cd my-app
+npm start
+```
 
+一个React项目中，默认安装：
+- react：React框架的核心
+- react-dom：React视图渲染的核心，基于React构建WebApp（HTML页面）。
+- react-native：构建和渲染App的
+- react-script：脚手架为了让项目目录看起来干净一些，把webpack打包的规则及相关的插件/loader等都隐藏到了node_modules目录下，react-script就是脚手架中自己对打包命令的一种封装，基于它打包，会调用
+
+目录文件分析：
+
+package.json
+```json
+{
+  "name": "example",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": { 
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  /**
+    基于browserList规范，设置浏览器的兼容情况
+    @1 postcss-loader + autoprefixer会给CSS3设置相关的前缀
+    @2 babel-loader 会把ES6编译为ES5
+ */
+  "browserslist": {
+    "production": [
+      ">0.2%", // 使用率超过0.2%的浏览器
+      "not dead", // 不考虑IE
+      "not op_mini all" // 不考虑Opera
+
+      // 兼容IE配置
+      ">0.2%",
+      "last 2 versions",
+      "not ie<=8"
+    ],
+    "development": [ // 默认不兼容低版本和IE浏览器的
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
+
+```
 
 
 
