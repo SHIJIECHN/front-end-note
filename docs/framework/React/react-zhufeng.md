@@ -274,7 +274,7 @@ yarn add @babel/polyfill
 react-app-polyfill对@babel/polyfill的重写。
 
 5. 处理跨域
-   1. src目录中新建setupProxy.js
+   1. src目录中新建setupProxy.js（注意：必须时js，不能为ts，ts不生效）
    2. yarn add http-proxy-middleware。http-proxy-middleware实现跨域代理模块，webpack-dev-server的跨域代理原理，也是基于它完成的
 
 如果不想这样太麻烦的写法：可以在package.json中定义一个字段：proxy: '...', 但是proxy后面只能跟字符串，也就是只能代理到一台服务器上。
