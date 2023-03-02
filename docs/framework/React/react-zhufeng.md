@@ -319,4 +319,28 @@ React是Web前端框架
 
 JSX：JavaScript and xml(html)把JS和HTML标签混合在一起，并不是我们之前写的字符串拼接。
 
+- @1 vscode如何支持JSX语法（格式化、快捷提示）
+  + 创建的js文件，把后缀名社会为jsx即可，这样js文件中就可以支持JSX语法了
+  + webpack打包规则中，也是会对.jsx这种文件，按照JS的方式进行处理
+- @2 在HTML中嵌入“JS表达式”，需要基于“{} 胡子语法”
+  + JS表达式：执行有结果的。变量、数学运算、三元运算符、循环（借助于数组的迭代方法处理map、）。不是JS表达式：if循环、命令式变成的循环（for、for/in、for/of、while）。
+- @3 在ReactDOM.createRoot()的时候，不能直接把HTML/BODY作为根容器，需要指定一个额外的盒子，例如：#root。
+- @4 每一个构建的视图，只能有一个“根节点”
+  - 出现多个根节点则报错，Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>？
+  - React给我们提供了一个特殊的标签（节点）：<></> React.Fragment 空文档标题标签。即保证了只有一个根节点，又不新增一个HTML层级结构。
+
+
+```javascript
+import React from 'react'; // React 语法核心
+import ReactDOM from 'react-dom/client'; // 构建HTML（WebApp）的核心
+
+// 获取页面中#root的容器，作为“根”容器
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// 基于render方法渲染我们编写的视图，把渲染后的内容全部插入到#root中进行渲染
+root.render(
+  ....
+)
+```
+
 

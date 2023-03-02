@@ -119,3 +119,9 @@ contenBase讨论：
 - 通常情况下，服务访问output目录下的输出的文件夹，当output中没有要访问的文件，则会到contentBase对应的文件夹下访问。
 
 ## 3. 支持CSS
+- css-loader：处理import、url等
+- style-loader：将样式变成脚本插入到页面中。
+- less-loader: less变成css
+- sass-loader：sass变成css
+
+
