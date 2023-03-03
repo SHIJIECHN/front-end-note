@@ -302,7 +302,7 @@ type trimed = TrimLeft<'  Hello World  '> // expected to be 'Hello World  '
 1. 关键是使用infer在字符串内进行推导。
 
 ## Trim
-实现Trim<T>，它是一个字符串类型，并返回一个新字符串，其中两端的空白符都已被删除。
+实现Trim\<T\>，它是一个字符串类型，并返回一个新字符串，其中两端的空白符都已被删除。
 
 ```typescript
 // 方法一
@@ -739,7 +739,7 @@ type c = StartsWith<'abc', 'abcd'> // expected to be false
 
 ## EndsWith
 
-实现EndsWith<T, U>,接收两个string类型参数,然后判断T是否以U结尾,根据结果返回true或false
+实现`EndsWith<T, U>`,接收两个string类型参数,然后判断T是否以U结尾,根据结果返回true或false
 
 ```typescript
 type EndsWith<T extends string, U extends string> = T extends `${string}${U}` ? true : false
@@ -805,9 +805,9 @@ type PropertyKey = number| string | symbol
 
 ## RequiredByKeys
 
-实现一个通用的RequiredByKeys<T, K>，它接收两个类型参数T和K。
+实现一个通用的`RequiredByKeys<T, K>`，它接收两个类型参数T和K。
 
-K指定应设为必选的T的属性集。当没有提供K时，它就和普通的Required<T>一样使所有的属性成为必选的
+K指定应设为必选的T的属性集。当没有提供K时，它就和普通的`Required<T>`一样使所有的属性成为必选的
 
 ```typescript
 type Merge<T> = {
@@ -828,7 +828,7 @@ type UserRequiredName = RequiredByKeys<User, 'name'> // { name: string; age?: nu
 
 ## Mutable
 
-实现一个通用的类型 Mutable<T>，使类型 T 的全部属性可变（非只读）
+实现一个通用的类型`Mutable<T>`，使类型 T 的全部属性可变（非只读）
 
 ```typescript
 type Mutable<T> = {
@@ -846,7 +846,7 @@ type MutableTodo = Mutable<Todo> // { title: string; description: string; comple
 
 ## OmitByType
 
-实现 OmitByType<T, U> 根据类型 U 排除 T 中的 Key：
+实现 `OmitByType<T, U>` 根据类型 U 排除 T 中的 Key：
 
 ```typescript
 type OmitByType<T, U> = {

@@ -10,7 +10,7 @@ typeof方法可以在类型上下文中使用，用于获取一个变量或者�
 let s = "hello";
 let n: typeof s; // let n: string
 ```
-与ReturnType<T>搭配使用，返回该函数的返回值的类型
+与`ReturnType<T>`搭配使用，返回该函数的返回值的类型
 ```typescript
 type Predicate = (s: unknown) => boolean
 type K = ReturnType<Predicate>; // type K = boolean

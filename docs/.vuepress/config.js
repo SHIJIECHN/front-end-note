@@ -1,6 +1,6 @@
 const pluginConf = require('./config/pluginConf.js');
 const navConf = require('./config/navConf.js');
-const headConf = require("./config/headConf.js")
+const headConf = require("./config/headConf.js");
 
 module.exports = {
   base: '/front-end-note/',
@@ -19,5 +19,22 @@ module.exports = {
     lastUpdated: '更新时间',
     editLinkText: '在 GitHub 上编辑此页',
     nav: navConf,
+  },
+  // bundler: {
+  //   vuePluginOptions: {
+  //     template: {
+  //       compilerOptions: {
+  //         isCustomElement: tag => ['mi', 'msup', 'mo', 'mrow', 'annotation', 'semantics', 'math', 'msub'].includes(tag)
+  //       }
+  //     }
+  //   }
+  // },
+  markdown: {
+    importCode: {
+      handleImportPath: str => str.replace(/^@components/, path.resolve(__dirname, './components'))
+    },
+    code: {
+      lineNumbers: true
+    }
   }
 }
