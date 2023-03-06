@@ -68,7 +68,7 @@ module.exports = {
   - `filename: '/js/main.js'`
   - 最终结果：`'./assets/js/main.js'`
 
-### 1.4. 创建index.html文件
+### 1.4. 自动产出html
 在`src`目录下创建`index.html`模板，并安装`html-webpack-plugin`插件，以`src/index.html`为模板，用来自动生成最终`index.html`放到`dist`目录中。
 ```javascript
 npm install html-webpack-plugin@5.5.0 -D
@@ -175,7 +175,49 @@ modeul.exports = {
 }
 ```
 
-## 4. 图片
+## 4. loader的三种写法
+
+### 4.1 loader
+
+```javascript
+module: {
+  rules: [
+    { test: /\.css$/, loader: ['style-loader', 'css-loader'] }
+  ]
+}
+```
+
+### 4.2 use
+
+```javascript
+module: {
+  rules: [
+    { test: /\.css$/, use: ['style-loader', 'css-loader'] }
+  ]
+}
+```
+
+### 4.3 use + loader
+
+```javascript
+module: {
+    rules: [
+        {
+            test: /\.css$/,
+            include: path.resolve(__dirname,'src'),
+            exclude: /node_modules/,
+            use: [{
+                loader: 'style-loader',
+                options: {
+                    insert:'top'
+                }
+            },'css-loader']
+        }
+    ]
+}
+```
+
+## 5. 图片
 引入图片的方式：
 1. 手动引入：放在静态文件根目录里，通过html的img直接引用，需要配置devServer.contentBase；HTML中直接引入相对路径
 2. JS文件引入：通过 require import 引入
@@ -185,7 +227,7 @@ modeul.exports = {
 npm install file-loader url-loader html-loader -D
 ```
 
-### 4.1. 手动引入
+### 5.1. 手动引入
 ```javascript
 // 1.放在静态文件根目录里，通过html的img直接引用
 <img src="/logo.png" alt="logo.png">
@@ -258,9 +300,9 @@ modeul.exports = {
 }
 ```
 
-### 4.2 JS中引入图片
+### 5.2 JS中引入图片
 
-#### 4.2.1 JS
+#### 5.2.1 JS
 
 ```javascript
 let logo=require('./images/logo.png');
@@ -269,7 +311,7 @@ img.src=logo;
 document.body.appendChild(img);
 ```
 
-#### 4.2.2 Webpack.config.js
+#### 5.2.2 Webpack.config.js
 ```javascript
 {
   test: /\.(jpg|png|gif|bmp)$/, use: [{
@@ -283,11 +325,11 @@ document.body.appendChild(img);
 }
 ```
 
-### 4.3 CSS中引入
+### 5.3 CSS中引入
 
 可以在CSS文件中引入图片。
 
-#### 4.3.1 CSS
+#### 5.3.1 CSS
 
 ```css
 #image-container{
@@ -298,11 +340,10 @@ document.body.appendChild(img);
 }
 ```
 
-#### 4.3.2 HTML
+#### 5.3.2 HTML
 ```javascript
 <div id="image-container">image-container</div>
 ```
-
 
 file-loader的实现：
 ```javascript
@@ -323,11 +364,11 @@ loader.war = true; // 图片的话需要raw为 true
 module.exports = loader;
 ```
 
-## 5. 转义ES6/ES7/JSX
+## 6. 转义ES6/ES7/JSX
 
 Babel是一个编译JavaScript的平台，可以把ES6/ES7，React的JSX转义为ES5
 
-### 5.1 安装依赖包
+### 6.1 安装依赖包
 
 ::: theorem 
 
@@ -407,7 +448,7 @@ console.log(p);
 
 ::::
 
-### 5.3 babel-loader的实现
+### 6.2 babel-loader的实现
 
 babel-loader @babel/core @babel/preset-env三者之间的关系解析：
 
@@ -438,9 +479,9 @@ function loader(source) {
 ```
 
 
-## 6. ESLint代码校验
+## 7. ESLint代码校验
 
-### 6.1 安装依赖
+### 7.1 安装依赖
 
 - eslint: 核心包
 - eslint-loader：webpack loader
@@ -497,7 +538,7 @@ module.exports = {
 
 ::::
 
-### 6.2 最佳实践：airbnb
+### 7.2 最佳实践：airbnb
 如果react开发不知道如何配置，使用eslint-config-airbnb。
 
 安装依赖：[eslint-config-airbnb](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb)
@@ -531,7 +572,7 @@ module.exports = {
 };
 ```
 
-### 6.3 自动修复
+### 7.3 自动修复
 文件 -> 首选项 -> 设置。 搜索：codeActionsOnSave。在settings.json中编辑。
 
 ```javascript
@@ -540,14 +581,14 @@ module.exports = {
 }
 ```
 
-## 7. sourcemap
+## 8. sourcemap
 
 - sourcemap 是为了解决开发代码与实际运行代码不一致时，帮助我们debug到原始文件代码的技术
 - webpack通过配置可以自动给我们source-map文件，map文件是一种对应编辑文件和源文件的方法
 
 
 |类别    |代码形式<div style="width: 80px"></div>|含义     |
-| -------|:-----------|----|
+| -------|:-----------|--------|
 |source-map|原始代码| 最好的sourcmap质量有完整的结果，但是会很慢|
 |eval-source-map|原始代码| 同样道理，但是最高的质量和最低的性能|
 |cheap-module-eval-source-map|原始代码 |（只有行内）同样道理，但是更高的质量和更低的性能|
@@ -567,3 +608,112 @@ module.exports = {
 |inline|将.map作为DataURI嵌入，不单独生成.map文件|
 
 
+## 9. 打包第三方类库
+
+```javascript
+npm install lodash@4.17.20
+```
+
+### 9.1 直接引入
+```javascript
+
+```
+
+### 9.2 插件引入
+
+- webpack配置ProvidePlugin后，在使用时将不需要import和require进行引入，直接使用
+- _ 函数会自动添加到当前模块的上下文，无需显示声明
+- 这种方式也会将lodash打包到输出文件中。
+
+:::: tabs
+
+::: tab webpack.config.js
+
+```javascript
+import {ProvidePlugin} from 'webpack'
+
+module.exports = {
+  plugins: [
+    // 会自动向模块内部注入lodash模块, 在模块内部可以通过 _ 引用
+    new ProvidePlugin({
+      _: 'lodash',
+    }),
+  ],
+}
+```
+:::   
+
+::: tab index.js
+
+```javascript
+// 直接使用
+console.log(_.join(['a', 'b', 'c'], '@'));
+```
+:::
+
+::::
+
+### 9.3 expose-loader
+
+- 不需要任何其他插件配合，质押将下面的代码添加到所有loader之前
+- 还是需要在模块内至少手工引入一次，会把变量挂载全局对象上 window._
+- 也需要打包的
+
+```javascript
+npm install expose-loader@1.0.1 -D
+```
+
+```javascript
+{
+  test: require.resolve('lodash'),
+  loader: 'expose-loader',
+  options: {
+    globalName: '_',
+    override: true,
+  },
+}
+```
+
+### 9.4 externals
+如果我们向引入一个库，但是又不想让webpack打包，并且不影响在程序中以window全局等方式进行使用，可以通过externals。
+
+- 缺点：在html文件中需要手动引入CDN
+
+:::: tabs 
+
+::: tabs index.html
+```javascript
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+```
+:::
+
+::: tabs webpack.config.js
+
+```javascript
+module.exports = {
+  externals: {
+    jquery: '$', // 如果在模块内部引用了jquery这个模块，会从window.$上取值
+  },
+}
+```
+:::
+
+::: tabs index.js
+
+```javascript
+ const jQuery = require("jquery");
+ import jQuery from 'jquery';
+```
+:::
+
+:::: 
+
+### 9.5 html-webpack-externals-plugin
+
+```javascript
+npm i html-webpack-externals-plugin@3.8.0 -D
+```
+
+```javascript
+
+```
