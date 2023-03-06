@@ -30,11 +30,6 @@ module.exports = {
   //   }
   // },
   markdown: {
-    importCode: {
-      handleImportPath: str => str.replace(/^@components/, path.resolve(__dirname, './components'))
-    },
-    code: {
-      lineNumbers: true
-    }
+    lineNumbers: true
   }
 }

@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Webpack
+autoGroup-1: Webpack
 sidebarDepth: 3
 title: 1. Webpack基础、图片loader、css loader
 ---

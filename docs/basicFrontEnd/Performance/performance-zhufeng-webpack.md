@@ -1,7 +1,7 @@
 ---
-autoGroup-4: Webpack
+autoGroup-2: Webpack5
 sidebarDepth: 3
-title: webpack(珠峰)
+title: webpack基础知识
 ---
 
 ## webpack学习的顺序
@@ -105,18 +105,20 @@ npm install webpack-dev-server@3.11.0 -D
 |DevServer|publicPath  |表示打包生成的静态文件所在的位置（若DevServer里面的publicPath没有设置，则认为是output里面设置的publicPath的值|
 |devServer|static| 用于配置提供额外静态文件内容的目录|
 
-webapck.config.js配置devServer：
-- contentBase：配置开发服务运行时的文件根目录
-- writeToDisk：打包后写入磁盘
-- port：开发服务器监听的端口
-- open：自动打开浏览器
-- publicPath：开发服务器
+::: theorem path的区别和联系
 
-::: theorem Newton's First Law
-
-In an inertial frame of reference, an object either remains at rest or continues to move at a constant velocity, unless acted upon by a force.
+1. `publicPath`可以看做是`devServer`对生成目录`dist`设置的虚拟目录，`devServer`首先从`devServer.publicPath`中取值，如果它没有设置，就取`output.publicPath`的值作为虚拟目录，如果它也没有设置，就取默认值`/`。
+2. `output.publicPath`不仅可以影响虚拟目录的取值，也影响利用`html-webpack-plugin`插件生成的`index.html`中引用的`js`、`css`、`img`等资源的引用路径。会自动在资源路径前面追加设置的`output.publicPath`
+3. 一般情况下要保证`devServer`中的`publicPath`与`output.publicPath`保持一致
 
 :::
+
+`webapck.config.js`配置`devServer`：
+- `contentBase`：配置开发服务运行时的文件根目录
+- `writeToDisk`：打包后写入磁盘
+- `port`：开发服务器监听的端口
+- `open`：自动打开浏览器
+- `publicPath`：开发服务器
 
 :::: tabs
 
@@ -323,11 +325,245 @@ module.exports = loader;
 
 ## 5. 转义ES6/ES7/JSX
 
+Babel是一个编译JavaScript的平台，可以把ES6/ES7，React的JSX转义为ES5
 
 ### 5.1 安装依赖包
+
+::: theorem 
+
 - [babel-loader](https://www.npmjs.com/package/babel-loader)：使用Babel和Webpack转义JavaScript文件
 - [@babel/core](https://www.npmjs.com/package/@babel/core)：Babel编译的核心包
-- [@babel/preset-env](https://babeljs.io/docs/babel-preset-env)：
+- [@babel/preset-env](https://babeljs.io/docs/babel-preset-env)：Babel默认只转换最新的ES语法，比如箭头函数
+- [@babel/preset-react](https://www.npmjs.com/package/@babel/preset-react): React插件的Babel预设
+- [@babel/plugin-proposal-decorators](https://babeljs.io/docs/babel-plugin-proposal-decorators): 把类和对象装饰器编译成ES5
+- [@babel/plugin-proposal-class-properties](https://babeljs.io/docs/babel-plugin-proposal-class-properties): 转换静态类属性以及使用属性初始值化语法声明的属性
+- [core-js](): 给低版本浏览器提供接口的库，例如：
+
+:::
+
 ```javascript
-npm i babel-loader @babel/core @babel/preset-env  @babel/preset-react  -D
+npm i babel-loader@8.2.1 @babel/core@7.12.7 @babel/preset-env@7.12.7  @babel/preset-react@7.12.7  -D
+npm i @babel/plugin-proposal-decorators@7.12.1 @babel/plugin-proposal-class-properties@7.12.1 -D
+npm i core-js@3.7.0 -D
 ```
+
+:::: tabs
+
+::: tab webpack.config.js
+
+```javascript
+{
+  test: /\.jsx?$/,
+  use: [
+    {
+      loader: 'babel-loader',
+      options: {
+        // 预设（插件的集合）
+        presets: [
+          //'@babel/preset-env', // 可以转换JS语法
+          ['@babel/preset-env', { // 可默认只转换map set等，不能转换promise，需要配置参数
+            useBuiltIns: 'usage', //按加载polyfill
+            corejs: { version: 3 }, // 指定corejs的版本号 2或者3 polyfill
+            targets: { // 指定要兼容哪些浏览器
+              chrome: '60'
+            }
+          }],
+          '@babel/preset-react', // 可以转换JSX语法
+        ],
+        // 插件
+        plugins: [
+          ["@babel/plugin-proposal-decorators", { legacy: true }], // 使用装饰器语法
+          ["@babel/plugin-proposal-class-properties", { loose: true }], // 类属性
+        ]
+      }
+    }
+  ]
+}
+```
+:::
+
+::: tab index.js
+
+```javascript
+/**
+ * 装饰器
+ * @param {*} target 装饰的目标
+ * @param {*} key 装饰的key PI
+ * @param {*} description 属性描述
+ */
+function readonly(target, key, description) {
+
+}
+
+class Person {
+  @readonly PI = 3.14
+}
+
+let p = new Person();
+p.PI = 3.15;
+console.log(p);
+```
+::: 
+
+::::
+
+### 5.3 babel-loader的实现
+
+babel-loader @babel/core @babel/preset-env三者之间的关系解析：
+
+::: theorem  babel-loader的实现
+1. 先将ES6转换成ES6语法树（@babel/core）
+2. 然后调用预设preset-env把ES6语法树转换成ES5语法树（@babel/preset-env）
+3. 再对ES5语法树重新生成ES5代码（@babel/core）
+:::
+
+```javascript
+const babelCore = require('@babel/core');
+const presetEnv = require('@babel/preset-env');
+
+/**
+ * 实现babel-loader，babel-loader作用就是调用@babel/core
+ * @babel/core 本身只是提供一个管理功能
+ *    把源代码转成抽象语法树，进行遍历和生成，它本身也并不知道具体转换什么语法，以及语法如何转换
+ * @param {*} source 源文件内容  let sum = (a, b) => a + b;
+
+ */
+function loader(source) {
+  let es5 = babelCore.transform(source, {
+    presets: ['@babel/preset-env'] // 具体如何转换靠preset
+  }); // 使用@babel/core转换代码
+  return es5;
+}
+
+```
+
+
+## 6. ESLint代码校验
+
+### 6.1 安装依赖
+
+- eslint: 核心包
+- eslint-loader：webpack loader
+- babel-eslint：转换ES6的工具
+
+```javascript
+npm install eslint@7.14.0 eslint-loader@4.0.2 babel-eslint@10.1.0 -D
+```
+
+修改webpack.config.js配置，并在根目录下创建 .eslintrc.js文件。
+
+:::: tabs
+
+::: tab webpack.config.js
+
+```js
+{
+  test: /\.jsx?$/,
+  use: [{
+    loader: 'eslint-loader',
+    options: { fix: true }, // 启动自动修复
+  }], // 先进行代码校验，再进行编译代码
+  enforce: 'pre', // 强制指定顺序 pre 之前。pre normal inline pos
+  // exclude: /node_modules/, // 不需要检查node_modules里面的代码
+  include: resolve(__dirname, 'src'), // 只减产src目录里面的文件
+},
+```
+
+:::   
+
+::: tab .eslintrc.js
+
+```js
+module.exports = {
+  root: true, // 根配置文件
+  parser: "babel-eslint", // 需要一个parser解析器，帮我们把源代码转成抽象语法树
+  //指定解析器选项
+  parserOptions: {
+    sourceType: "module",
+    ecmaVersion: 2015
+  },
+  //指定脚本的运行环境
+  env: {
+    browser: true,
+  },
+  // 启用的规则及其各自的错误级别
+  rules: {
+    "indent": "off",//缩进风格
+    "quotes": "off",//引号类型 
+    "no-console": "error",//禁止使用console
+  }
+}
+```
+
+::::
+
+### 6.2 最佳实践：airbnb
+如果react开发不知道如何配置，使用eslint-config-airbnb。
+
+安装依赖：[eslint-config-airbnb](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb)
+```javascript
+npm i eslint-config-airbnb@18.2.1 eslint-loader@4.0.2 eslint@7.14.0 eslint-plugin-import@2.22.1 eslint-plugin-react@7.21.5 eslint-plugin-react-hooks@4.2.0 and eslint-plugin-jsx-a11y@6.4.1 -D
+```
+
+.eslintrc.js 
+
+```javascript {4}
+module.exports = {
+  root: true, // 根配置文件
+  parser: "babel-eslint", // 需要一个parser解析器，帮我们把源代码转成抽象语法树
+  extends: 'airbnb',
+  // 指定解析器选项
+  parserOptions: {
+    sourceType: "module",
+    ecmaVersion: 2015,
+  },
+  // 指定脚本的运行环境
+  env: {
+    browser: true,
+  },
+  // 启用的规则及其各自的错误级别
+  rules: {
+    "linebreak-style": "off",
+    indent: "off", // 缩进风格
+    quotes: "off", // 引号类型
+    "no-console": "error", // 禁止使用console
+  },
+};
+```
+
+### 6.3 自动修复
+文件 -> 首选项 -> 设置。 搜索：codeActionsOnSave。在settings.json中编辑。
+
+```javascript
+"editor.codeActionsOnSave": {
+  "source.fixAll": true
+}
+```
+
+## 7. sourcemap
+
+- sourcemap 是为了解决开发代码与实际运行代码不一致时，帮助我们debug到原始文件代码的技术
+- webpack通过配置可以自动给我们source-map文件，map文件是一种对应编辑文件和源文件的方法
+
+
+|类别    |代码形式<div style="width: 80px"></div>|含义     |
+| -------|:-----------|----|
+|source-map|原始代码| 最好的sourcmap质量有完整的结果，但是会很慢|
+|eval-source-map|原始代码| 同样道理，但是最高的质量和最低的性能|
+|cheap-module-eval-source-map|原始代码 |（只有行内）同样道理，但是更高的质量和更低的性能|
+|cheap-eval-source-map|转换代码 |（行内）每个模块被eval执行，并且sourcemap作为eval的dataurl|
+|eval|生成代码| 每个模块都被eval执行，并且存在@sourceURL，带eval的构建模式能cache SourceMap|
+|cheap-source-map|转换代码| （行内） 生成的sourcemap没有列映射，从loaders生成的sourcemap没有被使用|
+|cheap-module-source-map|原始代码| （只有行内）与上面一样除了每行特点的葱loader中进行映射|
+
+其实只有五个关键字的组合：eval、source-map、cheap、module、inline。
+
+|类别    |含义     |
+| -------|:-----------|
+|eval|使用eval包裹代码|
+|source-map|产生.map文件|
+|cheap|不包含列信息，也不包含loader和sourcemap|
+|module|包含loader的sourcemap，否则无法定义源文件|
+|inline|将.map作为DataURI嵌入，不单独生成.map文件|
+
+

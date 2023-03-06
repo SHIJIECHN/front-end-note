@@ -1,5 +1,5 @@
 ---
-autoGroup-4: Webpack
+autoGroup-1: Webpack
 sidebarDepth: 3
 title: 2. Plugin、SourceMap、WebpackDevServer热更新
 ---
