@@ -859,3 +859,290 @@ devServer: {
   },
 },
 ```
+
+## 15. webpack-dev-middleware
+
+```javascript
+npm i webpack-dev-middleware@4.0.2 
+```
+
+创建文件devServer.js。与webpack-dev-server实现效果是一样的。
+```javascript
+const express = require('express');
+
+const app = express();
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackOptions = require('./webpack.config');
+
+// 这个地方可以写业务，放后台业务
+app.get('/api/users1', (req, res) => {
+  res.json({ data: 'users1' });
+});
+
+const compiler = webpack(webpackOptions);
+app.use(webpackDevMiddleware(compiler, {}));
+app.listen(3000);
+```
+
+- webpak-dev-server的好处是相对简单，直接安装依赖后执行命令即可
+- webpack-dev-middleware的好处是在既有express代码基础上快速添加webpack-dev-server的功能，同时利用express老根据需求添加更多的功能，如mock服务、代理请求等。
+
+
+## 16. 生产环境配置
+
+### 16.1 提取CSS
+
+因为CSS的下载和S可以并行，当一个HTML文件很大的时候，我们可以把CSS单独提取出来加载。
+
+- mini-css-extract-plugin
+- filename 打包后文件的名称
+
+```javascript
+npm i mini-css-extract-plugin@1.3.1 -D
+```
+
+```javascript
+// 第一步：引入插件
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 提取css到单独文件
+// 第二步：修改loader配置
+{ test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }, // CSS
+{ test: /\.less$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'] }, // less
+{ test: /\.scss$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'] }, // sass
+// 第三步：插件使用
+plugins:[
+  new MiniCssExtractPlugin({
+    filename: '[name].css',
+  }),
+]
+```
+
+### 16.2 指定输出图片和CSS目录
+
+```javascript {42,43,55}
+const { resolve } = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin'); // 拷贝静态文件
+const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 打包前清空目录
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // 提取css到单独文件
+
+module.exports = {
+  mode: 'development', 
+  devtool: false,
+  entry: './src/index.js', 
+  output: {
+    path: resolve(__dirname, 'dist'), 
+    filename: 'main.js', 
+    publicPath: '/', 
+  },
+  devServer: {
+    contentBase: resolve(__dirname, 'static'),
+    writeToDisk: true,
+    port: 8080, 
+    open: false, 
+  },
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        loader: 'eslint-loader', 
+        options: { fix: true }, 
+        enforce: 'pre', 
+        include: resolve(__dirname, 'src'), 
+      },
+      { test: /\.css$/, use: [MiniCssExtractPlugin.loader, 'css-loader'] }, // CSS
+      { test: /\.less$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'] }, // less
+      { test: /\.scss$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'] }, // sass
+      {
+        test: /\.(jpg|png|gif|bmp)$/,
+        use: [{
+          loader: 'url-loader', 
+          options: {
+            name: '[hash:10].[ext]', 
+            esModule: false, 
+            limit: 8 * 1024,
+            outputPath: 'images', // 默认情况下图片放在dist根目录下，指定写入到输出目录dist/images
+            publicPath: '/images', // 使用outputPath时，需要加上publicPath
+          },
+        }],
+      }, // 图片
+      { test: /\.html$/, use: ['html-loader'] },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].css',
+    }),
+    new CleanWebpackPlugin({ // 在重新打包前先把输出目录清空一下
+      cleanOnceBeforeBuildPatters: ['**/*'],
+    }),
+  ],
+};
+```
+
+### 16.3 hash、chunkhash和contenthash
+- 文件指纹：打包后输出的文件名和后缀
+- hash一般是结合CDN缓存来使用，通过webpack构建之后，生成对应文件名自动带上对应的MD5值。如果文件内容发生改变的话，那么对应文件哈希值也会改变，对应的HTML引用URL地址也会改变，触发CDN服务器从资源服务器上拉去对应数据，进而更新本地缓存。
+
+|占位符名称    |含义     |
+| -------|:-----------|
+|ext|资源后缀名|
+|name|文件名称|
+|path|文件的相对路径|
+|folder|文件所在的文件夹|
+|hash|每次webpack构建时生成一个唯一的hash值|
+|chunkhash|根据chunk生成hash值，来源于同一个chunk，则hash值相同|
+|contenthash|文件的内容hash，文件内容相同hash值相同|
+
+创建文件hash.js模拟三种hash的生成
+
+```javascript
+function createHash() {
+  return require('crypto').createHash('md5'); // 创建一个hash对象
+}
+
+const depModule1 = 'depModule1';
+const depModule2 = 'depModule2';
+
+const entry1 = `require("${depModule1}")`; // entry1入口文件，依赖depModule1
+const entry2 = `require("${depModule2}")`; // entry2入口文件，依赖depModule2
+
+// 两个入口文件
+const entry = {
+  entry1,
+  entry2,
+};
+
+// 如果使用hash，那么它将是工程级别，没修改一个文件，所有的文件名都会发生改变
+const hash = createHash()
+  .update(entry1)
+  .update(entry2)
+  .update(depModule1)
+  .update(depModule2)
+  .digest('hex');
+
+console.log('hash: ', hash); // hash:  f038bdaed39f4d8061b9c99d61c6bb78
+// hash 与所有模块都有关系，只要有一个发生改变，hash都会发生改变
+
+// chunkhash 会根据不同的入口文件，进行依赖文件解析，构建对应的hash值
+// 修改 depModule1的内容，entry1ChunkHash发生改变，entry2ChunkHash不变
+const entry1ChunkHash = createHash()
+  .update(entry1)
+  .update(depModule1)
+  .digest('hex');
+console.log('entry1ChunkHash: ', entry1ChunkHash); // entry1ChunkHash:  080984c6466ddb322e070af31ad4aa88
+
+const entry2ChunkHash = createHash()
+  .update(entry1)
+  .update(depModule1)
+  .digest('hex');
+console.log('entry2ChunkHash: ', entry2ChunkHash); // entry1ChunkHash:  080984c6466ddb322e070af31ad4aa88
+
+// contenthash 内容hash。只要内容没有改变，hash值就不会变
+const file1Content = entry1 + depModule1;
+const file1Hash = createHash()
+  .update(file1Content)
+  .digest('hex');
+console.log('file1Hash: ', file1Hash); // file1Hash:  080984c6466ddb322e070af31ad4aa88
+
+const file2Content = entry1 + depModule1;
+const file2Hash = createHash()
+  .update(file2Content)
+  .digest('hex');
+console.log('file2Hash: ', file2Hash); // file2Hash:  080984c6466ddb322e070af31ad4aa88
+```
+
+
+#### 16.3.1 hash
+- hash是整个项目的hash值，其根据每次编译内容计算得到，每次编译之后都会生成新的hash，即修改任何文件都会导致所有文件的哈数发生修改。
+
+```javascript {5,6,10,17}
+module.exports = {
+  mode: 'development', 
+  devtool: false,
+  entry: {
+    main: './src/index.js',
+    vendor: ['lodash'], // 第三方
+  },
+  output: {
+    path: resolve(__dirname, 'dist'), 
+    filename: '[name].[hash:8].js', 
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[hash:8].css',
+    }),
+    new CleanWebpackPlugin({ 
+      cleanOnceBeforeBuildPatters: ['**/*'],
+    }),
+  ],
+};
+```
+
+### 16.3.2 chunkhash
+- 采用hash计算的话，每次构建后生成的hash值都不一样，即使文件内容没有改变，这种方式无法实现缓存效果，因此我们需要另一种哈希值计算方式，即chunkhash。
+- chunkhash与hash不同，它根据不同入口文件（entry）进行依赖文件解析、构建对应的chunk，生成对应的哈希值。我们生产环境中会把一些公共库和程序入口文件区分开，单独打包构建，接着采用chunkhash的方式生成哈希值，只要我们不改动公共库的代码，就可以保证其哈希值不会受影响
+
+
+```javascript {10,17}
+module.exports = {
+  mode: 'development', 
+  devtool: false,
+  entry: {
+    main: './src/index.js',
+    vendor: ['lodash'], // 第三方
+  },
+  output: {
+    path: resolve(__dirname, 'dist'), 
+    filename: '[name].[chunkhash:8].js', 
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[chunkhash:8].css',
+    }),
+    new CleanWebpackPlugin({ 
+      cleanOnceBeforeBuildPatters: ['**/*'],
+    }),
+  ],
+};
+```
+
+#### 16.3.3 contenthash
+
+- 使用chunkhash存在一个问题，就是当在一个JS文件中引入CSS文件，编译后它们的哈希值是相同的，而且只要JS文件发生改变，关联的CSS文件hash也会发生改变，这个时候可以在mini-css-extract-plugin里使用contenthash值，保证即使CSS文件所在的模块里其他内容发生改变，直到CSS文件内容不变，那么就不会重复构建
+
+
+```javascript {17}
+module.exports = {
+  mode: 'development', 
+  devtool: false,
+  entry: {
+    main: './src/index.js',
+    vendor: ['lodash'], // 第三方
+  },
+  output: {
+    path: resolve(__dirname, 'dist'), 
+    filename: '[name].[chunkhash:8].js', 
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[contenthash:8].css',
+    }),
+    new CleanWebpackPlugin({ 
+      cleanOnceBeforeBuildPatters: ['**/*'],
+    }),
+  ],
+};
+```
