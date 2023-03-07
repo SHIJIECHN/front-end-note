@@ -615,14 +615,17 @@ npm install lodash@4.17.20
 ```
 
 ### 9.1 直接引入
-```javascript
 
+把第三方库直接打包到输出文件，特别大。模块内需要引入。
+
+```javascript
+import _ from 'lodash';
 ```
 
 ### 9.2 插件引入
 
 - webpack配置ProvidePlugin后，在使用时将不需要import和require进行引入，直接使用
-- _ 函数会自动添加到当前模块的上下文，无需显示声明
+- _ 函数会自动添加到当前模块的上下文，不需要模块内引入
 - 这种方式也会将lodash打包到输出文件中。
 
 :::: tabs
@@ -655,9 +658,10 @@ console.log(_.join(['a', 'b', 'c'], '@'));
 
 ### 9.3 expose-loader
 
-- 不需要任何其他插件配合，质押将下面的代码添加到所有loader之前
+- 不需要任何其他插件配合，直接将下面的代码添加到所有loader之前
 - 还是需要在模块内至少手工引入一次，会把变量挂载全局对象上 window._
 - 也需要打包的
+- 需要模块内引入
 
 ```javascript
 npm install expose-loader@1.0.1 -D
@@ -675,19 +679,19 @@ npm install expose-loader@1.0.1 -D
 ```
 
 ### 9.4 externals
-如果我们向引入一个库，但是又不想让webpack打包，并且不影响在程序中以window全局等方式进行使用，可以通过externals。
+如果我们向引入一个库，但是又不想让webpack打包，并且不影响在程序中以window全局等方式进行使用，可以通过externals。不需要模块内引入
 
 - 缺点：在html文件中需要手动引入CDN
 
 :::: tabs 
 
-::: tabs index.html
+::: tab index.html
 ```javascript
 <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
 ```
 :::
 
-::: tabs webpack.config.js
+::: tab webpack.config.js
 
 ```javascript
 module.exports = {
@@ -698,11 +702,10 @@ module.exports = {
 ```
 :::
 
-::: tabs index.js
+::: tab index.js
 
 ```javascript
- const jQuery = require("jquery");
- import jQuery from 'jquery';
+console.log(_.join(['a', 'b', 'c'], '@'));
 ```
 :::
 
@@ -714,6 +717,145 @@ module.exports = {
 npm i html-webpack-externals-plugin@3.8.0 -D
 ```
 
-```javascript
+:::: tabs
 
+::: tab webpack.config.js
+```javascript
+plugins: {
+  new HtmlWebpackExternalsPlugin({
+    externals: [
+      {
+        module: 'lodash', // 模块名
+        entry: 'https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.js', // CDN脚本地址
+        global: '_', // 全局变量名
+      },
+    ],
+  }),
+}
+```
+:::
+
+
+::: tab index.js
+
+```javascript
+import { join } from 'lodash';
+
+console.log(join(['a', 'b', 'c'], '@'));
+```
+:::
+
+::::
+
+
+## 10. watch
+
+当代码发生修改后自动重新编译
+
+```javascript
+module.exports = {
+  watch: true, // 开启监控模式。默认false,也就是不开启
+  watchOptions: { // 只有开启监听模式时，watchOptions才有意义
+    ignored: /node_modules/, // 忽略的文件夹
+    aggregateTimeout: 300, // 监听到变化后会等300ms再去执行（防抖的优化）
+    poll: 1000, // 轮询。每秒问操作系统多少次文件是否变化
+  },
+}
+```
+
+- webpack 定时获取文件的更新时间，并跟上次保存的时间进行比对，不一致就表示发生了变化，poll就用来配置每秒问多少次
+- 当检测文件不再发生改变，会先缓存起来，等待一段时间后在通知监听者，这个等待时间通过aggregateTimeout配置
+- webpack只会监听entry依赖的文件
+- 我们需要尽可能减少需要监听的文件数量和检查频率，当然频率降低会导致灵敏度下降
+
+
+## 11. 添加商标
+
+```javascript
+plugins: {
+  new webpack.BannerPlugin('xxx');
+}
+```
+
+## 12. 拷贝静态文件
+
+有时项目中没有引用的文件也需要打包到目标目录
+
+```javascript
+npm i copy-webpack-plugin@6.3.2 -D
+```
+
+```javascript
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+new CopyWebpackPlugin({
+  patterns: [
+    {
+      from: resolve(__dirname, 'src/design'), // 静态资源目录源地址
+      to: resolve(__dirname, 'dist/design'), // 目标地址，相对于output的path目录
+    },
+  ],
+}),
+```
+
+## 13. 打包前清空输出目录
+
+```javascript
+npm i clean-webpack-plugin@3.0.0 -D
+```
+
+```javascript
+const { CleanWebpackPlugin } = require('clean-webpack-plugin'); // 打包前清空目录
+
+new CleanWebpackPlugin({ // 在重新打包前先把输出目录清空一下
+  cleanOnceBeforeBuildPatters: ['**/*'],
+}),
+```
+
+## 14. 服务器代理
+
+如果有单独的后端开发服务器API，并且希望在同域名下发送API请求，那么代理某些URL会很有用。
+
+### 14.1 不修改路径
+
+```javascript
+proxy: {
+  '/api': 'http://localhost:3333',
+},
+```
+
+### 14.2 修改路径
+
+```javascript
+proxy: {
+  '/api': {
+    target: 'http://localhost:3333',
+    pathRewrite: {
+      '^/api': '',
+    },
+  },
+},
+```
+
+### 14.3 before after
+
+before在webpack-dev-server静态资源中间件处理之前，可以用来拦截部分请求返回特定内容，或者实现简单的数据mock。
+
+```javascript {6-15}
+devServer: {
+  contentBase: resolve(__dirname, 'static'),
+  writeToDisk: true, 
+  port: 8080, 
+  open: false, 
+  before(app) { // webpack-dev-server本质是一个express服务器 app
+    app.get('/api/users', (req, res) => {
+      res.json([{ name: 'zhufeng2', age: 12 }]);
+    });
+  },
+  after(app) { 
+    app.get('/api/users', (req, res) => {
+      res.json([{ name: 'zhufeng2', age: 12 }]);
+    });
+  },
+},
 ```
