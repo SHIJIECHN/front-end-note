@@ -1683,6 +1683,103 @@ babel-plugin-transform-runtime 可以实现自动分析，使用了哪些功能�
 1. preset-env useBuiltIns usage
 2. preset-env + babel-plugin-transform-runtime
 
+## 19. 多入口配置
+
+在src目录先创建pages文件夹，pages下创建page1.js、page2.js。以page1.js和page2.js为两个入口。
+
+:::: tabs 
+::: tab webpack.config.js
+```javascript
+const { resolve, join, basename } = require('path');
+
+// 自动读取入口文件
+const pagesRoot = resolve(__dirname, 'src', 'pages'); // 页面所在的根路径
+const pages = fs.readdirSync(pagesRoot); // 读取pages下的所有文件
+const entry = pages.reduce((entry, filename) => {
+  // entry[page1] = '...'
+  entry[basename(filename, '.js')] = join(pagesRoot, filename);
+  return entry;
+}, {});
+
+console.log(entry);
+/**
+ * {
+ *  page1: 'C:\\Users\\webpack-demo\\01-basic\\src\\pages\\page1.js',
+ *  page2: 'C:\\Users\\webpack-demo\\01-basic\\src\\pages\\page2.js'
+ * }
+ */
+module.exports = {
+  entry: entry，
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      filename: 'page1.html', // 生成的html文件名
+      chunks: ['page1'], // page1.html 应用 page1 的资源
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      filename: 'page2.html',
+      chunks: ['page2'],
+    }),
+  ]
+}
+```
+:::
+::: tab page1.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpack5</title>
+<script defer src="/page1.js"></script></head>
+<body></body>
+</html>
+```
+:::
+::: tab page2.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpack5</title>
+<script defer src="/page2.js"></script></head>
+<body></body>
+</html>
+```
+:::
+::::
+
+优化webpack.config.js
+```javascript
+const pagesRoot = resolve(__dirname, 'src', 'pages'); // 页面所在的根路径
+const pages = fs.readdirSync(pagesRoot); // 读取pages下的所有文件
+const htmlWebpackPlugins = [];
+const entry = pages.reduce((entry, filename) => {
+  // entry[page1] = '...'
+  const entryname = basename(filename, '.js');
+  entry[entryname] = join(pagesRoot, filename);
+  htmlWebpackPlugins.push(new HtmlWebpackPlugin({
+    template: './src/index.html',
+    filename: `${entryname}.html`, // html文件名
+    chunks: [entryname], // page1.html 应用 page1 的资源
+  }));
+  return entry;
+}, {});
+
+module.exports = {
+  entry: entry，
+  plugins: [
+    ...htmlWebpackPlugins,
+  ]
+}
+```
+
 
 ## 18. 基础知识总结
 1. webpack核心概念：Entry、Output、Module、Chunk、Loader、Plugin、Context。
