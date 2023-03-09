@@ -36,7 +36,7 @@ npm i webpack@5.9.0 webpack-cli@4.2.0 html-webpack-plugin@4.5.0 clean-webpack-pl
 - 去掉注释正则： `\/\*[\s\S]*\*\/|\/\/.*`
 - 去掉空白行：`^\s*(?=\r?$)\n`
 
-初始化配置打包
+### 2.1 初始化配置打包
 
 :::: tabs 
 
@@ -115,7 +115,126 @@ module.exports = 'title';
 :::   
 ::: tab 打包后的文件
 ```javascript
-
+var __webpack_modules__ = ({
+  "./src/title.js":
+    ((module) => {
+      module.exports = 'title';
+    })
+});
+var __webpack_module_cache__ = {};
+function __webpack_require__(moduleId) {
+  if (__webpack_module_cache__[moduleId]) {
+    return __webpack_module_cache__[moduleId].exports;
+  }
+  var module = __webpack_module_cache__[moduleId] = {
+    exports: {}
+  };
+  __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+  return module.exports;
+}
+(() => {
+  let title = __webpack_require__("./src/title.js");
+  console.log(title);
+})();
+;
 ```
 :::   
 ::::
+
+- 模块ID
+  - 不管你是用声明样的路径来加载的，最终莫夸ID统一会变成相对根目录的先对路径
+    - index.js -> ./src/index.js
+    - title.js -> ./src/title.js
+    - JQuery
+
+### 2.2 打包文件手写main.js
+
+```javascript
+(() => {
+  // webpack 自己读取模块产生
+  var modules = {
+    './src/title.js': (module) => {
+      module.exports = 'title';
+    }
+  }
+
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) { // 先看缓存中有没有已经缓存的模块对象
+      return cache[moduleId].exports; // 如果有就直接返回
+    }
+    // 定义module={ exports: {}}，并将该对象往缓存cache中也缓存一份
+    var module = cache[moduleId] = {
+      exports: {}
+    }
+    modules[moduleId](module, module.exports, require); // 从modules中拿出moduleId对应的函数并执行
+    return module.exports; // 返回
+  }
+
+  // .src/index.js
+  (() => {
+    let title = require('./src/title.js');
+    console.log(title);
+  })();
+})();
+```
+
+## 3. 兼容性实现
+
+- CommonJS： exports/module.exports, require
+- ES6: export/export default
+
+### 3.1 CommonJS加载CommonJS
+
+
+:::: tabs 
+::: tab index.js
+```javascript
+// CommonJS模块
+let title = require('./title.js');
+console.log(title.name);
+console.log(title.age);
+```
+:::   
+
+::: tab title.js
+```javascript
+// CommonJS 模块
+exports.name = "title_name";
+exports.age = "title_age";
+```
+:::   
+
+::: tab main.js
+```javascript
+(() => { 
+  var modules__ = ({
+    "./src/title.js":
+      ((module, exports) => {
+        exports.name = "title_name";
+        exports.age = "title_age";
+      })
+  });
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) {
+      return cache[moduleId].exports;
+    }
+    var module = cache[moduleId] = {
+      exports: {}
+    };
+    modules[moduleId](module, module.exports, require);
+    return module.exports;
+  }
+  (() => {
+    let title = require("./src/title.js");
+    console.log(title.name);
+    console.log(title.age);
+  })();
+})();
+```
+:::   
+:::: 
+
+### 3.2 CommonJS加载ES6模块
+
