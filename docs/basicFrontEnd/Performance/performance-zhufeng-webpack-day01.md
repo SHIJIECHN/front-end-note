@@ -1683,7 +1683,7 @@ babel-plugin-transform-runtime 可以实现自动分析，使用了哪些功能�
 1. preset-env useBuiltIns usage
 2. preset-env + babel-plugin-transform-runtime
 
-## 19. 多入口配置
+## 18. 多入口配置
 
 在src目录先创建pages文件夹，pages下创建page1.js、page2.js。以page1.js和page2.js为两个入口。
 
@@ -1781,7 +1781,7 @@ module.exports = {
 ```
 
 
-## 18. 基础知识总结
+## 19. 基础知识总结
 1. webpack核心概念：Entry、Output、Module、Chunk、Loader、Plugin、Context。
 2. 基本配置：
    1. entry：入口文件

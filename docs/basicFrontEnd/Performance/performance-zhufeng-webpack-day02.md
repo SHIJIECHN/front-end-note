@@ -35,3 +35,87 @@ npm i webpack@5.9.0 webpack-cli@4.2.0 html-webpack-plugin@4.5.0 clean-webpack-pl
 
 - 去掉注释正则： `\/\*[\s\S]*\*\/|\/\/.*`
 - 去掉空白行：`^\s*(?=\r?$)\n`
+
+初始化配置打包
+
+:::: tabs 
+
+::: tab webpack.config.js
+```javascript
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+
+module.exports = {
+  mode: 'development',
+  devtool: false,
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js'
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      filename: 'index.html'
+    }),
+    new CleanWebpackPlugin({ cleanOnceBeforeBiuldPatterns: ['**/*'] }),
+  ],
+}
+```
+:::   
+::: tab package.json
+```json {7,8}
+{
+  "name": "02-bundle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack serve"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^4.5.0",
+    "webpack": "^5.9.0",
+    "webpack-cli": "^4.2.0"
+  }
+}
+```
+:::   
+::: tab index.js
+```javascript
+let title = require('./title.js');
+console.log(title);
+```
+:::  
+::: tab title.js
+```javascript
+module.exports = 'title';
+```
+:::
+::: tab index.html
+```javascript
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpack5</title>
+</head>
+<body>
+</body>
+</html>
+```
+:::   
+::: tab 打包后的文件
+```javascript
+
+```
+:::   
+::::
