@@ -9,7 +9,7 @@ title: 正则
 
 - 转义符号：\
 - 转义字符：\字符
-- 
+
 ```javascript
 var str = "我是一名'牛逼'的程序员"; // 可以
 var str = '我是一名"牛逼"的程序员'; // 可以
@@ -52,11 +52,12 @@ wrap.innerHTML = str;
 ```
 
 ## 2. 正则基础
-正则EegExp = regular expression
+正则`RegExp = regular expression`
 
 设定特定的规则，把某个字符符合规则的字符串匹配出来。
 
 对字符串中的字符检索。
+
 ```javascript
 // RegExp():
 // 参数1：需要匹配的正则表达式。正则匹配要求：必须是字符串片段，对大小写敏感，并且是连续的
@@ -116,7 +117,7 @@ console.log(result); // ['xyz']
 // 3. 结果为 xyz
 
 // 正则区间: [A-Z]。顺序的范围按照ASCII码排列
-//相匹配第一位是数字，第二为大写字母、第三位小写字母
+// 想匹配第一位是数字，第二为大写字母、第三位小写字母
 var str = 'dklfihJd5kdK5DjfKKWSiddikdD',
   reg = /[0-9][A-Z][a-z]/g;
 
@@ -237,7 +238,7 @@ var reg = /\d*/g,
 var result = str.match(reg);
 console.log(result); // ['', '', '', '', '', '', '', '']
 
-// 字符串从左到右，依次先匹配多，在匹配少，如果一旦匹配上就不回头匹配
+// 字符串从左到右，依次先匹配多，再匹配少，如果一旦匹配上就不回头匹配
 // 贪婪匹配原则：如果匹配上多个，绝不匹配少个
 
 // n? {0,1}
@@ -430,7 +431,7 @@ var str = 'js-plus-plus',
 reg = /-(\w)/g; // ( ) 子表达式 要有括号 $1 才能引用到
 var str3 = str.replace(reg, function($, $1){
   console.log($,$1); // -p p
-  return $1.toUpperCase(); // $1.toUpperCase is not a function
+  return $1.toUpperCase(); 
 })
 console.log(str3); // jsPlusPlus
 
@@ -540,7 +541,7 @@ console.log(str1); // My name is Jone, I'm 12 years old.
 ```
 
 模板匹配测试
-```javascript
+```html
 <div class="artical"></div>
 <script type="html" id="tpl">
   <h1>{{title}}</h1>
@@ -632,3 +633,18 @@ reg = /(?:a)(b)(c)/;
 console.log(str.match(reg)); // ['abc', 'b', 'c']
 // 没有匹配子表达式a。?: 目的是不让它捕获该表达式
 ```
+
+## 总结
+1. 元字符：`\w==[0-9A-Za-z]`, `\d===[0-9]`, `\s===[\r\t\n\f\v]`, `\b`, `\.`===除了`\n\t`外的所有字符。所有字符：`[\s\S]`, `[\w\W]`
+2. 量词：
+   - n+: {1,正无穷} 出现1次到正无穷
+   - n*: {0,正无穷} 出现0次到正无穷
+   - n?: {0,1} 出现0次到1次
+   - n{x,y} {x,正无穷}
+   - ^n: 以n开头的字符串
+   - n$: 以n结尾的字符串
+3. 正则的规则：1. 不回头；2. 贪婪模式
+4. 正向预查：?=n 匹配任何其他紧接着字符串n的字符串，?!n 不是紧跟着
+5. 子表达式：(), 反向引用：\1
+6. replace：$1 必须是子表达式，否则无效
+7. 不捕获分组: ?:

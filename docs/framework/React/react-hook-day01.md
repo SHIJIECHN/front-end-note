@@ -1,20 +1,31 @@
 ---
 autoGroup-2: Hook
 sidebarDepth: 3
-title: Hook动机与useState
+title: 1. Hook动机与useState
 ---
 
 ## 动机
 
-> 使用`Hook`的原因
+::: theorem 类组件的缺点
 
-1. 解决在组件之间复用状态逻辑很难的问题。`Hook`提供在无需修改组件结构的情况下复用状态逻辑。
-2. 将组件中相互关联的部分拆分成更小的函数，解决复杂组件中难以理解的逻辑。
-3. `Class`组件中`this`指向的问题
+1. 组件数据状态逻辑不能重用、组件之间传值过程复杂。
+   1. “组件数据状态逻辑不能重用”：由于类组件中的组件数据状态state必须卸载该组件构造函数的内部，无法将state抽离出组件，因此别的组件有类似state逻辑，也必须自己实现一次。
+   2. “组件之间传值过程复杂”：React本身为单向数据流，即父组件可以传值给子组件，但子组件不允许直接修改父组件中的数据状态。子组件为了达到修改父组件中的数据状态，通常采用“高阶组件（HOC）”或“父组件暴露修改函数给子组件（render props）”这两种方式。这两种方式都会让组件变得复杂。
+2. 复杂场景下代码难以组织在一起。
+   1. 数据获取与事件订阅分散在不同的生命周期函数中。
+   2. 内部state数据只能是整体，无法被拆分更细致。
+3. 复杂且不容易理解的this。例如事件处理函数都需要bind(this)才可以正确执行，想获取某些自定义属性都需要使用this.state.xxx或this.props.xxx.
+:::
 
-> Hook是什么？
+::: theorem Hook如何解决上述问题
+1. 通过自定义`Hook`，可以将数据状态逻辑从组件中抽离出去，这样同一个`Hook`可以被多个组件使用
+2. 通过`React`内置的`useEffect`函数，将不同数据分别从`this.state`中独立拆分出去
+3. 函数组件和普通`JS`函数非常类似，在普通函数中定义的变量、方法都可以不使用`this`，而直接使用该变量或函数。因此可以不用去关心`this`。
+:::
 
+::: theorem Hook 是什么？
 它是一个简单的函数，函数组件在执行的时候能够给函数组件添加一些特殊的功能
+:::
 
 ## setState()
 
@@ -23,7 +34,7 @@ title: Hook动机与useState
 function App() {
   // 声明一个叫 count 的 state变量
   const [count, setCount] = useState(0); // 返回一个数组
-  console.log(useState(1)); // [1, f] 一个数值1 和函数f
+  console.log(useState(1)); // [1, f] 一个数值1和函数f
 
   return (
     <div className="App">
@@ -41,13 +52,13 @@ import {setState} from 'react'
 const [count, setCount] = setState(0);
 ```
 
-> useState需要哪些参数
-
+::: theorem useState需要哪些参数
 唯一的参数就是初始默认值
+:::
 
-> useState方法的返回值
-
-返回值为数组，包括：当前state以及更新state的函数。需要成对的获取它们。
+::: theorem useState方法的返回值
+返回值为数组，包括：当前`state`以及更新`state`的函数。需要成对的获取它们。
+:::
 
 ```javascript
 console.log(useState(1)); // [1, f] 一个数值1 和函数f
@@ -84,18 +95,18 @@ function App() {
 }
 
 /**
- * 打印结果说明：加载
+ * 打印结果说明：
  * 1. 每次点击任意按钮都会打印一次render，说明每次执行setCount函数时，都会重新加载app组件
  * 2. useState钩子函数一直被复用，但返回的都是不同的结果
  * 3. 返回的结果并不影响其他的结果，互不干扰
  */
 ```
 
-> 当使用多个useState hook的时候，如何将运行的钩子useState与视图对应起来？如点击Click1，怎么知道对应哪个useState中的数值？
+> 当使用多个`useState hook`的时候，如何将运行的钩子`useState`与视图对应起来？如点击`Click1`，怎么知道对应哪个`useState`中的数值？
 
-根据useState出现的顺序来确定的。
+根据`useState`出现的顺序来确定的。
 
-在每一次渲染app组件的时候，都会有一个记忆单元格（状态数组）
+在每一次渲染`app`组件的时候，都会有一个记忆单元格（状态数组）
 ```javascript
 [
   ()=>({count1, setCount1}),
@@ -103,19 +114,19 @@ function App() {
   ()=>({count3, setCount3})
 ]
 ```
-当调用useState函数时，会将初始值、状态、修改状态的函数存放到一个单元格，然后将指针往下移动，再次调用useState函数时，再次保存一个单元格，指针往下移动，以此类推。
+当调用`useState`函数时，会将初始值、状态、修改状态的函数存放到一个单元格，然后将指针往下移动，再次调用`useState`函数时，再次保存一个单元格，指针往下移动，以此类推。
 
-> Hook 有什么规则
-
-1. 只在最顶层使用Hook
+::: theorem Hook 有什么规则
+1. 只在最顶层使用`Hook`
 2. 不在循环、条件或嵌套函数中使用
-3. 只在React函数中调用Hook
+3. 只在`React`函数中调用`Hook`
+:::
 
 ### 4. 惰性初始state
-initialState参数只会在组件的初始渲染中起作用，后续渲染时会被忽略
+`initialState`参数只会在组件的初始渲染中起作用，后续渲染时会被忽略
 ```javascript
-//初始值是函数
-//一般情况下,数据更改时组件内部程序是会反复执行，想要只运行一次时可以使用惰性初始化state
+// 初始值是函数
+// 一般情况下,数据更改时组件内部程序是会反复执行，想要只运行一次时可以使用惰性初始化state
   const [counter, setCounter] = useState(() => {
     const initalState = someExpensiveComputation(props);
     return initialState;
@@ -123,17 +134,20 @@ initialState参数只会在组件的初始渲染中起作用，后续渲染时�
 ```
 
 ### 5. 注意点
-使用useState注意事项：
-1. 使用useState返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
-2. 在函数组件中，当setCount()的参数是原始值且没有发生改变时，app组件不会重新加载，但是参数是引用值且没有发生更改时，app组件会重新加载，以上基于Object.is算法
-3. 在类组件中，不管是原始值还是引用值，app组件也是会重新加载
-4. 函数组件更新同时保存上一次的state和最新的state的返回值
-5. 多次使用setCount函数会合并只会加载一次app组件
-6. 类组件state合并，函数组件中state不会合并对象
+
+::: theorem 使用`useState`注意事项：
+1. 使用`useState`返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
+2. 在函数组件中，当`setCount()`的参数是原始值且没有发生改变时，`app`组件不会重新加载，但是参数是引用值且没有发生更改时，`app`组件会重新加载，以上基于`Object.is`算法
+3. 在类组件中，不管是原始值还是引用值，`app`组件也是会重新加载
+4. 函数组件更新同时保存上一次的`state`和最新的`state`的返回值
+5. 多次使用`setCount`函数会合并只会加载一次`app`组件
+6. 类组件`state`合并，函数组件中`state`不会合并对象
+:::
 
 
 代码分析：
-1. 使用useState返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
+
+1. 使用`useState`返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
 ```javascript
 // 定义全局变量arr
 window.arr = []
@@ -150,9 +164,10 @@ function App() {
 }
 
 ```
-控制台中打印arr数组，包含一个f函数，点击Click，再打印arr，arr= \[f,f]，其中arr\[0]=== arr\[1]为true。说明setCount是唯一的引用。
+控制台中打印`arr`数组，包含一个f函数，点击`Click`，再打印`arr`，`arr= [f,f]`，其中`arr[0]=== arr[1]`为`true`。说明`setCount`是唯一的引用。
 
-2. 在函数组件中，当setCount()的参数是原始值且没有发生改变时，app组件不会重新加载，但是参数是引用值且没有发生更改时，app组件会重新加载，以上基于Object.is算法
+2. 在函数组件中，当`setCount()`的参数是原始值且没有发生改变时，`app`组件不会重新加载，当参数是引用值且没有发生更改时，`app`组件会重新加载，以上基于`Object.is`算法
+   
 ```js
 
 function App() {
@@ -167,11 +182,11 @@ function App() {
   )
 }
 ```
-点击Btn1，页面不会重新加载；点击Btn2，页面每次都会重新加载。
+点击`Btn1`，页面不会重新加载；点击`Btn2`，页面每次都会重新加载。
 
-4. 函数组件更新同时保存上一次的state和最新的state的返回值
+4. 函数组件更新同时保存上一次的`state`和最新的`state`的返回值
 
-如果新的count需要通过使用先前的count计算得出，那么可以将函数传递给setCount。该函数将接收先前的count，并返回一个更新后的值。
+如果新的`count`需要通过使用先前的`count`计算得出，那么可以将函数传递给`setCount`。该函数将接收先前的`count`，并返回一个更新后的值。
 ```javascript
 console.log('render')
 const handleClick = () => {
@@ -192,7 +207,7 @@ console.log(count);
  */
 ```
 
-5. 多次使用setCount函数会合并只会加载一次app组件
+5. 多次使用`setCount`函数会合并只会加载一次`app`组件
 ```javascript
 function App() {
   const [count, setCount] = useState(0);
@@ -222,7 +237,7 @@ function App() {
  */
 ```
 
-6. 类组件state合并，函数组件中state不会合并对象
+6. 类组件`state`合并，函数组件中`state`不会合并对象
 
 ```javascript
 // 函数组件
