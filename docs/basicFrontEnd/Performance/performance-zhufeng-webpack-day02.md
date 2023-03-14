@@ -331,5 +331,180 @@ function fn() {
 let getValue = fn();
 console.log(getValue());// hello
 ```
-## 3.3 ES module加载ES module
+### 3.3 ES module加载ES module
 
+webpack如何直到这是个es module还是commonjs
+如果代码里面有了import 或者export webpack就认为这是一个es module 不管有没有require exports
+
+:::: tabs 
+::: tab index.js
+```javascript
+import name, { age } from './title';
+console.log(name);
+console.log(age);
+```
+:::   
+::: tab title.js
+```javascript
+export default 'title_name'; // 默认导出
+export const age = 'title_age'; // 批量导出
+```
+:::   
+
+::: tab main.js
+```javascript
+(() => {
+  var modules = {
+    "./src/index.js":
+      ((module, exports, require) => {
+        require.r(exports);
+        var title = require("./src/title.js");
+        console.log(title.default);
+        console.log(title.age);
+      }),
+    './src/title.js': (module, exports, require) => {
+      // 不管是CommonJS还是es module最后都变成了CommonJS，如果原来是es module的话
+      // 就把exports传给r方法处理一下，exports.__esModule = true以后就可以通过这个属性来判断原来是不是es module
+      require.r(exports);
+      require.d(exports, {
+        default: () => DEFAULT_EXPORT, // getter 
+        age: () => age
+      })
+      const DEFAULT_EXPORT = 'title_name'; // 默认导出
+      const age = 'title_age'; // age
+
+    }
+  }
+
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) {
+      return cache[moduleId].exports;
+    }
+    var module = cache[moduleId] = {
+      exports: {}
+    }
+    modules[moduleId](module, module.exports, require);
+    return module.exports;
+  }
+
+  require.r = (exports) => { // r方法作用是添加属性：Symbol.toStringTag和__esModule
+    Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+    Object.defineProperty(exports, '__esModule', { value: true }); // __esModule=true 标识
+  }
+  // 为什么要用一个字母，因为减少打包后的文件体积
+  // __webpack_require__ exports definition 都可
+  require.d = (exports, definition) => {
+    for (let key in definition) { // 循环definition，将属性赋给exports定义属性
+      Object.defineProperty(exports, key, { enumerable: true, get: definition[key] })
+    }
+  }
+
+  // .src/index.js
+  (() => {
+    require("./src/index.js");
+  })();
+})();
+```
+:::   
+
+::::
+
+### 3.4 ES module加载CommonJS
+
+n方法有什么用？兼容
+
+:::: tabs 
+::: tab index.js
+```javascript
+import name, { age } from './title';
+console.log(name);
+console.log(age);
+```
+:::
+::: tab title.js
+```javascript
+module.exports = {
+  name: 'title_name',
+  age: 'title_age'
+}
+```
+:::   
+::: tab mian.js
+```javascript
+(() => {
+  var modules = {
+    "./src/index.js":
+      ((module, exports, require) => {
+        require.r(exports);
+        var title = require("./src/title.js"); // {name: 'title_name', age: 'title_age'}
+        // n方法有什么用? 在这个地方我根本不知道title.js是es module还是commonJS
+        var title_default = require.n(title);
+        console.log((title_default())); // 默认值
+        console.log(title.age);// age
+
+      }),
+    "./src/title.js":
+      (module) => {
+        module.exports = {
+          name: 'title_name',
+          age: 'title_age'
+        }
+      }
+  }
+
+  var cache = {};
+  function require(moduleId) {
+    if (cache[moduleId]) {
+      return cache[moduleId].exports;
+    }
+    var module = cache[moduleId] = {
+      exports: {}
+    }
+    modules[moduleId](module, module.exports, require);
+    return module.exports;
+  }
+  require.n = (exports) => {
+    // 如果是es6模块，返回值就是exports default类型，如果是CommonJS模块就返回它自己
+    var getter = exports._esModule ? () => exports.default : () => exports;
+    return getter;
+  };
+
+  require.r = (exports) => { // r方法作用是添加属性：Symbol.toStringTag和__esModule
+    Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+    Object.defineProperty(exports, '__esModule', { value: true }); // __esModule=true 标识
+  }
+  // 为什么要用一个字母，因为减少打包后的文件体积
+  // __webpack_require__ exports definition 都可
+  require.d = (exports, definition) => {
+    for (let key in definition) { // 循环definition，将属性赋给exports定义属性
+      Object.defineProperty(exports, key, { enumerable: true, get: definition[key] })
+    }
+  }
+
+  // .src/index.js
+  (() => {
+    require("./src/index.js");
+  })();
+})();
+```
+:::   
+
+::::
+
+#### 3.5 总结
+- common+common 不需要任何处理
+- commom+es6  es6需要转成common
+- es6+es6 两个es6都要转成common
+- ex6+common es6需要转成common
+
+
+## 4. 异步加载代码块
+
+1. 执行e方法，返回一个promise
+2. e中调用f.j，f.j是一个函数
+
+## 5. husky
+代码提交规范
+
+http://zhufengpeixun.com/strong/html/114.react+typescript.html#t23.%20git%E8%A7%84%E8%8C%83%E5%92%8Cchangelog
