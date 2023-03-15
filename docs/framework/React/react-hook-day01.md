@@ -30,20 +30,20 @@ title: 1. Hook动机与useState
 ## setState()
 
 ```javascript
-// 函数组件
-function App() {
-  // 声明一个叫 count 的 state变量
-  const [count, setCount] = useState(0); // 返回一个数组
-  console.log(useState(1)); // [1, f] 一个数值1和函数f
+// 声明一个叫 count 的 state变量。
+  // 第一个元素是定义的变量名，第二个元素为修改该变量对应的函数名称
+const [count, setCount] = useState(0); // 返回一个数组
+console.log(useState(1)); // [1, f] 一个数值1和函数f
 
-  return (
-    <div className="App">
-      <h1>{count}</h1>
-      <button onClick={() => setCount(count + 1)}>Click</button>
-    </div>
-  );
-}
+setCount(newValue);// 修改count的值
 ```
+
+setCount采用“异步直接赋值”的形式，并不会像类组件中的setState()那样做“异步对比累加赋值”。
+
+“直接赋值”：
+
+1. 对于简单的数据类型，比如number、string类型，可以直接通过setCount(newValue)直接进行赋值。
+2. 对于复杂类型数据，如array、object类型，若想修改其中某一个属性值而不影响其他属性，则需要先复制出一份，修改某属性后再整体赋值。
 
 ### 1. 声明State变量
 ```javascript
@@ -137,10 +137,12 @@ function App() {
 
 ::: theorem 使用`useState`注意事项：
 1. 使用`useState`返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
-2. 在函数组件中，当`setCount()`的参数是原始值且没有发生改变时，`app`组件不会重新加载，但是参数是引用值且没有发生更改时，`app`组件会重新加载，以上基于`Object.is`算法
-3. 在类组件中，不管是原始值还是引用值，`app`组件也是会重新加载
-4. 函数组件更新同时保存上一次的`state`和最新的`state`的返回值
-5. 多次使用`setCount`函数会合并只会加载一次`app`组件
+2. 在函数组件中，`setCount()`的参数：
+   1. 是原始值且没有发生改变时，组件不会重新加载，
+   2. 是引用值且没有发生更改时，组件会重新加载，以上基于`Object.is`算法
+3. 在类组件中，不管是原始值还是引用值，组件都重新加载
+4. 函数组件更新，会保存上一次的`state`和最新的`state`的返回值
+5. 多次使用`setCount`函数会合并只会加载一次组件
 6. 类组件`state`合并，函数组件中`state`不会合并对象
 :::
 
@@ -154,7 +156,7 @@ window.arr = []
 function App() {
   const [count, setCount] = useState(0);
   console.log('render');
-  window.arr.push(setCount)
+  window.arr.push(setCount); // 每次push的setCount都是同一个函数引用
   return (
     <div>
       <p>{count}</p>
@@ -166,7 +168,9 @@ function App() {
 ```
 控制台中打印`arr`数组，包含一个f函数，点击`Click`，再打印`arr`，`arr= [f,f]`，其中`arr[0]=== arr[1]`为`true`。说明`setCount`是唯一的引用。
 
-2. 在函数组件中，当`setCount()`的参数是原始值且没有发生改变时，`app`组件不会重新加载，当参数是引用值且没有发生更改时，`app`组件会重新加载，以上基于`Object.is`算法
+2. 在函数组件中，`setCount()`的参数：
+   1. 是原始值且没有发生改变时，组件不会重新加载，
+   2. 是引用值且没有发生更改时，组件会重新加载，以上基于`Object.is`算法
    
 ```js
 
@@ -176,6 +180,7 @@ function App() {
   console.log('render')
   return (
     <div>
+      {/* 点击button，修改count或obj的值 */}
       <button onClick={() => setCount(count)}>Btn1</button>
       <button onClick={() => setObj({})}>Btn2</button>
     </div>
@@ -193,12 +198,12 @@ const handleClick = () => {
   setCount(count => count + 1);
   setCount(count => {
     // count是上一个setCount执行后的count结果，即更新后的count
-    console.log('setCount : ' + count)
+    console.log('setCount : ' + count); // 1
     return count + 1;
   });
-  console.log('handleClick: ' + count);
+  console.log('handleClick: ' + count); // 0 setCount是异步修改的，此时count还是原来的值
 }
-console.log(count);
+console.log(count); // 2
 /**
  * handleClick : 0
  * setCount: 1

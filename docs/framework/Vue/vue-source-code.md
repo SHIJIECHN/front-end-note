@@ -1476,6 +1476,7 @@ function reactify(o, vm) {
     // 如果是这种结构 { data: { name: 'jack', children: { name: 'jim'}}} 两个name都会映射到Vue实例上
     // 所以后面name: 'jim'会覆盖name: 'jack'。
   }
+}
 ```
 我们之前处理的reactify方法已经不行了，需要一个新的方法来处理。
 
