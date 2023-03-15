@@ -757,76 +757,6 @@ console.log(targetCode);
 ```javascript
 // 箭头函数
 const sum = (a,b)=>a+b;
-
-// 转换前
-{
-  "type": "Program",
-  "start": 0,
-  "end": 22,
-  "body": [
-    {
-      "type": "VariableDeclaration",
-      "start": 0,
-      "end": 22,
-      "declarations": [
-        {
-          "type": "VariableDeclarator",
-          "start": 6,
-          "end": 22,
-          "id": {
-            "type": "Identifier",
-            "start": 6,
-            "end": 9,
-            "name": "sum"
-          },
-          "init": {
-            "type": "ArrowFunctionExpression",
-            "start": 11,
-            "end": 22,
-            "id": null,
-            "expression": true,
-            "generator": false,
-            "async": false,
-            "params": [
-              {
-                "type": "Identifier",
-                "start": 12,
-                "end": 13,
-                "name": "a"
-              },
-              {
-                "type": "Identifier",
-                "start": 14,
-                "end": 15,
-                "name": "b"
-              }
-            ],
-            "body": {
-              "type": "BinaryExpression",
-              "start": 19,
-              "end": 22,
-              "left": {
-                "type": "Identifier",
-                "start": 19,
-                "end": 20,
-                "name": "a"
-              },
-              "operator": "+",
-              "right": {
-                "type": "Identifier",
-                "start": 21,
-                "end": 22,
-                "name": "b"
-              }
-            }
-          }
-        }
-      ],
-      "kind": "const"
-    }
-  ],
-  "sourceType": "module"
-}
 ```
 转换后
 ```javascript
@@ -834,95 +764,7 @@ const sum = (a,b)=>a+b;
 var sum = function sum(a, b) {
   return a + b;
 };
-
-{
-  "type": "Program",
-  "start": 0,
-  "end": 49,
-  "body": [
-    {
-      "type": "VariableDeclaration",
-      "start": 0,
-      "end": 49,
-      "declarations": [
-        {
-          "type": "VariableDeclarator",
-          "start": 4,
-          "end": 48,
-          "id": {
-            "type": "Identifier",
-            "start": 4,
-            "end": 7,
-            "name": "sum"
-          },
-          "init": {
-            "type": "FunctionExpression",
-            "start": 10,
-            "end": 48,
-            "id": {
-              "type": "Identifier",
-              "start": 19,
-              "end": 22,
-              "name": "sum"
-            },
-            "expression": false,
-            "generator": false,
-            "async": false,
-            "params": [
-              {
-                "type": "Identifier",
-                "start": 23,
-                "end": 24,
-                "name": "a"
-              },
-              {
-                "type": "Identifier",
-                "start": 26,
-                "end": 27,
-                "name": "b"
-              }
-            ],
-            "body": {
-              "type": "BlockStatement",
-              "start": 29,
-              "end": 48,
-              "body": [
-                {
-                  "type": "ReturnStatement",
-                  "start": 33,
-                  "end": 46,
-                  "argument": {
-                    "type": "BinaryExpression",
-                    "start": 40,
-                    "end": 45,
-                    "left": {
-                      "type": "Identifier",
-                      "start": 40,
-                      "end": 41,
-                      "name": "a"
-                    },
-                    "operator": "+",
-                    "right": {
-                      "type": "Identifier",
-                      "start": 44,
-                      "end": 45,
-                      "name": "b"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      ],
-      "kind": "var"
-    }
-  ],
-  "sourceType": "module"
-}
 ```
-
-#### 2.2 实现
 
 ```javascript
 npm i @babel/core@7.21.3 babel-types@6.26.0 -D
@@ -931,30 +773,221 @@ npm i @babel/core@7.21.3 babel-types@6.26.0 -D
 ```javascript
 let core = require('@babel/core');
 let types = require('babel-types');
-// let BabelPluginTransform = require('babel-plugin-transform-es2015-arrow-functions')
+let BabelPluginTransformEs2015ArrowFunctions = require('babel-plugin-transform-es2015-arrow-functions')
 const sourceCode = `
 const sum = (a,b)=>{
+  console.log(this);
   return a+b
 }
 `;
 
 // babel插件其实是一个对象，它会有一个visitor访问器
-let BabelPluginTransform = {
+let BabelPluginTransformEs2015ArrowFunctions2 = {
   // 每个插件都会有自己的访问器
   visitor: {
     // 属性就是节点的类型，babel在比阿尼到对应类型的节点的时候会调用此函数
-    ArrowFunctionExpression(nodePath) { // 参数是节点的路径
+    ArrowFunctionExpression(nodePath) { // 捕获箭头函数表达式，参数是节点的路径
       let node = nodePath.node; // 获取当前路径上的节点
+      // 处理this指针的问题
+      const thisBinding = hoistFunctionEnviroment(nodePath); // 提升函数作用域
       node.type = 'FunctionExpression';
     }
   }
+}
+
+function findParent(fnPath) {
+  do {
+    if ((fnPath.isFunction() && !fnPath.isArrowFunctionExpression()) || fnPath.isProgram()) {
+      return fnPath;
+    }
+  } while (fnPath = fnPath.parentPath);
+
+}
+
+function hoistFunctionEnviroment(fnPath) {
+  // thisEnvFn=Program节点
+  // const thisEnvFn = fnPath.findParent(p => { // 找父节点
+  //   // 如果是函数则不能是箭头函数，或者是Program或者是类的属性
+  //   return (p.isFunction() && !p.isArrowFunctionExpression()) || p.isProgram();
+  // });
+  const thisEnvFn = findParent(fnPath);
+  // thisPaths就是放着哪些地方用到了this
+  let thisPaths = getScopeInfoInformation(fnPath); // 找到作用域信息
+  let thisBinding = '_this'; // 把this变量重定向的变量名
+  // 如果有地方用到了，则需要在thisEnvFn环境上添加一个语句 let _this = this
+  if (thisPaths.length > 0) {
+    // 表示在this函数环境中添加一个变量id_this=初始值 this thisExpression
+    thisEnvFn.scope.push({
+      id: types.identifier('_this'),
+      init: types.thisExpression()
+    })
+    // 遍历所有使用到this的路径节点，把所有thisExpression全变成_this标识符
+    thisPaths.forEach(thisChild => {
+      let thisRef = types.identifier(thisBinding);
+      thisChild.replaceWith(thisRef);
+    })
+  }
+}
+function getScopeInfoInformation(fnPath) {
+  let thisPaths = [];
+  // 遍历当前的path的所有子节点，看谁的类型是ThisExpression
+  fnPath.traverse({
+    // 找到ThisExpression类型
+    ThisExpression(thisPath) {
+      thisPaths.push(thisPath)
+    }
+  })
+  return thisPaths;
 }
 /**
  * babel-core本身只是用来生成语法树，遍历语法树，生成语法树
  * 它本身不负责转换语法树
  */
 let targetCode = core.transform(sourceCode, {
-  plugins: [BabelPluginTransform]
+  plugins: [BabelPluginTransformEs2015ArrowFunctions2]
 });
 console.log(targetCode.code);
 ```
+
+#### 2.2 把类编译为Function
+
+```javascript
+npm i babel-plugin-transform-es2015-classes
+```
+
+```javascript
+// 把一个类转成函数
+
+let core = require('@babel/core');
+let types = require('babel-types');
+let BabelPluginTransformClasses = require('@babel/plugin-transform-classes')
+const sourceCode = `
+class Person {
+  constructor(name) {
+    this.name=name;
+  }
+  getName() {
+    return this.name;
+  }
+}
+`;
+
+// babel插件其实是一个对象，它会有一个visitor访问器
+/**
+ * 编写插件的一般步骤：
+ * 1. 仔细观察转换前和转换后的语法树，找到它们的相同点和不同点
+ * 2. 想办法把转换前的转成转换后的，并且要尽可能的复用旧节点
+ * 老的没有，新的有，就得创建新节点了，可以通过babel-types可以创建新节点
+ */
+let BabelPluginTransformClasses2 = {
+  // 每个插件都会有自己的访问器
+  visitor: {
+    ClassDeclaration(nodePath) {
+      let { node } = nodePath;
+      let { id } = node; // Person标识符
+      let classMethods = node.body.body;// 获取原来类上的方法 constructor getName
+      let body = [];
+      classMethods.forEach(method => {
+        if (method.kind === 'constructor') { // 如果方法的类型是构造函数的话
+          // Person [name] this.name=name(body复用) 
+          let construcorFunction = types.functionDeclaration(id, method.params, method.body, method.generator, method.async);
+          body.push(construcorFunction)
+        } else {// 其他的函数属于普通函数，需要放在原型上的
+          // method.key=getName
+          let left = types.memberExpression(types.memberExpression(id, types.identifier('prototype')), method.key);
+          let right = types.functionExpression(null, method.params, method.body, method.generator, method.async);
+          let assignmentExpression = types.assignmentExpression('=', left, right);
+          body.push(assignmentExpression)
+        }
+      })
+      // nodePath.replaceWith();// 替换成单节点
+      nodePath.replaceWithMultiple(body); // 替换成多节点
+    }
+  }
+}
+
+/**
+ * babel-core本身只是用来生成语法树，遍历语法树，生成语法树
+ * 它本身不负责转换语法树
+ */
+let targetCode = core.transform(sourceCode, {
+  plugins: [BabelPluginTransformClasses2]
+});
+console.log(targetCode.code);
+
+// function Person(name) {
+//   this.name = name;
+// }
+// Person.prototype.getName = function () {
+//   return this.name;
+// }
+```
+
+#### 2.3 自动包裹trycatch
+
+```javascript
+// 把一个类转成函数
+
+let core = require('@babel/core');
+let types = require('babel-types');
+let template = require('@babel/template');
+const sourceCode = `
+function sum(a,b){
+  return a+b+c;
+}
+`;
+
+// babel插件其实是一个对象，它会有一个visitor访问器
+/**
+ * 编写插件的一般步骤：
+ * 1. 仔细观察转换前和转换后的语法树，找到它们的相同点和不同点
+ * 2. 想办法把转换前的转成转换后的，并且要尽可能的复用旧节点
+ * 老的没有，新的有，就得创建新节点了，可以通过babel-types可以创建新节点
+ */
+let TryCatchTransformClasses = {
+  // 每个插件都会有自己的访问器
+  visitor: {
+    FunctionDeclaration(nodePath) {
+      let { node } = nodePath;
+      let { id } = node;
+      let blockStatement = node.body;
+      // 如果次函数的对个语句已经是一个try语句了，就不要再处理了，否则会死循环
+      if (blockStatement.body && types.isTryStatement(blockStatement.body[0])) {
+        return;
+      }
+
+      // 把一个JS字符串转成一个AST节点
+      let catchStatement = template.statement('console.log(error)')();
+      let catchClause = types.catchClause(types.identifier('error'), types.blockStatement([catchStatement]));
+      // node.body就是原来的函数里的语句，现在要放到try里面
+      let tryStatement = types.tryStatement(node.body, catchClause);
+      // 新的函数方法名不变sum，参数不变 a,b
+      var func = types.functionDeclaration(id, node.params, types.blockStatement([
+        tryStatement
+      ]), node.generator, node.async);
+      nodePath.replaceWith(func);
+    }
+  }
+}
+
+/**
+ * babel-core本身只是用来生成语法树，遍历语法树，生成语法树
+ * 它本身不负责转换语法树
+ */
+let targetCode = core.transform(sourceCode, {
+  plugins: [TryCatchTransformClasses]
+});
+console.log(targetCode.code);
+
+/*
+function sum(a,b){
+  try{
+    return a+b+c;
+  }catch(error){
+    console.log(error);
+  }
+}
+*/
+```
+
+#### 2.4 写一个插件可以自动去除代码里的console.log
