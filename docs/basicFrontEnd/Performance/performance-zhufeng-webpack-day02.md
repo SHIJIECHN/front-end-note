@@ -682,7 +682,7 @@ http://zhufengpeixun.com/strong/html/114.react+typescript.html#t23.%20git%E8%A7%
 - 浏览器会把JS源码通过解析器转为抽象语法树，在进一步转化为字节码或直接生成机器码
 - 一般来说每个JS引擎都会有自己的抽象语法树格式，Chrome的V8引擎，Firefox的SpiderMonkey引擎
 
-#### 1.1 常用的JavaScript Parse：
+#### 1.1 常用的JavaScript Parse
 - esprima
 - traceur
 - acorn
@@ -745,11 +745,46 @@ estraverse.traverse(ast, {
  */
 let targetCode = escodegen.generate(ast);
 console.log(targetCode);
+/**
+function newast() {
+}
+ */
 ```
 
 ### 2. babel插件
+
+- [babel-handbook](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md)
+- [babel-types](https://babeljs.io/docs/babel-types.html)
+- [astexplorer](https://astexplorer.net/)
+
 - 访问者模式Visitor对于某个对象或者一组对象，不同的访问者，产生的结果不同，执行操作也不同
+- visitor的对象定义了用于AST中获取具体节点的方法
+- visitor上挂载以节点type命名的方法，当遍历AST的时候，如果匹配上type，就会执行对应的方法
 - @babel/core Babel 的编译器，核心 API 都在这里面，比如常见的 transform、parse
+
+|属性|说明|
+|---|:---|
+|path|当前AST节点路径|
+|node|当前AST节点|
+|parent|父AST节点|
+|parentPath|父AST节点路径|
+|scope|作用域|
+|get(key)|获取某个属性的path|
+|set(key,node)|设置某个属性|
+|is类型(opts)|判断当前节点是否是某个类型|
+|find(callback)|从当前节点一直向上找到根节点（包括自己）|
+|findParent(callback)|从当前节点一直向上找到根节点（不包括自己）|
+|insertBefore(nodes)|在之前插入节点|
+|insertAfter(nodes)|在之后插入节点|
+|replaceWith(replacement)|用某个节点替换当前节点|
+|replaceWithMultiple(nodes)|用多个节点替换当前节点|
+|replaceWithSourceString(replacement)|把源代码转成AST节点再替换当前节点|
+|remove()|删除当前节点|
+|traverse(visitor,state)|遍历当前节点的子节点，第一个参数是节点，第二个参数是用来传递数据的状态|
+|skip()|跳过当前节点子节点的遍历|
+|stop()|结束所有的遍历|
+
+
 
 #### 2.1 转换箭头函数
 [babel-plugin-transform-es2015-arrow-functions](https://www.npmjs.com/package/babel-plugin-transform-es2015-arrow-functions)
@@ -785,8 +820,8 @@ const sum = (a,b)=>{
 let BabelPluginTransformEs2015ArrowFunctions2 = {
   // 每个插件都会有自己的访问器
   visitor: {
-    // 属性就是节点的类型，babel在比阿尼到对应类型的节点的时候会调用此函数
-    ArrowFunctionExpression(nodePath) { // 捕获箭头函数表达式，参数是节点的路径
+    // 属性就是节点的类型，babel在找到对应类型的节点的时候会调用此函数
+    ArrowFunctionExpression(nodePath) { // 如果是箭头函数，就进入，参数是节点的路径
       let node = nodePath.node; // 获取当前路径上的节点
       // 处理this指针的问题
       const thisBinding = hoistFunctionEnviroment(nodePath); // 提升函数作用域
@@ -801,9 +836,13 @@ function findParent(fnPath) {
       return fnPath;
     }
   } while (fnPath = fnPath.parentPath);
-
 }
 
+/**
+ * 1.要在函数的外面声明一个_this变量，值是this
+ * 2.在函数的内容，换this 变成_this
+ * @param {*} fnPath 
+ */
 function hoistFunctionEnviroment(fnPath) {
   // thisEnvFn=Program节点
   // const thisEnvFn = fnPath.findParent(p => { // 找父节点
@@ -811,14 +850,14 @@ function hoistFunctionEnviroment(fnPath) {
   //   return (p.isFunction() && !p.isArrowFunctionExpression()) || p.isProgram();
   // });
   const thisEnvFn = findParent(fnPath);
-  // thisPaths就是放着哪些地方用到了this
+  // thisPaths就是放着那些地方用到了this
   let thisPaths = getScopeInfoInformation(fnPath); // 找到作用域信息
   let thisBinding = '_this'; // 把this变量重定向的变量名
   // 如果有地方用到了，则需要在thisEnvFn环境上添加一个语句 let _this = this
   if (thisPaths.length > 0) {
-    // 表示在this函数环境中添加一个变量id_this=初始值 this thisExpression
+    // 表示在this函数环境中添加一个变量id_this=初始值 this为thisExpression
     thisEnvFn.scope.push({
-      id: types.identifier('_this'),
+      id: types.identifier('_this'), 
       init: types.thisExpression()
     })
     // 遍历所有使用到this的路径节点，把所有thisExpression全变成_this标识符
@@ -857,7 +896,6 @@ npm i babel-plugin-transform-es2015-classes
 
 ```javascript
 // 把一个类转成函数
-
 let core = require('@babel/core');
 let types = require('babel-types');
 let BabelPluginTransformClasses = require('@babel/plugin-transform-classes')
@@ -882,10 +920,12 @@ class Person {
 let BabelPluginTransformClasses2 = {
   // 每个插件都会有自己的访问器
   visitor: {
+    //如果是箭头函数，那么就会进来此函数，参数是箭头函数的节点路径对象
+    //nodePath代表路径，node代表路径上的节点
     ClassDeclaration(nodePath) {
       let { node } = nodePath;
-      let { id } = node; // Person标识符
-      let classMethods = node.body.body;// 获取原来类上的方法 constructor getName
+      let { id } = node; // Person标识符 Identifier name:Person
+      let classMethods = node.body.body;// 获取原来类上的方法 constructor getName。 Array<MethodDefinition>
       let body = [];
       classMethods.forEach(method => {
         if (method.kind === 'constructor') { // 如果方法的类型是构造函数的话
@@ -915,19 +955,19 @@ let targetCode = core.transform(sourceCode, {
 });
 console.log(targetCode.code);
 
-// function Person(name) {
-//   this.name = name;
-// }
-// Person.prototype.getName = function () {
-//   return this.name;
-// }
+/*
+function Person(name) {
+  this.name = name;
+}
+Person.prototype.getName = function () {
+  return this.name;
+}
+*/
 ```
 
 #### 2.3 自动包裹trycatch
 
 ```javascript
-// 把一个类转成函数
-
 let core = require('@babel/core');
 let types = require('babel-types');
 let template = require('@babel/template');
@@ -937,7 +977,6 @@ function sum(a,b){
 }
 `;
 
-// babel插件其实是一个对象，它会有一个visitor访问器
 /**
  * 编写插件的一般步骤：
  * 1. 仔细观察转换前和转换后的语法树，找到它们的相同点和不同点
@@ -948,7 +987,7 @@ let TryCatchTransformClasses = {
   // 每个插件都会有自己的访问器
   visitor: {
     FunctionDeclaration(nodePath) {
-      let { node } = nodePath;
+      let { node } = nodePath; // 当前所在的节点
       let { id } = node;
       let blockStatement = node.body;
       // 如果次函数的对个语句已经是一个try语句了，就不要再处理了，否则会死循环
@@ -990,4 +1029,134 @@ function sum(a,b){
 */
 ```
 
+总结：插件框架
+```javascript
+let core = require('@babel/core');
+let types = require('babel-types');
+const sourceCode = `...`;
+
+let BabelPlugin = {
+  visitor: {
+    // 处理转换
+  }
+}
+let targetCode = core.transform(sourceCode, {
+  plugins: [BabelPlugin]
+});
+console.log(targetCode.code);
+```
+
 #### 2.4 写一个插件可以自动去除代码里的console.log
+
+
+### 3. webpack babel插件
+实现最简单的treeshaking。
+```javascript
+// 转换前
+import { flatten as flat, concat as con } from 'lodash' 
+
+// 转换后
+import flat from 'lodash/flatten';
+import con from 'lodash/concat';
+```
+因为下面的这种导入方式体积比较小。写法还是第一种，但是实际导入方式修改了
+
+目录结构：
+|-src
+  |-index.js
+|-babel-plugin-import
+  |-babel-plugin-import.js
+|-webpack.config.js  
+
+:::: tabs
+::: tab babel-plugin-import.js
+```javascript
+// babel-type是一个用来构建AST节点的工具库
+const t = require('babel-types');
+/**
+ * 把那些importSpecifier变成importDefaultSpecifier
+ * visitor.ImportDeclaration={enter(path, state){},leave(){}}
+ * 等价于
+ * const visitor = { ImportDeclaration(path, state){} }
+ */
+const visitor = {
+  // 捕获ImportDeclaration节点
+  ImportDeclaration: {
+    // 当进入这个节点的时候，执行此函数 节点的路径path，state是节点的状态
+    // opts就是webpack.config.js里面配置的options对象
+    enter(path, state = { opts: {} }) { // state的默认值为{opts:{}}
+      const { node } = path; // //获取节点
+      const { libraryName, libraryDirectory = 'fp' } = state.opts;//获取选项中的支持的库的名称
+      const specifiers = node.specifiers; ///获取批量导入声明数组 [ImportSpecifier,ImportSpecifier]
+      const source = node.source; // lodash
+      //如果当前的节点的模块名称是我们需要的库的名称，并且导入不是默认导入才会进来
+      if (libraryName === source.value && !t.isImportDefaultSpecifier(specifiers[0])) {
+        // 把每个specifier变成默认导入 遍历批量导入声明数组specifiers
+        const defaultImportDeclaration = specifiers.map(specifier => {
+          //导入声明importDefaultSpecifier flatten
+          const importDefaultSpecifier = t.importDefaultSpecifier(specifier.local);
+          return t.importDeclaration(
+            [importDefaultSpecifier],
+            //导入模块source lodash/flatten
+            t.stringLiteral(libraryDirectory
+              ? `${libraryName}/${libraryDirectory}/${specifier.imported.name}`
+              : `${libraryName}/${specifier.imported.name}`
+            )
+          );
+        })
+        path.replaceWithMultiple(defaultImportDeclaration);// 替换当前节点
+      }
+    }
+  }
+}
+
+module.exports = function () {
+  return {
+    visitor
+  }
+}
+```
+:::   
+::: tab index.js
+```js
+import { flatten as flat, concat as con } from 'lodash';
+// 将上面的表达式转成下面的形式
+// import flat from 'lodash/flatten';
+// import con from 'lodash/concat';
+console.log(flat([1, [2, [3]]]));
+console.log(con([1], [2]))
+```
+:::   
+::: tab webpack.config.js
+```javascript
+const path = require('path');
+
+module.exports = {
+  mode: 'development',
+  entry: './src/index.js',
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            plugins: [
+              [path.resolve(__dirname, 'babel-plugins/babel-plugin-import.js'), {
+                "libraryName": 'lodash',
+                "libraryDirectory": 'fp'
+              }]
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+:::   
+::::
