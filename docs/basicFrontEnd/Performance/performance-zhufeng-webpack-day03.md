@@ -84,6 +84,14 @@ function newast() {
 }
  */
 ```
+模板
+```javascript
+let = esprima.parseModule(sourceCode); // 1. 生成ast
+estraverse.traverse(ast, { // 2. 遍历ast
+    enter(node){}
+})
+let targetCode = escodegen.generate(ast); // 3. 重新生成代码
+```
 
 ### 2. babel插件
 
@@ -396,11 +404,12 @@ import con from 'lodash/concat';
 因为下面的这种导入方式体积比较小。写法还是第一种，但是实际导入方式修改了
 
 目录结构：
-|-src
-  |-index.js
-|-babel-plugin-import
-  |-babel-plugin-import.js
-|-webpack.config.js  
+
+|-src    
+|----index.js   
+|-babel-plugin-import   
+|----babel-plugins   
+|-webpack.config.js     
 
 :::: tabs
 ::: tab babel-plugin-import.js

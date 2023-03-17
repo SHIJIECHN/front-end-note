@@ -135,7 +135,17 @@ module.exports = {
     writeToDisk: true, // 如果指定此选项，也会把打包后的文件写入磁盘一份，也就是说会在项目下创建dist文件夹
     port: 8080, // 指定HTTP服务器的端口号
     open: false // true 自动打开浏览器
-    publicPath: '/'
+    publicPath: '/',
+    proxy: { // 配置代理服务器
+      '/api': {
+        target: 'http://localhost:3001/', // 代理服务器
+        pathRewrite: {
+          '^/api': '', // 重写路径
+        },
+        secure: true, // 允许在HTTPS上运行后端服务器
+        changeOrigin: true, // 修改主机来源
+      },
+    },
   },
 }
 ```
@@ -273,7 +283,7 @@ logo; // 图片路径
 
 - `url-loader`：是对`file-laoder`的增强。多一个参数`limit`。
 
-判断图片的带下是否小于`limit`，如果大于的话就把工作交给`file-loader`处理。如果小于的话，就转成`base64`字符串内嵌到`HTML`中。
+判断图片的大小是否小于`limit`，如果大于的话就把工作交给`file-loader`处理。如果小于的话，就转成`base64`字符串内嵌到`HTML`中。
 
 ```javascript {6,10}
 modeul.exports = {
@@ -366,7 +376,7 @@ function loader(source) {
   return `module.exports = "${filename}"`
 
 }
-loader.war = true; // 图片的话需要raw为 true
+loader.raw = true; // 图片的话需要raw为 true
 module.exports = loader;
 ```
 
@@ -380,7 +390,7 @@ module.exports = loader;
 
 - [babel-loader](https://www.npmjs.com/package/babel-loader)：使用`Babel`和`Webpack`转义`JavaScript`文件
 - [@babel/core](https://www.npmjs.com/package/@babel/core)：`Babel`编译的核心包
-- [@babel/preset-env](https://babeljs.io/docs/babel-preset-env)：`Babel`默认只转换最新的`ES`语法，比如箭头函数
+- [@babel/preset-env](https://babeljs.io/docs/babel-preset-env)：`Babel`默认只转换最新的`ES`语法，比如箭头函数。这个是所需要插件的集合。
 - [@babel/preset-react](https://www.npmjs.com/package/@babel/preset-react): `React`插件的`Babel`预设
 - [@babel/plugin-proposal-decorators](https://babeljs.io/docs/babel-plugin-proposal-decorators): 把类和对象装饰器编译成`ES5`
 - [@babel/plugin-proposal-class-properties](https://babeljs.io/docs/babel-plugin-proposal-class-properties): 转换静态类属性以及使用属性初始值化语法声明的属性
@@ -408,7 +418,7 @@ npm i core-js@3.7.0 -D
         // 预设（插件的集合）
         presets: [
           //'@babel/preset-env', // 可以转换JS语法
-          ['@babel/preset-env', { // 可默认只转换map set等，不能转换promise，需要配置参数
+          ['@babel/preset-env', { // 默认只转换map set等，不能转换promise，需要配置参数
             useBuiltIns: 'usage', //按加载polyfill
             corejs: { version: 3 }, // 指定corejs的版本号 2或者3 polyfill
             targets: { // 指定要兼容哪些浏览器
@@ -456,7 +466,7 @@ console.log(p);
 
 ### 6.2 babel-loader的实现
 
-babel-loader @babel/core @babel/preset-env三者之间的关系解析：
+babel-loader @babel/core @babel/preset-env三者之间的关系，也就是babel-loader的实现
 
 ::: theorem  babel-loader的实现
 1. 先将`ES6`转换成`ES6`语法树（`@babel/core`）
@@ -512,7 +522,7 @@ npm install eslint@7.14.0 eslint-loader@4.0.2 babel-eslint@10.1.0 -D
   }], // 先进行代码校验，再进行编译代码
   enforce: 'pre', // 强制指定顺序 pre 之前。pre normal inline pos
   // exclude: /node_modules/, // 不需要检查node_modules里面的代码
-  include: resolve(__dirname, 'src'), // 只减产src目录里面的文件
+  include: resolve(__dirname, 'src'), // 只检查src目录里面的文件
 },
 ```
 

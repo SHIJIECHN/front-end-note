@@ -1,7 +1,7 @@
 ---
 autoGroup-2: Webpack5
 sidebarDepth: 3
-title: webpack工作流
+title: webpack模块加载
 ---
 
 ## 1. 预备知识
@@ -113,7 +113,7 @@ module.exports = 'title';
 </html>
 ```
 :::   
-::: tab 打包后的文件
+::: tab main.js
 ```javascript
 var __webpack_modules__ = ({
   "./src/title.js":
@@ -141,10 +141,9 @@ function __webpack_require__(moduleId) {
 :::   
 ::::
 
-- 模块ID：不管你是用什么样的路径来加载的，最终莫夸ID统一会变成相对根目录的相对路径
+- 模块ID：不管你是用什么样的路径来加载的，最终模块ID统一会变成相对根目录的相对路径
   - index.js -> ./src/index.js
   - title.js -> ./src/title.js
-  - JQuery
 
 ### 2.2 打包文件手写main.js
 
@@ -349,7 +348,7 @@ console.log(getValue());// hello
 ```
 ### 3.3 ES module加载ES module
 
-webpack如何知道这是个es module还是commonjs
+webpack如何知道这是个es module还是commonjs？
 如果代码里面有了import 或者export webpack就认为这是一个es module 不管有没有require exports
 
 :::: tabs 
