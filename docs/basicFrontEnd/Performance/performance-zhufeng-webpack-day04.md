@@ -11,6 +11,7 @@ title: webpack工作流程
 npm init -y
 npm i webpack webpack-cli -D
 ```
+webpack.config.js配置文件。
 ```javascript
 const path = require('path');
 module.exports = {
@@ -34,7 +35,7 @@ module.exports = {
 ```
 npm run build 实际上执行的webpack，在/node_modules/.bin中，有webpack.cmd，查看文件
 
-```javascript
+```javascript {12}
 @ECHO off
 SETLOCAL
 CALL :find_dp0
@@ -56,11 +57,11 @@ EXIT /b
 
 具体执行/node_module/webpack/bin/webpack.js文件，在webpack.js文件中：
 
-```javascript
-//....
+```javascript {8}
 const runCli = cli => {
 	const path = require("path");
-	const pkgPath = require.resolve(`${cli.package}/package.json`); // 文件路径cli.package为 webpack-cli
+// 文件路径cli.package为 webpack-cli
+	const pkgPath = require.resolve(`${cli.package}/package.json`); 
 	// eslint-disable-next-line node/no-missing-require
 	const pkg = require(pkgPath);
 	// eslint-disable-next-line node/no-missing-require
@@ -69,7 +70,7 @@ const runCli = cli => {
   // "bin": {
   //   "webpack-cli": "bin/cli.js"
   // },
-  // 最终结果是：webpack-cli/bin/cli.js文件
+  // 最终结果是执行：webpack-cli/bin/cli.js文件
 };
 ```
 
@@ -89,7 +90,7 @@ const runCli = cli => {
       "request": "launch",
       "name": "debug webpack",
       "cwd": "${workspaceFolder}", 
-      "program": "${workspaceFolder}/node_modules/webpack/bin/webpack.j" // 这里修改成自己当前环境下 webpack.cmd运行的文件
+      "program": "${workspaceFolder}/node_modules/webpack/bin/webpack.js" // 这里修改成自己当前环境下 webpack.cmd运行的文件
     }
   ]
 }
@@ -97,7 +98,7 @@ const runCli = cli => {
 
 ### 4. debugger.js
 
-- 在根目录创建文件debugger.js
+在根目录创建文件debugger.js
 
 ```javascript
 // 1. 引入核心模块
@@ -188,6 +189,8 @@ eventEmitter.emit('b');
 
 在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果.
 
+<img :src="$withBase('/basicFrontEnd/Performance/webpack-flow.jpg')" alt="工作流" />
+
 目录结构：
 ```javascript
 ├── debugger.js
@@ -211,7 +214,7 @@ eventEmitter.emit('b');
 └── webpack.config.js
 ```
 
-- 全局设置
+### 1. 全局设置
 :::: tabs
 ::: tab webpack.config.js
 ```javascript
@@ -265,11 +268,13 @@ let Compiler = require('./Compiler')
  */
 function webpack(options) {
   // 1. 初始化参数：从配置文件和 Shell 语句中读取并合并参数,得出最终的配置对象
-  console.log(process.argv)
+  // 数组。包含输入的命令行参数。
+  // process.argv[0]: webpack.config.js文件的绝对路径。process.argv[1]:webpack/index.js 文件路径。后面都是命令行的输入内容
+  console.log(process.argv); 
   // shell 命令行参数对象
   const shellConfig = process.argv.slice(2).reduce((shellConfig, item) => {
     let [key, value] = item; // item 为 --mode=development
-    shellConfig[key.slice(2)] = value;
+    shellConfig[key.slice(2)] = value; // {mode: development}
     return shellConfig;
   }, {});
   const finalOptions = { ...options, ...shellConfig }; // 得到最终配置对象
@@ -282,9 +287,9 @@ function webpack(options) {
   if (finalOptions.plugins && Array.isArray(finalOptions.plugins)) {
     for (let plugin of finalOptions.plugins) { // 循环插件数组
       // 刚开始的时候，就会执行所有插件实例的apply方法，并传递compiler实例
-      console.log(plugin)
+      console.log(plugin);
       // 所以说插件是在webpack开始编译之前全部挂载的
-      // 到那时要到插件关注的钩子触发的时候才执行
+      // 要到插件关注的钩子触发的时候才执行
       plugin.apply(compiler); // 执行插件上的apply方法
     }
   }
@@ -305,8 +310,9 @@ const { entry } = require('../webpack.config.js');
 const traverse = require('@babel/traverse').default; // 遍历语法树
 const generate = require('@babel/generator').default; // 把ast重新生成代码
 
-/** 路径 \，变成 /  */
+/** 路径 \ 变成 /  */
 // path.posix.sep /  不同系统的路径分隔符
+// window是\，Unix是/
 function toUnixPath(filePath) {
   return filePath.replace(/\\/g, path.posix.sep);
 }
@@ -320,48 +326,55 @@ class Compiler {
       emit: new SyncHook(), // 会在将要写入文件的时候触发
       done: new SyncHook(), // 会结束编译的时候触发
     };
-    this.entries = new Set(); // 这个数组存放的所有的入口模块
-    this.modules = new Set(); // 这里存放着所有的模块
-    this.chunks = new Set(); // 代码块 webpack5 this.chunks = new Set()
+    this.entries = []; // 这个数组存放的所有的入口模块
+    this.modules = []; // 这里存放着所有的模块
+    this.chunks = []; // 代码块 webpack5 this.chunks = new Set()
     this.assets = {}; // 输出列表，存放着将要产出的资源文件
-    this.files = new Set(); // 表示本次编译的所有产出的文件名
+    this.files = []; // 表示本次编译的所有产出的文件名
   }
 
   // 4. 执行对象的 run 方法开始执行编译
   run(callback) {
-
     // SyncHook 实例有call、tap方法
     // 这里先触发run钩子，再触发done钩子
-    this.hooks.run.call(); // 在调用run方法的时候会触发run这个钩子，进而执行它的回调函数
+    // 在调用run方法的时候会触发run这个钩子，进而执行它的回调函数
+    this.hooks.run.call(); 
+
     // 5. 根据配置中的entry找出入口文件，得到entry的绝对路径
-    // C:\Users\小石头\Documents\Learning\A01-basicFrontEnd\performance\webpack-demo\04.flow\src\index.js
-    // 打包后的文件，所有的路径都是\ => /
+    // C:\Users\04.flow\src\index.js
+    // 打包后的文件，所有的路径都是\ 变成 /
     let entry = {};
+    // 多入口时entry是对象，单个入口entry是字符串
     if (typeof this.options.entry === 'string') {
-      entry.main = this.options.entry;
+      entry.main = this.options.entry; // {main: './src/index.js'}
     } else {
-      entry = this.options.entry;
+      entry = this.options.entry; // {page1: './src/page1.js', page2:'./src/page2.js'}
     }
     for (let entryName in entry) {
+      // 统一路径分隔符
       let entryPath = toUnixPath(path.join(this.options.context, entry[entryName]));
+
       // 6. 从入口文件出发,调用所有配置的Loader对模块进行编译
+      // entryModule = { id: moduleId, dependencies: [], name, _source }
       let entryModule = this.buildModule(entryName, entryPath);
-      // this.modules.add(entryModule); // 入口模块
+      // this.modules.push(entryModule); // 入口模块
       // 中间就是编译过程...
       console.log(this.modules);
+
       // 8. 根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk
       let chunk = { name: entryName, entryModule, modules: this.modules.filter(module => module.name === entryName) }
-      this.chunks.add(chunk);
-      this.entries.add(chunk); // 也是入口代码块
+      this.chunks.push(chunk);
+      this.entries.push(chunk); // 也是入口代码块
     }
 
     // 9. 再把每个 Chunk 转换成一个单独的文件加入到输出列表
     // 一个chunk会成为this.assets对象的一个key value
     // 一个chunk对应this.assets的一个属性，而每个assets属性会对应一个文件file
     this.chunks.forEach(chunk => {
+      // 输出的文件名 根据chunk名字
       let filename = this.options.output.filename.replace('[name]', chunk.name);
       // key是文件名，value是打包后的文件内容
-      this.assets[filename] = getSource(chunk);
+      this.assets[filename] = getSource(chunk); // main.js文件的内容
     })
     this.hooks.emit.call();
     // 10. 在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
@@ -388,6 +401,7 @@ class Compiler {
   }
 
   /** 编译模块 1. 读取模块内容 */
+  // name为模块名称./src/index.js，modulePath为模块的绝对路径C:/User/04.flow/src/index.js
   buildModule = (name, modulePath) => {
     // 先读取原始源代码
     let targetSourceCode, originalSourceCode;
@@ -396,20 +410,23 @@ class Compiler {
     const rules = this.options.module.rules;
     let loaders = [];
     for (let i = 0; i < rules.length; i++) {
-      // 正则匹配商量模块的路径
+      // 正则匹配上了模块的路径
       if (rules[i].test.test(modulePath))
         loaders = [...loaders, ...rules[i].use];
     }
     // loaders执行是从右往左的
     for (let i = loaders.length - 1; i >= 0; i--) {
       let loader = loaders[i];
+      // 模块经过loader处理后的源代码
       targetSourceCode = require(loader)(targetSourceCode);
     }
-    let moduleId = './' + path.posix.relative(baseDir, modulePath); // 当前模块id
+    // 现在我们已经得到了转换后的代码 targetSourceCode：babel-loader es6=>es5
+    // 当前模块id ./src/index.js
+    let moduleId = './' + path.posix.relative(baseDir, modulePath); 
     // webpack最核心的几个概念：module，module中有模块ID、模块依赖数组
     let module = { id: moduleId, dependencies: [], name }
-    // 现在我们已经得到了转换后的代码：babel-loader es6=>es5
-    // 7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+    
+    // 7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理（入口模块）
     // { sourceType: 'module' }表示原代码是一个模块。模块就是里面有module.exports、 exports
     let astTree = parser.parse(targetSourceCode, { sourceType: 'module' });
     // 遍历语法树，并找出require节点
@@ -428,33 +445,37 @@ class Compiler {
           //   depModulePath = path.posix.join(dirname, moduleName); // 依赖的模块路径
           // }
           // 简化版本只考虑相对路径
-          // modulePath = 'C:/Users/小石头/Documents/Learning/A01-basicFrontEnd/performance/webpack-demo/04.flow/src/index.js'
-          // dirname = 'E:\A01-basicFrontEnd\performance\webpack-demo\04.flow\src' 模块所在文件的目录
+          // modulePath = 'C:/Users/04.flow/src/index.js'
+          // dirname = C:/Users/04.flow/src 模块所在文件的目录
           let dirname = path.posix.dirname(modulePath); // 加上posix分隔符全部统一为 /
-          // 'C:/Users/小石头/Documents/Learning/A01-basicFrontEnd/performance/webpack-demo/04.flow/src/title' 模块路径
+          // C:/Users/04.flow/src/title' 模块路径
           let depModulePath = path.posix.join(dirname, moduleName); // 依赖的模块路径
           // 加后缀
           let extensions = this.options.resolve.extensions;
-          // depModulePath = E:\A01-basicFrontEnd\performance\webpack-demo\04.flow\src\title.js 完整路径
+          // depModulePath = C:/Users/04.flow/src/title.js 完整路径
           depModulePath = tryExtensions(depModulePath, extensions, moduleName, dirname);
           // 模块ID的问题，每个打包的模块都会有一个moduleId
-          // path.posix.relative 获取相对路径
-          // ./src/title.js   depModulePath=/a/b/c    baseDir=/a/b   relative= c
+          // path.posix.relative 获取相对路径  
+          // depModulePath=C:/Users/04.flow/src/title.js, baseDir=C:/Users/04.flow   relative=title.js
           let depModuleId = './' + path.posix.relative(baseDir, depModulePath); // ./src/title.js
-          //修改抽象语法树
-          node.arguments = [types.stringLiteral(depModuleId)]; // 改变参数：./title.js 变成 ./src/title/js 
-          module.dependencies.add(depModulePath);// 添加依赖
+          //修改抽象语法树 改变参数：./title.js 变成 ./src/title/js 
+          // require('./title.js') => require('./src/title.js')
+          node.arguments = [types.stringLiteral(depModuleId)]; 
+          module.dependencies.push(depModulePath);// 添加依赖
         }
       }
     })
 
     // 根据新的语法树，生成新代码
     let { code } = generate(astTree);
-    module._source = code; // 转换后的代码。目前为止，module上有三个属性了：moduleId, dependencies _source
-    // 7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+    // 转换后的代码。目前为止，module上有三个属性了：
+    // moduleId, dependencies, _source
+    module._source = code; 
+
+    // 7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理（入口模块所依赖的模块）
     module.dependencies.forEach(dependency => {
       let dependencyModule = this.buildModule(name, dependency);
-      this.modules.add(dependencyModule)
+      this.modules.push(dependencyModule)
     })
     return module;
   }
@@ -513,7 +534,7 @@ module.exports = Compiler;
 :::   
 ::::
 
-- plugin文件夹
+### 2. plugin文件夹
 :::: tabs 
 ::: tab run-plugin.js
 ```javascript
@@ -572,7 +593,7 @@ module.exports = ReadmePlugin;
 :::    
 ::::
 
-- loaders文件夹
+### 3. loaders文件夹
 
 :::: tabs
 ::: tab logger-loader.js
