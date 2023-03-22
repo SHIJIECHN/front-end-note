@@ -79,6 +79,7 @@ Vue.use = function(plugin){
 4. 由于plugin参数支持对象和函数类型，所以通过判断plugin.install和plugin哪个是函数，即可知用户使用哪种方式祖册的插件，然后执行用户编写的插件并将args作为参数传入。
 5. 最后，将插件添加到installedPlugins中，保证相同的插件不会反复被注册
 
+
 ## install方法
 
 ### 1. 实现
@@ -152,7 +153,7 @@ class Store{
 
 问题：vuex中的state和全局变量有什么区别？state是响应式数据。
 
-
+<!-- 
 ## 实现getter
 ```js
 class Store{
@@ -181,7 +182,8 @@ class Store{
 }
 ```
 把用户传进来的getter保存到getters数组里。    
-**为什么用getter的时候不用写括号。**这个问题就像问我们平时写个变量，为什么不用括号一样。（如{{num}},而不是{{num()}}）。利用了Object.defineProperty。
+**为什么用getter的时候不用写括号。**这个问题就像问我们平时写个变量，为什么不用括号一样。（如`{{num}}`,而不是`{{num()}}`）。利用了Object.defineProperty。
+
 
 
 ## 实现mutation
@@ -263,6 +265,7 @@ class Store{
 }
 
 ```
+
 
 ## 实现actions
 ```js
@@ -514,4 +517,4 @@ asyncIncre({commit},arg){
 }
 ```
 谁调用commit？？是$store吗？并不是。所以要解决这个问题，我们必须换成箭头函数
-
+ -->

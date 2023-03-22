@@ -90,6 +90,14 @@ GET/POST：view source中仍然是url参数键值对形式 a=1&b=2
       管道化持久连接：
       <img :src="$withBase('/basicComputer/Network/pipelined-and-lasting-connection.png')" alt="pipelined-and-lasting-connection"> 
 
+|<div style="width: 120px;"></div> |GET|POST|
+|---|:---|:---|
+|1. 参数|数据在请求体中是查询字符串参数形式（`Query String Parameters`）|数据在请求体中是表单数据形式（`Form Data`）|
+|2. 缓存|会有缓存|不会作为url的一部分、不会缓存、保存在服务器日志和浏览器记录中|
+|3. 数据大小限制|url长度有限制|数据量大|
+|4. 数据类型|ASCII码字符|更多数据类型|
+|5. 请求流程|1.第三次握手后，浏览器确认并发送请求头和数据;</br> 2. 服务器返回200响应.| 1.第三次握手后，浏览器确认并发送post请求头;</br> 2.服务器返回状态码100后，continue响应;</br>3. 浏览器开始发送数据;</br> 4. 服务器返回200响应|
+
 ## GET/POST请求方式中的幂等性
 1. 数学中幂等：x^y = x; x = 0 || 1;
 
