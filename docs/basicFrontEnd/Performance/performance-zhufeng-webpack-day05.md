@@ -312,7 +312,7 @@ pitch内部有三个很重要的参数：previousRequest、currentRequest、rema
 
 <img :src="$withBase('/basicFrontEnd/Performance/pitch.ipg')" alt="pitch" />
 
-- previousTequest代表的是之前执行过pitch阶段的loader：loader1和loader2
+- previousRequest代表的是之前执行过pitch阶段的loader：loader1和loader2
 - currentRequest代表的是当前正在执行pitch阶段的loader和后面未执行pitch阶段的loader：loader3、loader4、loader5、源文件
 - remainingRequest代表未执行过pitch阶段的loader：loader4、loader5、源文件
 
@@ -406,8 +406,6 @@ module: {
   ],
 },
 ```
-
-
 
 ## 实战
 - babel-loader
