@@ -49,6 +49,12 @@ title: 6. http版本、关闭TCP、四次挥手、同源策略
 - `CLOSE` 没有任何连接状态
 
 ### 2. 四次挥手流程图解
+
+- FIN:数据包
+- seq:序列号
+- ACK:确认包
+- ack:确认信息包
+
  <img :src="$withBase('/basicComputer/Network/four-way-handshake.png')" alt="four-way-handshake"> 
 
 ### 3. 关闭TCP连接的口述

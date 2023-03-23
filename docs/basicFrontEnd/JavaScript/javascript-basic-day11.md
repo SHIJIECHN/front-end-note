@@ -569,9 +569,9 @@ Person.bindy(p, '张三')('male');
 
 ```js
 // 要求
-// 1. new时，this指向构造函数（Person）的实例对象
+// 1. new时，已经绑定的this失效，this指向构造函数（Person）的实例对象，
 var p2 = Person.bind(p, '张三');
-new p2('male'); // 
+var p3 = new p2('male'); // 等同于new Person()
 
 // 2. 直接执行，this指向p
 var p1 = Person.bind(p, '张三')('male');
@@ -583,7 +583,7 @@ Function.prototype.bindy = function(context) {
     args = Array.prototype.slice.call(arguments, 1);
     return function() {
         var newArgs = Array.prototype.slice.call(arguments);
-        console.log(this); // 实例化对象，因为new了
+        console.log(this); // new的时候，指向实例化对象
         console.log(_self); // 构造函数Person
         console.log(this instanceof _self);// false。
         // 因为_self在bindy时已经改变了this指向， 那怎么样让它是_self构造出来的呢？
@@ -594,7 +594,8 @@ Function.prototype.bindy = function(context) {
 }
 
 var p2 = Person.bindy(p, '张三');
-new p2('male'); // this指向p
+var p3 = new p2('male'); 
+
 ```
 想让匿名函数里面的this是_self构造出来的，
 ```js
@@ -705,3 +706,22 @@ var p1 = new Person({
 console.log(p1)
 p1.buy();
 ```
+
+
+总结:
+1. 原型prototype也是一个对象，所有对象都有自己的原型，包括原型本身。它是定义构造函数构造出的每个对象的公共祖先。所有构造出来的对象都可以继承原型上的属性和方法。prototype重写与赋值的区分：重写Car.prototype= {....}。
+2. 构造出来的对象不能对原型删、改、增，可以查。
+3. 构造器constructor指向构造函数本身，可以修改指向其他函数
+4. 实例化对象中有__proto__属性，指向构造函数的prototype原型对象上，所有实例对象可以访问原型上的方法和属性。new实例化的时候会产生this，this是空对象实际上是有一个__proto__属性，值是向构造函数的原型。手动执行__proto__值无效.
+5. 原型链：沿着__proto__这条线往上去找对应原型的属性，一层一层的去继承原型的属性的链条就叫原型链。原型链的顶端是Object.prototype
+6. 原型链上的增删改只能是自身的
+7. 原型上的方法this的指向：car.intro() -> thi指向car实例，Car.prototype.intro ->指向Car.prototype.谁用指向谁
+8. 构造函数实例化后返回this
+9. 声明对象的方法：1. 字面量，2.构造函数，3.自定义构造函数，4.Object.create
+10. Object.create(对象/null)：
+    1.  提供了创建对象的方法。把其他对象当作对象的原型(继承关系)
+    2.  Objec.create(null)对象为空，没有__proto__。创建出来的对象不继承Object.prototype
+11. bind的模拟实现
+    1.  返回一个函数
+    2.  可以传入参数:两种情况
+    3.  实例化失效:new Person.bindy(p); Person中的this应该指向p,不会修改为实例对象
