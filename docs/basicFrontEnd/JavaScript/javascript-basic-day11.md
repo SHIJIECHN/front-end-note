@@ -509,171 +509,209 @@ bind模拟实现的两个特点：
 #### 1. 不执行
 ```js
 var p = {
-    age: 20
+  age: 20
 }
 
 function Person() {
-    console.log(this);
-    console.log(this.age);
+  this.say = "你好";
+  console.log(this);
+  console.log(this.age);
 }
 
 // 更改this指向，实际上更改执行器上下文->context
-Function.prototype.bindy = function(context) {
-    // 使用的this肯定是指向调用bindy的function，但是return函数中this指向的是window
-    var _self = this; // 调用bindy的function
+Function.prototype.bindy = function (context) {
+  // 使用的this肯定是指向调用bindy的function，但是return函数中this指向的是window
+  var _self = this; // 调用bindy的function
 
-    // 不执行，肯定return一个函数。因为this.apply(context);会直接执行，而bind不执行
-    return function() {
-        _self.apply(context);
-    }
+  // 不执行，肯定return一个函数。因为this.apply(context);会直接执行，而bind不执行
+  return function () {
+    _self.apply(context);
+  }
 }
 Person.bind(p)();
 Person.bindy(p)();
+/**
+Person.bind(p)()执行：
+console.log(this); // { age: 20, say: '你好' }
+console.log(this.age); // 20
+ */
 ```
 
 #### 2. 传入参数：
 ```js
-// 传入参数第一种情况
+// 1. 传入参数第一种情况
 Person.bind(p, '张三', 'male')();
-// 传入参数第二种情况
+// 2. 传入参数第二种情况
 var p1 = Person.bind(p, '张三');
 p1('male');
+
+
 ```
 实现：
 ```js
 var p = {
-    age: 20
+  age: 20
 }
 
 function Person(name, sex) {
-    console.log(this);
-    console.log(this.age);
-    console.log(name, sex); // 1.新增
+  this.say = "你好";
+  console.log(this);
+  console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
+}
+Function.prototype.bindy = function (context) {
+  var _self = this;
+  // 返回一个数组。第一个参数是this，去掉第一个参数，后面才是需要的参数。
+  args = Array.prototype.slice.call(arguments, 1);
+  return function () {
+    // 匿名函数的参数列表
+    var newArgs = Array.prototype.slice.call(arguments);
+    _self.apply(context, args.concat(newArgs));
+  }
 }
 
-Function.prototype.bindy = function(context) {
-    var _self = this;
-    // 返回一个数组。第一个参数是this，去掉第一个参数，后面才是需要的参数。
-    args = Array.prototype.slice.call(arguments, 1); 
-    console.log(args);
-    return function() {
-        // 匿名函数的参数列表
-        var newArgs = Array.prototype.slice.call(arguments); 
-        console.log(args, newArgs);
-        _self.apply(context, args.concat(newArgs));
-    }
-}
-Person.bindy(p, '张三')('male');
+// 1. 传入参数第一种情况
+Person.bindy(p, '张三', '男')();
+// 2. 传入参数第二种情况
+var p1 = Person.bindy(p, '张三');
+p1('男');
+
+/**
+console.log(this); // { age: 20, say: '你好' }
+console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
+// 我的名字是张三性别男，今年20岁了
+ */
 ```
+
 #### 3. 实例化失效
+
+如果绑定的函数被new了，当前函数的this就是当前实例。
 
 ```js
 // 要求
-// 1. new时，已经绑定的this失效，this指向构造函数（Person）的实例对象，
+// 1. new时，this指向构造函数（Person）的实例对象，
 var p2 = Person.bind(p, '张三');
 var p3 = new p2('male'); // 等同于new Person()
 
 // 2. 直接执行，this指向p
 var p1 = Person.bind(p, '张三')('male');
 ```
-实际上，此时的this指向p对象。
-```js
-Function.prototype.bindy = function(context) {
-    var _self = this;
-    args = Array.prototype.slice.call(arguments, 1);
-    return function() {
-        var newArgs = Array.prototype.slice.call(arguments);
-        console.log(this); // new的时候，指向实例化对象
-        console.log(_self); // 构造函数Person
-        console.log(this instanceof _self);// false。
-        // 因为_self在bindy时已经改变了this指向， 那怎么样让它是_self构造出来的呢？
 
-        // this如果是构造函数构造出来的，也就是new出来的，那么原本的context就要指向this；
-        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
-    }
-}
-
-var p2 = Person.bindy(p, '张三');
-var p3 = new p2('male'); 
-
-```
-想让匿名函数里面的this是_self构造出来的，
+实现：
 ```js
 var p = {
-    age: 20
+  age: 20
 }
 
 function Person(name, sex) {
-    console.log(this);
-    console.log(this.age);
-    console.log(name, sex);
+  this.say = "你好";
+  console.log(this);
+  console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
+}
+Function.prototype.bindy = function (context) {
+  let _self = this;
+  let args = Array.prototype.slice.call(arguments, 1);
+  function fBound() {
+    // 通过new之后，这里的this就是fBound的实例，我们就把this传出去
+    let newArgs = Array.prototype.slice.call(arguments);
+    // 判断当前的this是不是fBound的实例，如果是，就说明是new出来的，那就返回当前实例；如果不是就返回context
+    _self.apply(this instanceof fBound ? this : context, args.concat(newArgs));
+  }
+  return fBound;
 }
 
-Function.prototype.bindy = function(context) {
-    var _self = this;
-    args = Array.prototype.slice.call(arguments, 1);
-    // 实现
-    var fn = function() {
-        var newArgs = Array.prototype.slice.call(arguments);
-        console.log(this); // fn()
-        console.log(this instanceof _self); // true
-        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
-    }
-    console.log(this); // Person
-    // fn和this指向一样，让他们构造器相等
-    fn.prototype = this.prototype;
-    return fn;
-}
-var p2 = Person.bindy(p, '张三');
-new p2('male');
+let bindFn = Person.bindy(p, '张三');
+let instance = new bindFn('男');
+
+/**
+console.log(this); // fBound { say: '你好' }
+console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
+// 我的名字是张三性别男，今年undefined岁了
+ */
 ```
-发现问题
-```js
-Function.prototype.bindy = function(context) {
-    var _self = this,
-        args = Array.prototype.slice.call(arguments, 1),
-        tempFn = function(){};
-    var fn = function() {
-        var newArgs = Array.prototype.slice.call(arguments);
-        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
-    }
 
-    fn.prototype = this.prototype;
-    fn.prototype.num = 2; // 会修改Person.prototype.num的值
-    return fn;
+进一步要实现：
+```javascript
+// 我们给Person原型上添加属性，再new
+Person.prototype.like = '猫';
+let bindFn = Person.bind(p, '张三');
+let instance = new bindFn('男');
+console.log(instance.like); // 猫。可以访问到原函数的原型上的属性
+```
+
+实现：
+```javascript {10}
+Function.prototype.bindy = function (context) {
+  let _self = this;
+  let args = Array.prototype.slice.call(arguments, 1);
+  function fBound() {
+    // 通过new之后，这里的this就是fBound的实例，我们就把this传出去
+    let newArgs = Array.prototype.slice.call(arguments);
+    // 判断当前的this是不是fBound的实例，如果是，就说明是new出来的，那就返回当前实例；如果不是就返回context
+    _self.apply(this instanceof fBound ? this : context, args.concat(newArgs));
+  }
+  fBound.prototype = _self.prototype; // _self.prototype也就是Person.prototype
+  return fBound;
 }
+```
+
+此时我们在fBound.prototype上添加属性，而_self.prototype也会受到影响
+
+```js
+Function.prototype.bindy = function (context) {
+  let _self = this;
+  let args = Array.prototype.slice.call(arguments, 1);
+  function fBound() {
+    // 通过new之后，这里的this就是fBound的实例，我们就把this传出去
+    let newArgs = Array.prototype.slice.call(arguments);
+    // 判断当前的this是不是fBound的实例，如果是，就说明是new出来的，那就返回当前实例；如果不是就返回context
+    _self.apply(this instanceof fBound ? this : context, args.concat(newArgs));
+  }
+  fBound.prototype = _self.prototype;
+  fBound.prototype.num = 2; // 会修改Person.prototype.num的值
+  return fBound;
+}
+```
+```javascript
+console.log(Person.prototype); // { like: '猫', num: 2 }
 ```
 
 利用圣杯模式解决：
+
 ```js
 var p = {
-    age: 20
+  age: 20
 }
-
-Person.prototype.num = 1;
 
 function Person(name, sex) {
-    console.log(this);
-    console.log(this.age);
-    console.log(name, sex);
+  this.say = "你好";
+  console.log(this);
+  console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
 }
 
-Function.prototype.bindy = function(context) {
-    var _self = this,
-        args = Array.prototype.slice.call(arguments, 1),
-        tempFn = function() {};
-    var fn = function() {
-        var newArgs = Array.prototype.slice.call(arguments);
-        _self.apply(this instanceof _self ? this : context, args.concat(newArgs));
-    }
-
-    tempFn.prototype = this.prototype;
-    fn.prototype = new tempFn();
-    fn.prototype.num = 2; // 会修改Person.prototype.num的值
-    return fn;
+Function.prototype.bindy = function (context) {
+  let _self = this;
+  let args = Array.prototype.slice.call(arguments, 1);
+  let tempFn = function () { }; // 定义一个空函数
+  function fBound() {
+    let newArgs = Array.prototype.slice.call(arguments);
+    _self.apply(this instanceof fBound ? this : context, args.concat(newArgs));
+  }
+  tempFn.prototype = _self.prototype;
+  fBound.prototype = new tempFn();
+  fBound.prototype.num = 2;
+  return fBound;
 }
-var p2 = Person.bindy(p, '张三');
-p2('male');
+
+Person.prototype.like = '猫';
+let bindFn = Person.bindy(p, '张三');
+let instance = new bindFn('男');
+console.log(Person.prototype); // { like: '猫' }
+
+/**
+console.log(this); // fBound { say: '你好' }
+console.log('我的名字是' + name + '性别' + sex + '，今年' + this.age + '岁了');
+// 我的名字是张三性别男，今年undefined岁了
+ */
 ```
 
 ## 练习
@@ -724,4 +762,4 @@ p1.buy();
 11. bind的模拟实现
     1.  返回一个函数
     2.  可以传入参数:两种情况
-    3.  实例化失效:new Person.bindy(p); Person中的this应该指向p,不会修改为实例对象
+    3.  实例化失效:new Person.bindy(p); Person中的this应该指向实例对象

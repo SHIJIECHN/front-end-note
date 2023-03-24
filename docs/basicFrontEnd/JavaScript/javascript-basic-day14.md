@@ -31,29 +31,47 @@ console.log(person1);
 ### 2. 浅拷贝
 ```js
 var person1 = {
-    name: 'Tom',
-    age: 20,
-    height: 180,
-    weight: 140,
-    son: {
-        first: 'Jack',
-        second: 'Tom'
-    }
+  name: 'Tom',
+  age: 20,
+  height: 180,
+  weight: 140,
+  son: {
+    first: 'Jack',
+    second: 'Tom'
+  }
 }
 
 // 创建新的对象
 var person2 = {}
 
 // 浅拷贝
-for(var key in person1){
-    person2[key] = person1[key];
+for (var key in person1) {
+  person2[key] = person1[key];
 }
 
 // 浅拷贝过程中，原始值赋值的是副本，两个人变量完全独立
 person2.name = 'Asha';
 // 浅拷贝引用值是指针，两个变量指向同一个对象。
 person2.son.first = 'Ben';
-console.log(person1, person2)
+console.log(person1, person2); // 原始值不会受影响，而引用值会受到影响
+/**
+person1
+{
+  name: 'Tom',
+  age: 20,
+  height: 180,
+  weight: 140,
+  son: { first: 'Ben', second: 'Tom' }
+}
+person2
+{
+  name: 'Asha', 
+  age: 20,
+  height: 180,
+  weight: 140,
+  son: { first: 'Ben', second: 'Tom' }
+}
+ */
 ```
 总结：
 1. 将person2定义为空对象，此时person2和person1是独立的存储空间。
@@ -156,6 +174,31 @@ person2.children.forth = {
     age: 20
 }
 console.log(person1, person2);
+/**
+{
+  name: '张三',
+  age: 18,
+  sex: 'male',
+  children: {
+    first: { name: 'One', age: 13 },
+    second: { name: 'Two', age: 18 },
+    third: { name: 'Three', age: 20 }
+  },
+  car: [ 'Benz', 'Mazda' ]
+} 
+{
+  name: '张三',
+  age: 18,
+  sex: 'male',
+  children: {
+    first: { name: 'One', age: 13 },
+    second: { name: 'Two', age: 18 },
+    third: { name: 'Three', age: 20 },
+    forth: { name: 'Four', age: 20 }
+  },
+  car: [ 'Benz', 'Mazda' ]
+}
+ */
 ```
 
 ## 练习

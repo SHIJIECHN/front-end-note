@@ -10,70 +10,121 @@ iframe中的src引入不同网页资源是不受同源策略的阻止，所以�
 
 ### 1. iframe的使用与特性
 
-#### 获取iframe窗口对象
-`iframe`加载了一个页面，那么`iframe`就是这个页面的窗口，想获得这个`iframe`的窗口对象`window`：`myIframe.contentWindow`
+- `iframe`加载了一个页面，那么`iframe`就是这个页面的窗口，想获得这个`iframe`的窗口对象`window`：`myIframe.contentWindow`
+- `iframe`窗口存在父子关系，子窗口获取父级窗口的`window.name`属性：`window.parent.name`。孙级页面获取父级窗口：`window.parent.parent.name`。
+
+:::: tabs
+::: tab index1.html
 ```html
-<!--***********************index.html*******************-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
 <body>
-    <iframe src="index2.html" id="myIframe"></iframe>
-    <script>
-        var myIframe = document.getElementById('myIframe');
+<iframe src="index2.html" id="myIframe"></iframe>
+<script type="text/javascript">
+  //获取节点
+  var myIframe = document.getElementById('myIframe');
 
-        myIframe.onload = function() {
-            console.log(myIframe.contentWindow.name); // iframeWindow
-        }
-    </script>
+  //当引用页面加载完毕后
+  myIframe.onload = function () {
+    //打印iframe标签里的index2.html里面的所设置window.name属性的值
+    //contentWindow相当于 浏览器对象 window
+    console.log(myIframe.contentWindow.name); //index2 iframeWindow
+  }
+  window.name = 'index1. iframeWindow';
+</script>
 </body>
-<!--***********************index2.html*******************-->
+</html>
+```
+:::   
+::: tab index2.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
 <body>
-    <script>
-        window.name = 'iframeWindow'
-    </script>
+<script type="text/javascript">
+  //定义name属性
+  window.name = 'index2 iframeWindow';
+  console.log('index2页面获取父name：',window.parent.name); 
+  // index2页面获取父name：index1. iframeWindow
+</script>
 </body>
+</html>
 ```
-
-#### iframe窗口存在父子关系，子窗口获取父级窗口的window.name属性：window.parent.name
-```js
-window.parent.name
-```
-
-#### 同源页面，父子窗口相互获取name属性
-父级页面：parent.html
-```js
-<iframe src="son.html" id="myIframe"></iframe>
-var myIframe = document.getElementById('myIframe');
-window.name = 'parent.html';
-myIframe.onload = function() {
-    console.log(myIframe.contentWindow.name); // son.html
-}
-```
-子级页面：son.html
-```js
-<iframe src="grandson.html" id="iframe"></iframe>
-var iframe = document.getElementById('iframe');
-window.name = 'son.html';
-iframe.onload = function(){
-	console.log(window.parent.name); // parent.html
-}
-```
-孙级页面：grandson.html
-```js
-console.log(window.parent.parent.name); // parent.html
-```
+:::
+::::
 
 ### 2. window.name属性共享性问题
 window.name是有共享性，一个窗口只有一个name属性，只要不改变不关闭页面，这个窗口就只有唯一的一个name，无论在这个窗口中如何跳转，跳转之后的窗口都可以访问到name属性；在同一个窗口多个页面是共享的，可以随意读写。
 
-#### 同源页面，window.name共享
-父级页面parent.html
-```js
-window.name = 'parent.html'
-location.href = 'son.html'
+:::: tabs
+::: tab index1.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 创建一个 iframe窗口，加载index2.html-->
+  <iframe src="index2.html" id="myIframe"></iframe>
+</body>
+</html>
 ```
-子级页面：son.html
-```js
-console.log(window.name); // parent.html
+::: 
+::: tab index2.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!--在当前iframe下，跳转到index3.html-->
+  <a href="./index3.html">index3</a>
+  <script type="text/javascript">
+    window.name = 'index2 iframeWindow';
+  </script>
+</body>
+</html>
 ```
+:::   
+::: tab index3.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="text/javascript">
+    console.log(window.name);// 访问index2.html的window.name属性
+  </script>
+</body>
+</html>
+```
+:::   
+::::
 
 ### 3. iframe被同源策略阻止
 如果主页面与`iframe`窗口的源不同，主页面无法拿到`iframe`页面的值，并且会报错，也就是受同源策略限制。但是`iframe`内部页面之间的跳转是不受影响的。主页页面与`iframe`的子页面受同源策略影响
@@ -81,13 +132,12 @@ console.log(window.name); // parent.html
 
 ```html
 <body>
-    <!--index.html-->
     <iframe src="http://test2.jsplusplus.com/index.html" id="myIframe"></iframe>
     <script>
         var myIframe = document.getElementById('myIframe');
         myIframe.onload = function() {
             console.log(myIframe.contentWindow.name);
-            // 跨域 Uncaught DOMException: Blocked a frame with origin "http://127.0.0.1:5500" from accessing a cross-origin frame. at HTMLIFrameElement.myIframe.onload (http://127.0.0.1:5500/index.html:20:48)
+            // 跨域 Uncaught DOMException: Blocked a frame with origin "http://127.0.0.1:5500" ...
         }
     </script>
 </body>
@@ -99,8 +149,13 @@ console.log(window.name); // parent.html
 <img :src="$withBase('/basicComputer/Network/cross-domain01.png')" alt="cross-domain"> 
 
 ### 2. 设置基础域名（domain）+iframe
-核心思想：通过document.domain获取当前服务器域名，设置当前服务器域名，前提是两个网页的基础域名必须一致，再在主页面中通过iframe窗口获取子页面中的ajax，利用子页面与api同源，发起请求。实际上，`iframe`窗口被引入，父级页面就可以获得`iframe`窗口对象：`contentWindow`，此时`iframe`页面也就可以使用`$.ajax`向服务器发送请求。    
-父级页面：index.html (http://test2.jsplusplus.com/index.html)
+核心思想：通过document.domain获取当前服务器域名，设置当前服务器域名，前提是两个网页的基础域名必须一致，再在主页面中通过iframe窗口获取子页面中的ajax，利用子页面与api同源，发起请求。实际上，`iframe`窗口被引入，父级页面就可以获得`iframe`窗口对象：`contentWindow`，此时`iframe`页面也就可以使用`$.ajax`向服务器发送请求。 
+
+- 父级页面：index1.html (http://test2.jsplusplus.com/index.html)
+- 子级页面：index2.html (http://test.jsplusplus.com/index.html)
+
+:::: tabs
+::: tab index1.html
 ```html
 <body>
     <script>
@@ -123,7 +178,8 @@ console.log(window.name); // parent.html
     </script>
 </body>
 ```
-子级页面：index.html (http://test.jsplusplus.com/index.html)
+:::   
+::: tab index2.html
 ```html
 <body>
     <script src="js/utils.js"></script>
@@ -132,7 +188,11 @@ console.log(window.name); // parent.html
     </script>
 </body>
 ```
+:::   
+::::
+
 **封装AJAXDomain跨域函数**    
+
 封装的核心思想：利用上述父级页面的逻辑进行Domain函数的封装。   
 不同源客户端浏览器之间需要设置相同的基础域名，这样能够解决iframe不同源之间获取数据被同源策略阻止，而通过引入子窗口中ajax进行同域的请求数据。
 <img :src="$withBase('/basicComputer/Network/cross-domain02.png')" alt="cross-domain"> 

@@ -17,7 +17,7 @@ Person.prototype.name = 'Lucy';
 var p = new Person(); 
 // 里边保存了一个name:"Luncy" 实际并没有在person p的这个对象上，
 // 它是在我对象下面的原型链下面的原型上面，它保存原型上面
-console.log(p);
+console.log(p); // Person {}
 ```
 解释：
 1. 构造函数起作用的最根本操作时必须要经过new，如果不new的话原型就不存在。

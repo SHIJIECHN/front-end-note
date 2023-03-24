@@ -684,3 +684,104 @@ const flatten = arr => {
 console.log(flatten(arr))
 ```
 
+## 对象扁平化 
+
+### 1. 只嵌套对象
+```javascript
+const source = {
+  a: {
+    b: {
+      c: 1,
+      d: 2
+    },
+    e: 3
+  },
+  f: {
+    g: 2
+  }
+};
+```
+实现：
+```javascript
+function flatten(item, preKey = '', res = {}) {
+  // 获取item独享的所有[key, value]数组并且遍历，forEach的箭头函数用解构
+  Object.entries(item).forEach(([key, val]) => {
+    if (val && typeof val === 'object') {
+      flatten(val, preKey + key + '.', res);
+    } else {
+      res[preKey + key] = val;
+    }
+  })
+  return res;
+}
+
+const source = { a: { b: { c: 1, d: 2 }, e: 3 }, f: { g: 2 } };
+console.log(flatten(source));
+/**
+{ 
+  'a.b.c': 1, 
+  'a.b.d': 2, 
+  'a.e': 3, 
+  'f.g': 2 
+}
+ */
+```
+
+### 2. 有数组和对象，并且去掉null
+```javascript
+const input = {
+  a: 1,
+  b: [1, 2, { c: true }, [3]],
+  d: { e: 2, f: 3 },
+  g: null,
+};
+```
+```javascript
+function flatten(obj = {}, preKey = '', res = {}) {
+  if (!obj) return; // 判断控制，如果obj为空，直接返回
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (Array.isArray(value)) { // 1. 数组
+      // 如果obj是数组，则key就是数组的index，value就是对应的值。就用[]
+      // 因为value是数组，数组后面不需要.号
+      let temp = Array.isArray(obj)
+        ? `${preKey}[${key}]`
+        : `${preKey}${key}`;
+      flatten(value, temp, res);
+    } else if (typeof value === 'object') { // 2. 对象
+      let temp = Array.isArray(obj)
+        ? `${preKey}[${key}].`
+        : `${preKey}${key}.`
+      flatten(value, temp, res);
+    } else {
+      let temp = Array.isArray(obj) ? `${preKey}[${key}]` : `${preKey}${key}`
+      res[temp] = value
+    }
+  })
+  return res;
+}
+
+const input = {
+  a: 1,
+  b: [1, 2, { c: true }, [3]],
+  d: { e: 2, f: 3 },
+  g: null,
+};
+console.log(flatten(input));
+/**
+{
+  a: 1,
+  'b[0]': 1,
+  'b[1]': 2,
+  'b[2].c': true,
+  'b[3][0]': 3,
+  'd.e': 2,
+  'd.f': 3
+}
+ */
+```
+
+## 数组对象转树状形
+
+
+
