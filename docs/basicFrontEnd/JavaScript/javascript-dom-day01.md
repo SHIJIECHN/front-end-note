@@ -37,26 +37,27 @@ document对象是HTMLDocument（继承自Document类型）的一个实例，表�
     <script type="text/javascript">
         // getElementsByTagName
         var boxes = document.getElementsByTagName('div'); // 全部支持，返回类数组
-        console.log(boxes); 
+        console.log(boxes); // HTMLCollection(2) [div#box.box, div.box, box: div#box.box]
 
         // getElementsByClassName
         var boxes1 = document.getElementsByClassName('box'); // IE8及以下没有该方法
-        console.log(boxes1);
+        console.log(boxes1); // HTMLCollection(2) [div#box.box, div.box, box: div#box.box]
 
         // getElementsByName
         var input = document.getElementsByName('username');
-        console.log(input);
+        console.log(input); // NodeList [input]
 
         // querySelector
-        var div1 = document.querySelector('div'); // 标签
+        var div1 = document.querySelector('div'); // 标签 
         var div2 = document.querySelector('.box'); // 类名
         var div3 = document.querySelector('#box'); // id
-        console.log(div1, div2, div3)
+        console.log(div1, div2, div3)// div#box.box div#box.box div#box.box
 
 
         var divs = document.querySelectorAll('div');
         var boxes = document.querySelectorAll('.box');
         console.log(divs, boxes)
+        // NodeList(2) [div#box.box, div.box] NodeList(2) [div#box.box, div.box]
     </script>
 </body>
 ```

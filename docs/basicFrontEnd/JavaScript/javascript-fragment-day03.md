@@ -1,5 +1,5 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-4: JavaScript碎片知识
 sidebarDepth: 3
 title: Proxy
 ---

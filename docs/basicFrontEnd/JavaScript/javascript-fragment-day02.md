@@ -1,10 +1,16 @@
 ---
-autoGroup-1: ECMAScript
+autoGroup-4: JavaScript碎片知识
 sidebarDepth: 3
 title: defineProperty
 ---
 
 ## 定义对象属性
+
+默认情况下，采用defineProperty方式添加的属性，属性不可变性
+- 属性不可修改
+- 属性可不枚举
+- 属性不可删除
+
 ```javascript
 function defineProperty() {
     var _obj = {};
@@ -37,7 +43,12 @@ for (var k in obj) {
 
 delete obj.a; // 属性不可删除
 ```
-添加修改描述项
+
+添加修改描述项：
+- 可写：writable: true
+- 可枚举：enumerable: true
+- 可删除：configurable: true
+
 ```javascript
 function defineProperty() {
     var _obj = {};

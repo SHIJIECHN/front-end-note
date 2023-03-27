@@ -749,6 +749,7 @@ function flatten(obj = {}, preKey = '', res = {}) {
         : `${preKey}${key}`;
       flatten(value, temp, res);
     } else if (typeof value === 'object') { // 2. 对象
+    // value是对象,所以末尾需要加.号
       let temp = Array.isArray(obj)
         ? `${preKey}[${key}].`
         : `${preKey}${key}.`
@@ -782,6 +783,82 @@ console.log(flatten(input));
 ```
 
 ## 数组对象转树状形
+
+思路:
+- 将有父子关系的数据分成两类,一类是没有父节点的数据(parentId),另一类是有父节点的数据(children)
+- 通过parentId,对每个父节点再children查找对应的子节点,并将其放入父节点的children中
+- 然后每个子节点又作为一个父节点来重复之前的动作
+
+**对象拿到的是引用值,修改对象,其他引用该对象的地方也会发生改变**
+
+```javascript
+const list = [
+  { id: 04, pid: 03 },
+  { id: 01, pid: null },
+  { id: 02, pid: null },
+  { id: 03, pid: 01 },
+  { id: 05, pid: 01 },
+  { id: 06, pid: 03 },
+  { id: 07, pid: 02 },
+  { id: 09, pid: 02 },
+  { id: 10, pid: 07 },
+]
+
+function toTree(data) {
+  let result = [];
+  // 如果值是Array,则为true,否则为false
+  if (!Array.isArray(data)) {
+    return result
+  }
+  // 根据父节点进行拼接子节点
+  data.forEach(item => {
+    console.log(item);
+    delete item.children;// 已经有的话就删除
+  })
+  //把每一项的引用放入map对象里
+  let map = {};
+  data.forEach(item => {
+    map[item.id] = item;
+  });
+  console.log(map)
+  // 再次遍历数组,决定item的去向
+  data.forEach(item => {
+    let parent = map[item.pid]; // 从map中找当前item的pid,也就是当前item的父级
+    if (parent) {
+      // 如果 parent有值,则parent为item的父级
+      // 判断parent里有无children,如果没有则创建,如果有则直接把item push到children里
+      (parent.children || (parent.children = [])).push(item);
+    } else {
+      // 如果 map[item.pid] 找不到值 说明此 item 为 第一级
+      result.push(item);
+    }
+
+  })
+  return result;
+}
+toTree(list)
+```
+
+方法二:
+
+```javascript
+function toTree(data) {
+  let result = [];
+  let obj = {};
+  data.forEach(item => {
+    obj[item.id] = Object.assign(item, obj[item.id] || {});
+    if (item.pid) {
+      let parent = obj[item.pid] || {};
+      parent.child = parent.child || [];
+      parent.child.push(item);
+      obj[item.pid] = parent;
+    } else {
+      result.push(obj[item.id])
+    }
+  })
+  return result;
+}
+```
 
 
 

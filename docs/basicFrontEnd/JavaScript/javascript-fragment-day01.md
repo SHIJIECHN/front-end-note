@@ -5,7 +5,8 @@ title: Event Loop（浏览器）
 ---
 
 ## Event Loop
-<img :src="$withBase('/basicFrontEnd/Javascript/EventLoop.png')" alt="EventLoop" />
+
+<img :src="$withBase('/basicFrontEnd/JavaScript/EventLoop.png')" alt="EventLoop" />
 
 - 执行栈：所有代码都会放到这里执行；
 - 微任务：语言标准提供的API运行，Promise，MutationObserve、process.nextTick、setImediate；
@@ -50,7 +51,7 @@ setTimeout(() => {
 console.log('end')
 ```
 结合事件循环图分析一下流程：
-<img :src="$withBase('/basicFrontEnd/Javascript/EventLoop02.png')" alt="EventLoop" />
+<img :src="$withBase('/basicFrontEnd/JavaScript/EventLoop02.gif')" alt="EventLoop" />
 
 最终我们可以看到浏览器中输出的结果:
 ```Markdown
