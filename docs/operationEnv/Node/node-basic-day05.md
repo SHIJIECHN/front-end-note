@@ -97,5 +97,5 @@ console.log(buf2 === buf1) // false
 // 2
 const buf1 = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]);
 const buf2 = Buffer.from(buf1)
-console.log(buf2 === buf1) // false
+console.log(buf2 === buf1) // false 
 ```
