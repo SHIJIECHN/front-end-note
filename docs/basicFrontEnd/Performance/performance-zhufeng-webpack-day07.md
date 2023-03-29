@@ -4,6 +4,106 @@ sidebarDepth: 3
 title: tapable
 ---
 
+## 前奏
+
+在Webpack编译过程中存在两个核心对象：
+- 负责整体编译流程的Compiler对象
+- 负责编译Module的Compilation对象
+
+Webpack编译的过程中，本质是通过tapable实现了在编译过程中的一种发布订阅者模式的插件Plugin机制。
+
+Plugin的本质上基于Tapable这个库去实现的。
+
+tapable使用只需三步：
+1. 实例化钩子函数
+2. 注册事件
+3. 触发事件
+
+tapable提供了九个钩子函数：
+```javascript
+const {
+	SyncHook,
+	SyncBailHook,
+	SyncWaterfallHook,
+	SyncLoopHook,
+	AsyncParallelHook,
+	AsyncParallelBailHook,
+	AsyncSeriesHook,
+	AsyncSeriesBailHook,
+	AsyncSeriesWaterfallHook
+ } = require("tapable");
+```
+
+### 1. 按照同步/异步分类
+- Sync(同步)：
+  - SyncHook
+  - SyncBailHook
+  - SyncWaterfallHook
+  - SyncLoopHook
+- Async(异步)：
+  - Parallel(并行)
+    - AsyncParallelHook
+    - AsyncParallelBailHook
+  - Series(串行)
+    - AsyncSeriesHook
+    - AsynSeriesBailHook
+    - AsynSeriesWaterfallHook
+
+对于同步钩子，tap方法注册事件，通过call方法触发同步钩子函数执行。
+
+对于异步钩子，可以通过tap、tapAsync、tapPromise三种方式注册事件，通过对应的callAsync、promise两种方式来触发注册的函数。
+
+### 1. SyncHook
+
+- SyncHook是一个同步钩子
+- tap注册事件的回调函数的执行顺序和放入的顺序有关，先放先执行
+
+```javascript
+const { SyncHook } = require('tapable'); 
+// 1. 实例化钩子函数，参数是形参的数组，参数名没有意义，但是数组长度有用
+const syncHook = new SyncHook(['name', 'age']);
+// 第一个参数是名字，名字没有用
+// 2. 注册事件1
+syncHook.tap('1', (name, age) => {
+  console.log(1, name, age);
+})
+// 2. 注册事件2
+syncHook.tap('2', (name, age) => {
+  console.log(2, name, age);
+})
+// 2. 注册事件3
+syncHook.tap('3', (name, age) => {
+  console.log(3, name, age);
+})
+
+// 3. 调用事件并传递参数，会被每一个注册函数接收到
+syncHook.call('zhufeng', 10);
+
+/**
+1 zhufeng 10
+2 zhufeng 10
+3 zhufeng 10
+ */
+```
+
+通过tap函数注册监听函数，然后通过call函数按顺序执行之前注册的函数。
+
+简单的实现是这样的
+```javascript
+class SyncHook{
+  constructor(){
+    this.taps = []
+  }
+
+  tap(name, fn){
+    this.taps.push({name, fn})
+  }
+  
+  call(...args){
+    this.taps.forEach((tap)=> tap.fn(...args));
+  }
+}
+```
 
 ## 实现SyncHook
 
