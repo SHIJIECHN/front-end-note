@@ -175,3 +175,112 @@ let util = {};
 console.log(util.isString('abc')); // true
 console.log(util.isString(123)); // false
 ```
+
+## 并发问题
+
+```javascript
+const fs = require('fs');
+
+// 读取两个结果
+let arr = [];
+
+function out() {
+  if (arr.length === 2) {
+    console.Console.log(arr);
+  }
+}
+
+fs.readFile('./a.txt', 'UTF8', function (err, data) {
+  arr.push(data);
+  out(); // 每次执行完，通知我
+})
+fs.readFile('./b.txt', 'UTF8', function (err, data) {
+  arr.push(data);
+  out();
+})
+// 问题：全局污染，多人写作会冲突
+```
+
+调整。只有最后了才会触发回调得到结果。
+```javascript
+const fs = require('fs');
+
+function after(times, callback) {// 高阶函数
+  let arr = [];// 目前我们不关心顺序
+  return (data) => {
+    arr.push(data);// 保证顺序，可以使用索引
+    if (--times === 0) { // 多个请求并发，需要计数器实现
+      callback(arr)
+    }
+  }
+}
+
+let out = after(2, (arr) => {
+  console.log(arr);// [ 'a', 'b' ]
+})
+
+fs.readFile('./Promise/a.txt', 'utf-8', function (err, data) {
+  out(data); // 每次执行完，通知我
+});
+fs.readFile('./Promise/b.txt', 'utf-8', function (err, data) {
+  out(data);
+})
+```
+
+优化：发布订阅模式
+
+订阅 -> 发布。每次完成一个都能都能获得结果。
+
+```javascript
+const fs = require('fs');
+// 发布订阅模式核心就是把多个方法先暂存起来，最后一次执行，
+// 主要解决的问题是解耦。可以把订阅的逻辑分散到各个类中
+
+// 事件中心
+let events = {
+  _events: [],
+
+  on(fn) {
+    this._events.push(fn)
+  },
+  emit(data) {
+    this._events.forEach(fn => fn(data));
+  }
+}
+
+// 订阅有顺序
+events.on(() => {
+  console.log('每读一次，就触发一次');
+});
+
+let arr = [];
+events.on((data) => {
+  arr.push(data);
+});
+
+events.on((data) => {
+  if (arr.length === 2) { // 最终结果还是计数器
+    console.log('读取完毕')
+  }
+});
+
+
+fs.readFile('./a.txt', 'UTF8', function (err, data) {
+  events.emit(data);
+})
+fs.readFile('./b.txt', 'UTF8', function (err, data) {
+  events.emit(data);
+})
+
+/**
+每读一次，就触发一次
+每读一次，就触发一次
+读取完毕
+ */
+```
+
+观察者模式（vue2）
+- 基于发布订阅的（发布订阅之间是没有依赖关系的）。对于我们的观察者模式，有观察者、被观察者
+- 基于类
+- 观察者模式多了依赖关系，发布订阅是先订阅好，主动的去发布，观察者模式只要被观察者发生改变，就主动通知观察者
+
