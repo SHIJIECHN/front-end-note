@@ -276,9 +276,11 @@ fs.rename('./why', './koke', err => {
 ### 5. 文件夹复制
 
 ## events模块
+
 Node中的核心API都是基于异步事件驱动的。在这个体系中，某些对象（发射器，Emitters）发出一个事件，可以监听这个事件（监听器Listeners）并且传入的回调函数，这个回调函数会在监听到事件时调用。
 
 ### 1. 基本方法
+
 发出事件和监听事件都是通过EventEmitter类来完成的，它们属于events对象：
 - emitter.on(eventName, listener)：监听事件，也可以使用
 addListener

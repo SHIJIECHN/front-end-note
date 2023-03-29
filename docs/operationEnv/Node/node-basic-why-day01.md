@@ -59,6 +59,9 @@ title:  1. 邂逅Node
 2. 在Node.js中我们也需要进行一些额外的操作，比如文件系统读/写、网络IO、加密、压缩解压文件等。
 
 ### 2. Node和浏览器的区别
+
+浏览器中除了V8之外还有Blink等内核。
+
 <img :src="$withBase('/operationEnv/Node/Node.js.png')" alt="Node.js"> 
 
 ### 3. Node.js架构

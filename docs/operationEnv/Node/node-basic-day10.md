@@ -23,6 +23,9 @@ console.log(process.cwd()); // 执行文件的路径
 ```
 
 ## 事件循环
+
+[!官网](!https://nodejs.org/zh-cn/docs/guides/event-loop-timers-and-nexttick)
+
 - 宏任务：回调函数，XHR，setTimeout，setInterval，UI rendering， I/O，setImmidate（node）
 - 微任务：promise，process.nextTick（node）
 
@@ -36,11 +39,11 @@ Node.js的事件循环，它会把一些操作放到其他相关的线程来处�
 <img :src="$withBase('/operationEnv/Node/EventLoop.png')" alt="EventLoop"> 
 
 ### 1. 事件循环阶段phase
-1. Timers：setTimeout/setInterval
+1. **Timers**：setTimeout/setInterval
 2. Pending callbacks：执行延迟到下一个事件环迭代的I/O回调（内部机制使用）
 3. Idle，prepare：系统内部机制使用
-4. Poll：轮循，检查新的I/O事件；执行I/O的回调（几乎所有情况下，除了关闭的回调函数，那些由计时器和setImmediate调度的之外），其余情况node将在适当的时候在此阻塞。
-5. Check：setImmediate。
+4. **Poll**：轮循，检查新的I/O事件；执行I/O的回调（几乎所有情况下，除了关闭的回调函数，那些由计时器和setImmediate调度的之外），其余情况node将在适当的时候在此阻塞。
+5. **Check**：setImmediate。
 6. Close callbacks：关闭回调函数（内部机制使用）。
 
 在每次运行的事件循环之间，Node.js检查它是否在等待任何异步I/O或计时器，如果没有的话，则完全关闭。
