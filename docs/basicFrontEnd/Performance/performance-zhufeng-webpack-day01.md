@@ -39,7 +39,7 @@ mkdir dist
 
 ### 1.3. 基本配置文件
 
-::: theorem 配置文件 webpack.config.js
+theo 配置文件 webpack.config.js
 - `entry`：配置入口文件的地址。默认值是`./src/index.js`，但是可以通过`entry`属性，来制定一个（或多个）不同的入口起点。
 - `output`：配置出口文件地址。主要输出文件默认值是`./dist/main.js`，其他文件默认值放置在`./dist`文件夹中。
 - `mode`：开发模式。
@@ -107,7 +107,7 @@ npm install webpack-dev-server@3.11.0 -D
 |devServer|publicPath  |表示打包生成的静态文件所在的位置（若DevServer里面的publicPath没有设置，则认为是output里面设置的publicPath的值|
 |devServer|static| 用于配置提供额外静态文件内容的目录|
 
-::: theorem path的区别和联系
+theo path的区别和联系
 
 1. `publicPath`可以看做是`devServer`对生成目录`dist`设置的虚拟目录，`devServer`首先从`devServer.publicPath`中取值，如果它没有设置，就取`output.publicPath`的值作为虚拟目录，如果它也没有设置，就取默认值`/`。
 2. `output.publicPath`不仅可以影响虚拟目录的取值，也影响利用`html-webpack-plugin`插件生成的`index.html`中引用的`js`、`css`、`img`等资源的引用路径。会自动在资源路径前面追加设置的`output.publicPath`
@@ -230,7 +230,7 @@ module: {
 
 ## 5. 图片
 
-::: theorem 引入图片的方式
+theo 引入图片的方式
 1. 手动引入：放在静态文件根目录里，通过`html`的`img`直接引用，需要配置`devServer.contentBase`；`HTML`中直接引入相对路径
 2. `JS`文件引入：通过 `require import` 引入
 3. `CSS`中引入：可以在`CSS`中通过 `url` 引入图片 `css-loader`来进行处理
@@ -386,7 +386,7 @@ module.exports = loader;
 
 ### 6.1 安装依赖包
 
-::: theorem 
+theo 
 
 - [babel-loader](https://www.npmjs.com/package/babel-loader)：使用`Babel`和`Webpack`转义`JavaScript`文件
 - [@babel/core](https://www.npmjs.com/package/@babel/core)：`Babel`编译的核心包
@@ -468,7 +468,7 @@ console.log(p);
 
 babel-loader @babel/core @babel/preset-env三者之间的关系，也就是babel-loader的实现
 
-::: theorem  babel-loader的实现
+theo  babel-loader的实现
 1. 先将`ES6`转换成`ES6`语法树（`@babel/core`）
 2. 然后调用预设`preset-env`把`ES6`语法树转换成`ES5`语法树（`@babel/preset-env`）
 3. 再对`ES5`语法树重新生成`ES5`代码（`@babel/core`）
@@ -1346,7 +1346,7 @@ npm i px2rem-loader@0.1.9 lib-flexible@0.3.2 -D
 
 ## 17. polyfill
 
-::: theorem 三个概念
+theo 三个概念
 - 最新ES语法：比如，箭头函数
 - 最新ES API：比如，promise
 - 最新ES实例方法：比如，String.prototype.includes

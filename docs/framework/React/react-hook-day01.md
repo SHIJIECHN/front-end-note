@@ -6,7 +6,7 @@ title: 1. Hook动机与useState
 
 ## 动机
 
-::: theorem 类组件的缺点
+theo 类组件的缺点
 
 1. 组件数据状态逻辑不能重用、组件之间传值过程复杂。
    1. “组件数据状态逻辑不能重用”：由于类组件中的组件数据状态state必须卸载该组件构造函数的内部，无法将state抽离出组件，因此别的组件有类似state逻辑，也必须自己实现一次。
@@ -17,13 +17,13 @@ title: 1. Hook动机与useState
 3. 复杂且不容易理解的this。例如事件处理函数都需要bind(this)才可以正确执行，想获取某些自定义属性都需要使用this.state.xxx或this.props.xxx.
 :::
 
-::: theorem Hook如何解决上述问题
+theo Hook如何解决上述问题
 1. 通过自定义`Hook`，可以将数据状态逻辑从组件中抽离出去，这样同一个`Hook`可以被多个组件使用
 2. 通过`React`内置的`useEffect`函数，将不同数据分别从`this.state`中独立拆分出去
 3. 函数组件和普通`JS`函数非常类似，在普通函数中定义的变量、方法都可以不使用`this`，而直接使用该变量或函数。因此可以不用去关心`this`。
 :::
 
-::: theorem Hook 是什么？
+theo Hook 是什么？
 它是一个简单的函数，函数组件在执行的时候能够给函数组件添加一些特殊的功能
 :::
 
@@ -52,11 +52,11 @@ import {setState} from 'react'
 const [count, setCount] = setState(0);
 ```
 
-::: theorem useState需要哪些参数
+theo useState需要哪些参数
 唯一的参数就是初始默认值
 :::
 
-::: theorem useState方法的返回值
+theo useState方法的返回值
 返回值为数组，包括：当前`state`以及更新`state`的函数。需要成对的获取它们。
 :::
 
@@ -116,7 +116,7 @@ function App() {
 ```
 当调用`useState`函数时，会将初始值、状态、修改状态的函数存放到一个单元格，然后将指针往下移动，再次调用`useState`函数时，再次保存一个单元格，指针往下移动，以此类推。
 
-::: theorem Hook 有什么规则
+theo Hook 有什么规则
 1. 只在最顶层使用`Hook`
 2. 不在循环、条件或嵌套函数中使用
 3. 只在`React`函数中调用`Hook`
@@ -135,7 +135,7 @@ function App() {
 
 ### 5. 注意点
 
-::: theorem 使用`useState`注意事项：
+theo 使用`useState`注意事项：
 1. 使用`useState`返回的数组中的第二个元素是修改状态的函数，也是唯一的函数（引用是一致的）
 2. 在函数组件中，`setCount()`的参数：
    1. 是原始值且没有发生改变时，组件不会重新加载，

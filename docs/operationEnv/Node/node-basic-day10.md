@@ -24,7 +24,7 @@ console.log(process.cwd()); // 执行文件的路径
 
 ## 事件循环
 
-[!官网](!https://nodejs.org/zh-cn/docs/guides/event-loop-timers-and-nexttick)
+[官网](!https://nodejs.org/zh-cn/docs/guides/event-loop-timers-and-nexttick)
 
 - 宏任务：回调函数，XHR，setTimeout，setInterval，UI rendering， I/O，setImmidate（node）
 - 微任务：promise，process.nextTick（node）
@@ -33,18 +33,24 @@ Node.js的事件循环，它会把一些操作放到其他相关的线程来处�
 1. Node.js是通过事件循环机制来运行JS代码的
 2. 提供了线程池处理I/O操作任务
 3. 两种线程：
-   1. 事件循环线程：负责安排任务（require、同步执行回调、注册新任务）
-   2. 线程池（libuv实现），负责处理任务（I/O操作、CPU密集型任务）
+  1. 事件循环线程：负责安排任务（require、同步执行回调、注册新任务）
+  2. 线程池（libuv实现），负责处理任务（I/O操作、CPU密集型任务）
 
 <img :src="$withBase('/operationEnv/Node/EventLoop.png')" alt="EventLoop"> 
 
-### 1. 事件循环阶段phase
+::: theo 事件循环阶段phase
+
 1. **Timers**：setTimeout/setInterval
 2. Pending callbacks：执行延迟到下一个事件环迭代的I/O回调（内部机制使用）
 3. Idle，prepare：系统内部机制使用
 4. **Poll**：轮循，检查新的I/O事件；执行I/O的回调（几乎所有情况下，除了关闭的回调函数，那些由计时器和setImmediate调度的之外），其余情况node将在适当的时候在此阻塞。
 5. **Check**：setImmediate。
 6. Close callbacks：关闭回调函数（内部机制使用）。
+
+:::
+
+
+<img :src="$withBase('/operationEnv/Node/EventLoop.jpg')" alt="EventLoop"> 
 
 在每次运行的事件循环之间，Node.js检查它是否在等待任何异步I/O或计时器，如果没有的话，则完全关闭。
 
@@ -58,9 +64,11 @@ setImmediate(()=>{
 });
 ```
 执行结果可能出现以下两种情况，系统执行快时setTimeout先执行，系统执行慢setImmediate先执行。
+
 <img :src="$withBase('/operationEnv/Node/EventLoop01.png')" alt="EventLoop"> 
 
-如果想要setTimeout始终后面循环呢？    
+如果想要setTimeout始终后面循环呢？
+
 ```js
 setTimeout(()=>{
   setTimeout(()=>{
@@ -73,6 +81,11 @@ setTimeout(()=>{
 })
 ```
 <img :src="$withBase('/operationEnv/Node/EventLoop02.png')" alt="EventLoop"> 
+
+setTimeout与setImmediate执行顺序问题：
+
+- 如果setTimeout和setImmediate不在I/O周期（即主模块）内的脚本，则执行两个计时器的顺序非确定性，因为受进程性能的约束
+- 如果这两个计时器放入一个I/O循环内调用，setImmediate总是被优先调用
 
 ## 案例一
 ```js
@@ -689,9 +702,12 @@ nextTick1
 ```
 
 ## 理解process.nextTick
-需要注意的是，在Node.js的文档中指出，process.nextTick从技术上讲，它不属于事件循环的一部分。    
-它会在当前阶段的操作完成之后处理nextTick队列。   
-任何在给定阶段中调用的process.nexTTick()，它的回调都会在事件循环继续之前执行。可以理解为在当前阶段的所有同步代码执行完成之后，立即执行。   
+需要注意的是，在Node.js的文档中指出，process.nextTick从技术上讲，它不属于事件循环的一部分。  
+
+它会在当前阶段的操作完成之后处理nextTick队列。  
+
+任何在给定阶段中调用的process.nexTTick()，它的回调都会在**事件循环继续之前执行**。可以理解为在当前阶段的所有**同步代码执行完成之后**，立即执行。
+
 ```js
 console.log(1)
 

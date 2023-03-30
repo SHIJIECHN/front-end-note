@@ -241,7 +241,7 @@ exports.age = "title_age";
 
 ### 3.2 CommonJS加载ES6模块
 
-::: theorem 如果原来是es module，如何变成CommonJS？
+theo 如果原来是es module，如何变成CommonJS？
 export defult => exports.default   
 export xxx => exports xxx
 :::
