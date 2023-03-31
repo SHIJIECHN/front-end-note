@@ -50,11 +50,11 @@ export default {
 }
 </script>
 ```
+
 Parent.vue
 ```vue
 <template>
   <div id="app">
-    
     <child name="Tom" :age="20"/>
   </div>
 </template>
@@ -68,7 +68,9 @@ export default {
     Child
   }
 }
+</script>
 ```
+
 注意：age参数前要加冒号，否咋会报错:
 ```makefile
 Invalid prop: type check failed for prop "age". Expected Number with value 20, got String with value "20".
@@ -100,6 +102,7 @@ export default {
         }
     }
 }
+</script>
 ```
 Parent.vue
 ```vue
@@ -267,6 +270,7 @@ export default {
 
 ### 监听事件
 ShowNum.vue
+```vue
 <template>
   <div>计算和: {{count}}</div>
 </template>
@@ -288,6 +292,7 @@ export default {
     }
 }
 </script>
+```
 
 ### 移除事件监听
 ```js 

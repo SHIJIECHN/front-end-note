@@ -5,7 +5,16 @@ title: JavaScript模块化
 ---
 
 ## JS模块化解决的问题
-1. 最开始都是直接写在\<script>标签中
+
+模块化主要是解决开发过程中；
+
+- 引用模块之间互相依赖，无法保证模块已经加载，一定的加载顺序
+- 相同变量污染全局互相覆盖，命名冲突
+- 引用无用的代码
+
+## 早期解决方案
+
+1. 最开始都是直接写在`<script>`标签中
 ```html
 <!--index.html-->
 <script>
@@ -17,7 +26,7 @@ title: JavaScript模块化
     console.log(c);
 </script>
 ```
-2. 业务进一步复杂，开发者开始把JavaScript写到独立的JS文件中，与html文件解耦。
+1. 业务进一步复杂，开发者开始把JavaScript写到独立的JS文件中，与html文件解耦。
 ```html
 <!--index.html-->
 <script src="js/index.js"></script>
@@ -31,7 +40,7 @@ console.log(a);
 console.log(b);
 console.log(c);
 ```
-3. 再后来，更多的开发者参与进来，更多的js文件被引入进来
+1. 再后来，更多的开发者参与进来，更多的js文件被引入进来
 ```html
 <!--index.html-->
 <script src="js/module_a.js"></script>
@@ -56,11 +65,12 @@ console.log(b);
 console.log(c);
 ```
 module_x.js文件里面声明的变量在于全局作用域中，而且很难保证所有的js文件不冲突，所以会有下面问题：
-1. 加载顺序
-2. 污染全局
+1. 加载顺序不能会乱
+2. 所有变量都在全局，污染了全局
 
 ## 传统模块化
-立即执行函数，有独立的作用域
+
+传统的模块化采用即执行函数，每个模块都是一个立即执行函数，模块有独立的作用域。
 
 ```html
 <!--index.html-->
@@ -105,13 +115,15 @@ var moduleC = (function(moduleB) {
     console.log(moduleC.c);
 })(moduleA, moduleB, moduleC);
 ```
-实际上就是闭包，模块里面并不是把作用域抛到全局，而是形成一个闭包。    
-解决了全局污染以及模块之间的依赖问题，但是没有解决加载顺序。
+
+实际上就是闭包，模块里面并不是把作用域抛到全局，而是形成一个闭包。解决了全局污染以及模块之间的依赖问题，但是没有解决加载顺序。
 
 给用户提供一个配置项，让他通过配置实现不同的功能————插件化。
 
 ## CommonJS
+
 CommonJS就是解决上面问题的模块化规范。
+
 ```html
 <!--index.html-->
 <script src="js/index.js"></script>
@@ -123,6 +135,7 @@ var a = (function() {
     return [1, 2, 3, 4, 5].reverse();
 })();
 
+// 模块导出
 module.exports = {
     a
 }
@@ -147,7 +160,7 @@ module.exports = {
     c
 }
 
-// index.js
+// index.js 引入模块
 var moduleA = require('./module_a.js');
 var moduleB = require('./module_b.js');
 var moduleC = require('./module_c.js');
@@ -156,19 +169,26 @@ console.log(moduleA.a);
 console.log(moduleB.b);
 console.log(moduleC.c);
 ```
+
 特点：
 1. 每个文件就是一个模块，有自己的作用域；
 2. 文件加载同步进行；
 3. 对服务端非常友好，有缓存机制；
 4. 一定是在NodeJS中运行，所以基本上用在服务端
 
+
 ## AMD/CMD
+
 AMD（Asynchronous Module Definition）异步模块定义。
+
 ```js
-define(moduleName, [module], factory); // 定义模块
+// define(模块名称, [依赖的模块], 回调函数)
+define(moduleName, [module], factory); // 定义模块：
 require([module], callback); // 引入模块
 ```
+
 RequireJS实现AMD
+
 ```html
 <!--index.html-->
 <script src="js/require.js"></script>
@@ -201,6 +221,7 @@ define('moduleC', ['moduleB'], function(moduleB) {
 })
 
 // index.js
+// 需要配置路径
 require.config({
     paths: {
         moduleA: 'js/module_a',
@@ -215,14 +236,18 @@ require(['moduleA', 'moduleB', 'moduleC'], function(moduleA, moduleB, moduleC) {
     console.log(moduleC.c);
 })
 ```
+
 前置依赖：会得到所有依赖加载结束才会执行后面的函数。
 
 CMD（Common Module Definition）通用模块定义。
+
 ```js
 define(function(reqiure, exports, module){}); // 定义模块
 seajs.use([module路径], function(moduleA, moduleB, moduleC){}); // 使用模块
 ```
+
 SeaJS实现CMD
+
 ```html
 <!--index.html-->
 <script src="js/sea.js"></script>
@@ -240,7 +265,7 @@ define(function(require, exports, module) {
 
 // module_b.js
 define(function(require, exports, module) {
-    var moduleA = require('module_a'),
+    var moduleA = require('module_a'),// require 引入依赖模块
         b = [7, 8, 9, 10];
     return {
         b: moduleA.a.concat(b)
@@ -262,7 +287,13 @@ seajs.use(['module_a.js', 'module_b.js', 'module_c.js'], function(moduleA, modul
     console.log(moduleC.c);
 });
 ```
-CMD依靠require加载，define定义，export导出，module操作模块。在使用模块时， 需要配置模块的URL。依赖加载完毕后执行callback。
+CMD依靠
+- require加载
+- define定义
+- export导出
+- module操作模块
+
+在使用模块时， 需要配置模块的URL。依赖加载完毕后执行callback。
 
 CMD与CommonJS、AMD本质的不同：依赖就近，按需加载。
 AMD：依赖前置。前置的模块加载完毕，再执行回调。

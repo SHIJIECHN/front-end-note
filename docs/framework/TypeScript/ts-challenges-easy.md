@@ -4,12 +4,11 @@ sidebarDepth: 3
 title: 实战练习-easy
 ---
 
-## 1. Pick
-Implement the built-in `Pick<T, K>` generic without using it.
-  
-Constructs a type by picking the set of properties `K` from `T`
 
-For example:
+## 1. Pick
+实现 TS 内置的 `Pick<T, K>`，但不可以使用它。
+
+从类型 T 中选择出属性 K，构造成一个新的类型。
 
 ```ts
 interface Todo {
@@ -36,12 +35,14 @@ type MyPick<T, K extends keyof T> = {
 1. 如何限制 `K` 的取值：`A extends keyof B` 
 2. 如何生成一个仅包含 `K` 定义 `Key` 的类型 `[A in keyof B]: B[A]`
 
+
 ## Readonly
-Implement the built-in `Readonly<T>` generic without using it.
 
-Constructs a type with all properties of T set to readonly, meaning the properties of the constructed type cannot be reassigned.
+不要使用内置的Readonly`<T>`，自己实现一个。
 
-For example:
+该 Readonly 会接收一个 泛型参数，并返回一个完全一样的类型，只是所有属性都会被 readonly 所修饰。
+
+也就是不可以再对该对象的属性赋值。
 
 ```ts
 interface Todo {
@@ -133,7 +134,7 @@ type Length<T extends readonly any[]> = T["length"]
 总结：元组和数组都是数组，但元组对TS来说可以观测其长度，`T['length']`对元组来说返回的是具体值，而对数组来说返回的是number
 
 ## Exclude
-Implement the built-in Exclude<T, U>
+Implement the built-in Exclude`<T, U>`
 
 > Exclude from T those types that are assignable to U
 
@@ -199,6 +200,7 @@ type MyAwaited<T> = T extends Promise<infer U> ? U : never
 ```
 2. TS类型处理可以是递归的
 
+
 ## If
 Implement the util type `If<C, T, F>` which accepts condition `C`, a truthy value `T`, and a falsy value `F`. `C` is expected to be either `true` or `false` while `T` and `F` can be any type.
 
@@ -226,7 +228,8 @@ type cases = [
 type error = If<null, 'a', 'b'>
 ```
 总结：
-1. extends 可以用来判断值
+1. extends 可以用来判断值 
+
 
 ## Concat
 Implement the JavaScript `Array.concat` function in the type system. A type takes the two arguments. The output should be a new array that includes inputs in ltr order
@@ -330,7 +333,7 @@ type cases = [
 ```
 
 ## Parameters
-Implement the built-in Parameters<T> generic without using it.
+Implement the built-in Parameters`<T>` generic without using it.
 
 For example:
 
@@ -386,5 +389,5 @@ y = x;  // 只有number和string完全相同才能赋值成功
 // But we just assigned x to y, and we know that 'x' returns '2' in this scenario
 // That's not correct
 const e = y<string>(); // 'e' is of type '2'
-```
+``` 
 
