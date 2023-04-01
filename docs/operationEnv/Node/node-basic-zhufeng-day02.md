@@ -161,7 +161,7 @@ A：有三种方式：
  2. new Function()：函数中的变量可以获得全局变量，并且变量会污染全局
  3. node中自己实现的vm（沙箱环境）
 
-### 1. vm执行环境分析：
+vm执行环境分析：
 
 ```javascript
 const vm = require('vm');
@@ -174,9 +174,223 @@ vm.runInNewContext('console.log(a)');//  a is not defined
 2. runInThisContext创建一个新的上下文，与上面的函数同级，所以可以访问a，但是这个上下文不会产生函数
 3. runInNewContext 创建一个新的环境，与全局上下文同级。所以不能访问global中的变量
 
-### 2. require的实现
+## CommonJS规范的实现原理
 
-1. 读取文件
-2. 读取后给文件包装一个函数
-3. 通过runInThisContext 将它变成js语法
+### 1. 基本流程
+
+1. 读取文件 a.js
+2. 读取后给文件包装一个函数并赋给变量a，此时模块中的变量a就与外界的变量隔离开了。
+3. 再通过runInThisContext 将变量a字符串变成js语法，执行
+
+:::: tabs
+::: tab index.js
+```javascript
+let a = require('./a.js')
+console.log(a);
+
+// 读取到文件后相当于，包裹一个函数
+let a = (function (exports, module, require, __dirname, __filename) {
+  var a = 100; // 此时a与外面的a就隔离开来了
+  module.exports = a // a.js的内容
+
+  return module.exports; // 导出
+
+})(exports, module, require, __dirname, __filename)
+```
+:::
+::: tab a.js
+```javascript
+var a = 100;
+module.exports = function () {
+
+}
+```
+:::
+::::
+
+### 2. 源码实现
+
+源码流程：
+
+1. require方法 -> Module.prototype.require方法
+2. Module._load加载模块
+3. Module._resolveFilename 方法把传入的路径变成了绝对路径并尝试添加后缀名（.js .json) .node
+4. new Module 拿到绝对路径创造一个模块 this.id exports={}
+5. module.load 对模块进行加载
+6. 根据文件后缀 Module._extension['js']去做策略加载
+7. 用的是同步读取文件
+8. 增加一个函数的壳子，并且让函数执行，让module.exports作为this
+9. 用户会默认拿到了module.exports的返回结果
+最终返回的是exports对象
+
+
+:::: tabs
+::: tab req.js
+```javascript
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+function Module(id) {
+  this.id = id;
+  this.exports = {}; // 空对象
+}
+Module._cache = {}
+Module._extensions = {
+  '.js'(module) { // js是变成一个函数，执行
+    // 1. 读取文件
+    let script = fs.readFileSync(module.id, 'utf8');
+    // 2. 增加函数
+    let templateFn = `(function(exports,module,require,__dirname,__filename){${script}})`;
+    // 3. 将字符串变成函数，相当于 new Function
+    let fn = vm.runInThisContext(templateFn);
+    let exports = module.exports;
+    let thisValue = exports; // this = module.exports = exports
+    let filename = module.id;
+    let dirname = path.dirname(filename);
+    // 4. 函数执行。函数call的作用：1）改变this指向；2）让函数执行
+    fn.call(thisValue, exports, module, require, dirname, filename);// 调用了a模块，module.exports = 100
+  },
+  '.json'(module) {
+    // 加载模块。json是我们自己读到解析。
+    let script = fs.readFileSync(module.id, 'utf8');
+    module.exports = JSON.parse(script);
+  }
+}
+// 将路径变成绝对路径，并且加后缀
+Module._resloveFilename = function (id) {
+  let filePath = path.resolve(__dirname, id);// \Users\小石头\Documents\Learning\A05-operationEnv\Node\Node-demo\3.Node-Core\a
+  let isExists = fs.existsSync(filePath);// 是否有后缀
+  if (isExists) return filePath; // 如果有后缀，就直接返回
+  // 尝试添加后缀 .js 
+  let keys = Reflect.ownKeys(Module._extensions); // ['.js', '.json'];
+  for (let i = 0; i < keys.length; i++) {
+    let newPath = filePath + keys[i];
+    if (fs.existsSync(newPath)) return newPath; // 查看添加后缀后的文件存不存在，存在就把路径返回
+  }
+  throw new Error('module not found.')
+
+}
+
+Module.prototype.load = function () {
+  let ext = path.extname(this.id);// 获取文件后缀名
+  Module._extensions[ext](this); // 调用对应的策略，this是当前模块
+}
+
+function req(filename) {
+  // 1. 创造一个绝对应用地址，方便后续读取
+  filename = Module._resloveFilename(filename); // c:\Users\小石头\Documents\Learning\A05-operationEnv\Node\Node-demo\3.Node-Core\a.js
+
+  // 查看缓存
+  let cacheModule = Module._cache[filename];// 获取缓存的模块
+  if (cacheModule) return cacheModule.exports; // 直接将上次缓存到的模块返回
+
+  // 2. 根据路径创造一个模块
+  const module = new Module(filename);
+  Module._cache[filename] = module;// 最终：缓存模块。根据文件名绝对路径来缓存
+  // 3. 对模块进行加载
+  module.load(); // 就是让用户给module.exports赋值
+
+  return module.exports; // 默认是一个空对象
+}
+
+let a = req('./a.js');
+a = req('./a.js');
+```
+:::   
+::: tab a.js
+```javascript
+var a = 100;
+console.log('a exec');
+console.log(this === module.exports);// true
+module.exports = a
+```
+:::   
+::: tab a.json
+```json
+{
+  "name": "zhufeng",
+  "age": 10
+}
+```
+:::  
+::::
+
+
+
+### 3. module.exports、exports、this
+
+- 默认情况下。module.exports、exports、this指向同一个对象
+- 如果有多个方法，需要一个个导出，可以采用exports
+- 文件导出的方式：
+  - module.exports
+  - exports
+  - global（不建议使用）
+
+```javascript
+// this指代的是当前模块的导出对象
+console.log(module.exports === exports, this === module.exports); // true true 三者相等
+module.exports = 'hello'; // 内部会将module.exports直接导出
+```
+
+#### 情况一：使用exports导出。
+
+```javascript
+exports = 'hello'; // 无效结果，外面拿不到
+/**
+ * 模块中使用 exports = 'hello'导出，与使用 module.exports = 'hello'导出结果不一样。
+ * 说明：
+ * function(){
+ *  let exports = module.exports; // 将module.exports赋给exports
+ *  exports = 'hello'; // 将exports值改为 hello。module.exports不受影响
+ *  return module.exports;
+ * }
+ */
+```
+
+#### 情况二：exports.a导出属性导出
+
+```javascript
+exports.a = 'hello';
+exports.b = 'world';
+
+/**
+ * function(){
+ *  let exports = module.exports; // 将module.exports赋给exports，指向同一个对象
+ *  exports.a = 'hello'; // 增加属性 a
+ *  exports.b = 'hello'; // 增加属性 b
+ *  return module.exports;
+ * }
+ */
+
+// 也可以使用下面的方式导出
+this.a = 'hello';
+this.b = 'world';
+```
+
+分析下面导出的结果：
+
+```javascript
+// 下面导出方式最终导出什么结果
+module.exports = 'hello'; // 最终导出。更改module.exports优先级是最高的，因为最终会将module.exports直接导出
+exports.a = 'world';
+this.a = '.'
+
+/**
+ * function(){
+ *  let exports = module.exports; // 将module.exports赋给exports，指向同一个对象
+ *  module.exports = 'hello; // 将module.exports指向hello
+ *  exports.a = 'hello'; // 增加属性 a 为world。这是在原来的对象上加属性
+ *  return module.exports; 
+ * }
+ */
+```
+
+## Module
+
+- 核心模块、内置模块。node自带
+- 文件模块，引用都是相对路径
+- 第三方模块
+
+### 1. 文件模块的查找规范
+
 
