@@ -274,4 +274,112 @@ mkdir('a/b/c/d').then(() => {
 :::   
 :::: 
 
+### 2. 目录删除
 
+- fs.rmdir  fs.rmdirSync
+- fs.readdir 查看目录中的儿子列表，数组
+- fs.stat 文件状态，目录状态（isFile，isDirectory）
+- fs.unlink 删除文件 （fs.rename 重命名）
+
+```javascript
+const fs = require('fs');
+fs.rmdir('a', function (err) {
+  console.log(err);
+})
+```
+
+多层级目录无法删除，所以需要封装改写。
+
+#### 串行
+
+```js
+const fs = require('fs');
+const path = require('path');
+function rmdir(dir, cb) { // 写递归先不要考虑多层，先把两层处理完毕
+  fs.stat(dir, function (err, statObj) {
+    if (statObj.isDirectory()) {
+      fs.readdir(dir, function (err, dirs) { // dirs => [a.js, b]
+        dirs = dirs.map(item => path.join(dir, item)); // [ 'a\\a.js', 'a\\b' ]
+        // 把目录里面的拿出来，1个删除完毕后删除第二个
+        let index = 0;
+        function step() {
+          // 将儿子都删除完毕后，删除自己
+          if (index === dirs.length) return fs.rmdir(dir, cb);
+          //删除第一个成功后继续调用step继续删除，直到全部删除完毕后删除自己
+          rmdir(dirs[index++], step);
+        }
+        step();
+      })
+    } else {
+      // 如果是文件直接删除即可
+      fs.unlink(dir, cb);
+    }
+  })
+}
+
+rmdir('a', function () {
+  console.log('删除成功')
+})
+```
+
+#### 并发
+
+```javascript
+const fs = require('fs');
+const path = require('path');
+function rmdir(dir, cb) {
+  fs.stat(dir, function (err, statObj) {
+    if (statObj.isDirectory()) {
+      // 读目录
+      fs.readdir(dir, function (err, dirs) {
+        dirs = dirs.map(item => path.join(dir, item));
+        if (!dirs.length) {
+          // 当前目录什么都没有
+          return fs.rmdir(dir, cb);
+        }
+        let index = 0;
+        function done() {
+          //当index等于文件长度，说明已经遍历执行结束了，就删除目录
+          if (++index === dirs.length) {
+            return fs.rmdir(dir, cb);
+          }
+        }
+        for (let i = 0; i < dirs.length; i++) { // 遍历目录
+          rmdir(dirs[i], done); // 对目录中的文件分别执行
+        }
+      })
+    } else {
+      // 当前是文件
+      fs.unlink(dir, cb);
+    }
+  })
+}
+rmdir('a', function () {
+  console.log('删除成功')
+})
+```
+
+#### async + await
+
+```javascript
+const fs = require('fs').promises;
+const path = require('path');
+async function rmdir(dir) { // 如果用async await 就按照同步的逻辑来写
+  let statObj = await fs.stat(dir);// 获取目录信息
+  if (statObj.isDirectory()) {
+    let dirs = await fs.readdir(dir);
+    // 对每个文件都执行rmdir
+    dirs = dirs.map(item => rmdir(path.join(dir, item),));
+    await Promise.all(dirs);// 所有文件都执行成功
+    await fs.rmdir(dir); // 删除自己
+  } else {
+    return fs.unlink(dir);// 删除文件
+  }
+
+}
+rmdir('a').then(() => {
+  console.log('删除成功')
+}).catch(e => {
+  console.log(e);
+})
+```
