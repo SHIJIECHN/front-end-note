@@ -39,7 +39,7 @@ mkdir dist
 
 ### 1.3. 基本配置文件
 
-theo 配置文件 webpack.config.js
+::: theorem 配置文件 webpack.config.js
 - `entry`：配置入口文件的地址。默认值是`./src/index.js`，但是可以通过`entry`属性，来制定一个（或多个）不同的入口起点。
 - `output`：配置出口文件地址。主要输出文件默认值是`./dist/main.js`，其他文件默认值放置在`./dist`文件夹中。
 - `mode`：开发模式。
@@ -100,14 +100,14 @@ npm install webpack-dev-server@3.11.0 -D
 
 ### 2.2 publicPath
 
-|类别    |配置名称     |描述   |
-| -------|:-----------|:------|
-|output|path   |指定输出到硬盘上的目录|
-|output|publickPath  |表示打包生成的index.html文件里面引用资源的前缀|
-|devServer|publicPath  |表示打包生成的静态文件所在的位置（若DevServer里面的publicPath没有设置，则认为是output里面设置的publicPath的值|
-|devServer|static| 用于配置提供额外静态文件内容的目录|
+| 类别      | 配置名称    | 描述                                                                                                          |
+| --------- | :---------- | :------------------------------------------------------------------------------------------------------------ |
+| output    | path        | 指定输出到硬盘上的目录                                                                                        |
+| output    | publickPath | 表示打包生成的index.html文件里面引用资源的前缀                                                                |
+| devServer | publicPath  | 表示打包生成的静态文件所在的位置（若DevServer里面的publicPath没有设置，则认为是output里面设置的publicPath的值 |
+| devServer | static      | 用于配置提供额外静态文件内容的目录                                                                            |
 
-theo path的区别和联系
+::: theorem path的区别和联系
 
 1. `publicPath`可以看做是`devServer`对生成目录`dist`设置的虚拟目录，`devServer`首先从`devServer.publicPath`中取值，如果它没有设置，就取`output.publicPath`的值作为虚拟目录，如果它也没有设置，就取默认值`/`。
 2. `output.publicPath`不仅可以影响虚拟目录的取值，也影响利用`html-webpack-plugin`插件生成的`index.html`中引用的`js`、`css`、`img`等资源的引用路径。会自动在资源路径前面追加设置的`output.publicPath`
@@ -230,7 +230,7 @@ module: {
 
 ## 5. 图片
 
-theo 引入图片的方式
+::: theorem 引入图片的方式
 1. 手动引入：放在静态文件根目录里，通过`html`的`img`直接引用，需要配置`devServer.contentBase`；`HTML`中直接引入相对路径
 2. `JS`文件引入：通过 `require import` 引入
 3. `CSS`中引入：可以在`CSS`中通过 `url` 引入图片 `css-loader`来进行处理
@@ -386,7 +386,7 @@ module.exports = loader;
 
 ### 6.1 安装依赖包
 
-theo 
+::: theorem 
 
 - [babel-loader](https://www.npmjs.com/package/babel-loader)：使用`Babel`和`Webpack`转义`JavaScript`文件
 - [@babel/core](https://www.npmjs.com/package/@babel/core)：`Babel`编译的核心包
@@ -468,7 +468,7 @@ console.log(p);
 
 babel-loader @babel/core @babel/preset-env三者之间的关系，也就是babel-loader的实现
 
-theo  babel-loader的实现
+::: theorem  babel-loader的实现
 1. 先将`ES6`转换成`ES6`语法树（`@babel/core`）
 2. 然后调用预设`preset-env`把`ES6`语法树转换成`ES5`语法树（`@babel/preset-env`）
 3. 再对`ES5`语法树重新生成`ES5`代码（`@babel/core`）
@@ -603,26 +603,26 @@ module.exports = {
 - `webpack`通过配置可以自动给我们`source-map`文件，`map`文件是一种对应编辑文件和源文件的方法
 
 
-|类别    |代码形式<div style="width: 80px"></div>|含义     |
-| -------|:-----------|--------|
-|`source-map`|原始代码| 最好的`sourcemap`质量有完整的结果，但是会很慢|
-|`eval-source-map`|原始代码| 同样道理，但是最高的质量和最低的性能|
-|`cheap-module-eval-source-map`|原始代码 |（只有行内）同样道理，但是更高的质量和更低的性能|
-|`cheap-eval-source-map`|转换代码 |（行内）每个模块被`eval`执行，并且`sourcemap`作为`eval`的`dataurl`|
-|`eval`|生成代码| 每个模块都被`eval`执行，并且存在`@sourceURL`，带`eval`的构建模式能`cache SourceMap`|
-|`cheap-source-map`|转换代码| （行内） 生成的`sourcemap`没有列映射，从`loaders`生成的`sourcemap`没有被使用|
-|`cheap-module-source-map`|原始代码| （只有行内）与上面一样除了每行特点的从`loader`中进行映射|
-|`hidden-source-map`| 隐藏`sourcemap`|
+| 类别                           | 代码形式<div style="width: 80px"></div> | 含义                                                                                |
+| ------------------------------ | :-------------------------------------- | ----------------------------------------------------------------------------------- |
+| `source-map`                   | 原始代码                                | 最好的`sourcemap`质量有完整的结果，但是会很慢                                       |
+| `eval-source-map`              | 原始代码                                | 同样道理，但是最高的质量和最低的性能                                                |
+| `cheap-module-eval-source-map` | 原始代码                                | （只有行内）同样道理，但是更高的质量和更低的性能                                    |
+| `cheap-eval-source-map`        | 转换代码                                | （行内）每个模块被`eval`执行，并且`sourcemap`作为`eval`的`dataurl`                  |
+| `eval`                         | 生成代码                                | 每个模块都被`eval`执行，并且存在`@sourceURL`，带`eval`的构建模式能`cache SourceMap` |
+| `cheap-source-map`             | 转换代码                                | （行内） 生成的`sourcemap`没有列映射，从`loaders`生成的`sourcemap`没有被使用        |
+| `cheap-module-source-map`      | 原始代码                                | （只有行内）与上面一样除了每行特点的从`loader`中进行映射                            |
+| `hidden-source-map`            | 隐藏`sourcemap`                         |
 
 其实只有五个关键字的组合：`eval`、`source-map`、`cheap`、`module`、`inline`。
 
-|类别    |含义     |
-| -------|:-----------|
-|`eval`|使用`eval`包裹代码|
-|`source-map`|产生`.map`文件|
-|`cheap`|不包含列信息，也不包含`loader`和`sourcemap`|
-|`module`|包含`loader`的`sourcemap`，否则无法定义源文件|
-|`inline`|将`.map`作为`DataURI`嵌入，不单独生成`.map`文件|
+| 类别         | 含义                                            |
+| ------------ | :---------------------------------------------- |
+| `eval`       | 使用`eval`包裹代码                              |
+| `source-map` | 产生`.map`文件                                  |
+| `cheap`      | 不包含列信息，也不包含`loader`和`sourcemap`     |
+| `module`     | 包含`loader`的`sourcemap`，否则无法定义源文件   |
+| `inline`     | 将`.map`作为`DataURI`嵌入，不单独生成`.map`文件 |
 
 ### 8.1 开发环境
 
@@ -1016,15 +1016,15 @@ module.exports = {
 - 文件指纹：打包后输出的文件名和后缀
 - `hash`一般是结合`CDN`缓存来使用，通过`webpack`构建之后，生成对应文件名自动带上对应的`MD5`值。如果文件内容发生改变的话，那么对应文件哈希值也会改变，对应的`HTML`引用`URL`地址也会改变，触发`CDN`服务器从资源服务器上拉去对应数据，进而更新本地缓存。
 
-|占位符名称    |含义     |
-| -------|:-----------|
-|`ext`|资源后缀名|
-|`name`|文件名称|
-|`path`|文件的相对路径|
-|`folder`|文件所在的文件夹|
-|`hash`|每次`webpack`构建时生成一个唯一的`hash`值|
-|`chunkhash`|根据`chunk`生成`hash`值，来源于同一个`chunk`，则`hash`值相同|
-|`contenthash`|文件的内容`hash`，文件内容相同`hash`值相同|
+| 占位符名称    | 含义                                                         |
+| ------------- | :----------------------------------------------------------- |
+| `ext`         | 资源后缀名                                                   |
+| `name`        | 文件名称                                                     |
+| `path`        | 文件的相对路径                                               |
+| `folder`      | 文件所在的文件夹                                             |
+| `hash`        | 每次`webpack`构建时生成一个唯一的`hash`值                    |
+| `chunkhash`   | 根据`chunk`生成`hash`值，来源于同一个`chunk`，则`hash`值相同 |
+| `contenthash` | 文件的内容`hash`，文件内容相同`hash`值相同                   |
 
 创建文件`hash.js`模拟三种`hash`的生成
 
@@ -1346,7 +1346,7 @@ npm i px2rem-loader@0.1.9 lib-flexible@0.3.2 -D
 
 ## 17. polyfill
 
-theo 三个概念
+::: theorem 三个概念
 - 最新ES语法：比如，箭头函数
 - 最新ES API：比如，promise
 - 最新ES实例方法：比如，String.prototype.includes

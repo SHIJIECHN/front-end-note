@@ -183,10 +183,10 @@ function __webpack_require__(moduleId) {
 
 ## 3. 兼容性实现
 
-|模块类型    |导出模块     | 导入模块 |
-| -------|:-----------|:-----------|
-|CommonJS|exports、module.exports|require|
-|ES6|export、export default|import|
+| 模块类型 | 导出模块                | 导入模块 |
+| -------- | :---------------------- | :------- |
+| CommonJS | exports、module.exports | require  |
+| ES6      | export、export default  | import   |
 
 ### 3.1 CommonJS加载CommonJS
 
@@ -241,8 +241,8 @@ exports.age = "title_age";
 
 ### 3.2 CommonJS加载ES6模块
 
-theo 如果原来是es module，如何变成CommonJS？
-export defult => exports.default   
+::: theorem 如果原来是es module，如何变成CommonJS？
+export default => exports.default   
 export xxx => exports xxx
 :::
 

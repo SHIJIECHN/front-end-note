@@ -38,7 +38,7 @@ Node.js的事件循环，它会把一些操作放到其他相关的线程来处�
 
 <img :src="$withBase('/operationEnv/Node/EventLoop.png')" alt="EventLoop"> 
 
-::: theo 事件循环阶段phase
+::: theorem 事件循环阶段phase
 
 1. **Timers**：setTimeout/setInterval
 2. Pending callbacks：执行延迟到下一个事件环迭代的I/O回调（内部机制使用）

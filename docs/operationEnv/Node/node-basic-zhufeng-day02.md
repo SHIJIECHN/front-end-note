@@ -428,7 +428,7 @@ this.a = '.'
        "gm": "./bin/www"
     }
 5. 在global_module下执行命令npm link，就是将当前文件link到node_modules下
-6. 修改www文件，添加类型： #! /user/bin/env node
+6. 修改www文件，添加类型： #! /usr/bin/env node
 7. 命令行中输入gm
 ```
 
