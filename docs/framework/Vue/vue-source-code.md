@@ -27,7 +27,7 @@ Vue 的执行流程
 Vue 利用我们提供的数据和页面中模板生成了一个新的 HTML标签（node元素），替换到了页面中放置模板的位置。
 ```javascript
 // 引入Vue
-<script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.7.14/vue.js"></script>
 
 // 第一步：写模板
 <div id="root">

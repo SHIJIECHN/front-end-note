@@ -123,3 +123,22 @@ const server = http.createServer((req, res) => {
 
 })
 ```
+
+## 手写一个终端命令
+
+要求：在命令行中输入http-server则启动一个http服务，以执行命令文件夹为根路径，展示当前文件夹内容，如果是目录则展示目录文件，如果是文件，则展示文件内容。
+
+目录结构：
+```javascript
+├── bin
+│   ├── config.js
+│   └── www.js
+├── package-lock.json
+├── package.json
+└── src
+    ├── index.js
+    ├── template.html
+    ├── util.js
+    └── 你好
+```
+首先我们需要能够
