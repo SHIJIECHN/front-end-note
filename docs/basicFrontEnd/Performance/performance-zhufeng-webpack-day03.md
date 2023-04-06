@@ -4,7 +4,7 @@ sidebarDepth: 3
 title: 抽象语法树
 ---
 
-## 6. 抽象语法树
+## 抽象语法树
 
 抽象语法树（AST）是源代码语法结构的一种出现表示，它以树状的形式表现编程语言的语法结构，树上每个节点都表示源代码中的一种结构。
 
@@ -93,56 +93,267 @@ estraverse.traverse(ast, { // 2. 遍历ast
 let targetCode = escodegen.generate(ast); // 3. 重新生成代码
 ```
 
-### 2. babel插件
+### 2. 分析执行过程
 
+一个完整的编译器整体执行过程可以分为三个步骤：
+
+1. Parsing（解析过程）：这个过程包括此法分析、语法分析、构建AST
+2. Transformation（转化过程）：将上一步解析后的内容，按照编译器指定的规则进行处理，形成一个新的表现形式
+3. Code Generation（代码生成）：将上一步处理好的内容转化为新的代码
+
+#### 2.1 Parsing解析
+
+- 词法分析 
+- 语法解析
+
+主要过程为词法分析 -> 生成tokens数组 -> 对tokens进行语法分析 -> 生成AST抽象语法树
+
+词法分析使用tokenizer（分词器）或者lexer（此法分析器），将源码分成tokens，tokens是一个防止对象的数组，其中的每一个对象都可以看作是一个单元的描述信息。
+
+语法解析是将tokens重新整理成语法相互关联的表达形式，这种形式称为AST（抽象语法树）
+
+
+#### 2.2 Transformation（转化）
+
+改写AST（抽象语法树），遍历这个”树”的节点。需要Traversal（遍历）和Visitors（访问器）。
+
+Traveral（遍历）：遍历AST的所有节点，这个过程使用深度优先原则。
+
+Visitor（访问器）：访问器最基本的思想就是创建一个“访问器”对象，这个对象可以处理不同类型的节点函数。
+
+```javascript
+const visitor = {
+  ArrowFunctionExpression(node, parent){}, // 处理箭头函数类型节点
+  ThisExpression(node, parent){} // 处理this声明类型节点
+}
+```
+
+当enter进入到该节点，我们会调用访问器，然后会调用针对这个节点的相关函数，同时这个节点和其父节点作为参数传入。
+
+当leave离开的时候我们也能够调用访问器。
+
+为了能够处理enter和exit，访问器可以写成:
+
+```javascript
+const visitor = {
+  ArrowFunctionExpression: {
+    enter(node, parent){},
+    leave(node, parent){},
+  }
+}
+```
+
+#### 2.3 Code Generation（生成代码）
+
+将生成的新AST树再转回代码的过程。大部分代码生成器的主要过程是，不断的访问Transformation生成的AST或者结合tokens，按照指定的规则，将树上的节点打印拼接最终还原为新的code。
+
+## Babel
+
+Babel是一个最常用的JavaScript编译器。能够转义ES6的代码。工作流程分成三部分：
+
+- Parse（解析）
+- Transform（转换）
+- Generator（代码生成）
+
+我们可以借助Babel插件：
+
+- @babel/parser将源码转换成AST
+- @babel/traverse用于对AST的遍历，负责替换、移除和添加节点
+- @babel/generator 将AST生成源码，同时生成sourcemap
+- [babel-types](https://babeljs.io/docs/babel-types.html)：用于AST节点的Lodash式工具库，包含构造、验证以及变换AST节点的方法
+- @babel/core：Babel的编译器，核心API都在这里，比如常见的transform、parse，并实现了插件功能
 - [babel-handbook](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md)
-- [babel-types](https://babeljs.io/docs/babel-types.html)
 - [astexplorer](https://astexplorer.net/)
 
 - 访问者模式Visitor对于某个对象或者一组对象，不同的访问者，产生的结果不同，执行操作也不同
 - visitor的对象定义了用于AST中获取具体节点的方法
 - visitor上挂载以节点type命名的方法，当遍历AST的时候，如果匹配上type，就会执行对应的方法
-- @babel/core Babel 的编译器，核心 API 都在这里面，比如常见的 transform、parse
-
-|属性|说明|
-|---|:---|
-|path|当前AST节点路径|
-|node|当前AST节点|
-|parent|父AST节点|
-|parentPath|父AST节点路径|
-|scope|作用域|
-|get(key)|获取某个属性的path|
-|set(key,node)|设置某个属性|
-|is类型(opts)|判断当前节点是否是某个类型|
-|find(callback)|从当前节点一直向上找到根节点（包括自己）|
-|findParent(callback)|从当前节点一直向上找到根节点（不包括自己）|
-|insertBefore(nodes)|在之前插入节点|
-|insertAfter(nodes)|在之后插入节点|
-|replaceWith(replacement)|用某个节点替换当前节点|
-|replaceWithMultiple(nodes)|用多个节点替换当前节点|
-|replaceWithSourceString(replacement)|把源代码转成AST节点再替换当前节点|
-|remove()|删除当前节点|
-|traverse(visitor,state)|遍历当前节点的子节点，第一个参数是节点，第二个参数是用来传递数据的状态|
-|skip()|跳过当前节点子节点的遍历|
-|stop()|结束所有的遍历|
 
 
+| 属性                                 | 说明                                                                   |
+| ------------------------------------ | :--------------------------------------------------------------------- |
+| path                                 | 当前AST节点路径                                                        |
+| node                                 | 当前AST节点                                                            |
+| parent                               | 父AST节点                                                              |
+| parentPath                           | 父AST节点路径                                                          |
+| scope                                | 作用域                                                                 |
+| get(key)                             | 获取某个属性的path                                                     |
+| set(key,node)                        | 设置某个属性                                                           |
+| is类型(opts)                         | 判断当前节点是否是某个类型                                             |
+| find(callback)                       | 从当前节点一直向上找到根节点（包括自己）                               |
+| findParent(callback)                 | 从当前节点一直向上找到根节点（不包括自己）                             |
+| insertBefore(nodes)                  | 在之前插入节点                                                         |
+| insertAfter(nodes)                   | 在之后插入节点                                                         |
+| replaceWith(replacement)             | 用某个节点替换当前节点                                                 |
+| replaceWithMultiple(nodes)           | 用多个节点替换当前节点                                                 |
+| replaceWithSourceString(replacement) | 把源代码转成AST节点再替换当前节点                                      |
+| remove()                             | 删除当前节点                                                           |
+| traverse(visitor,state)              | 遍历当前节点的子节点，第一个参数是节点，第二个参数是用来传递数据的状态 |
+| skip()                               | 跳过当前节点子节点的遍历                                               |
+| stop()                               | 结束所有的遍历                                                         |
 
-#### 2.1 转换箭头函数
+### 1. 转换函数名
+
+要求：借助Babel给函数重命名
+
+```javascript
+//源代码
+const hello = () => {};
+//需要修改为：
+const world = () => {};
+```
+
+思路：
+1. 先将源码转化成AST
+2. 遍历AST上的节点，找到hello函数节点并修改
+3. 将转换过的AST再生成JS代码
+
+查看hello函数名节点：
+
+<img :src="$withBase('/basicFrontEnd/Performance/babel-ast-1.jpg')" alt="ast" />
+
+再查看目标函数AST，和原函数的AST做个比较：
+
+<img :src="$withBase('/basicFrontEnd/Performance/babel-ast-2.jpg')" alt="ast" />
+
+结合两个的比较我们有了思路：只需要将该节点的那么字段修改即可
+
+```javascript
+const parser = require('@babel/parser');
+const traverser = require('@babel/traverse').default;
+const generator = require('@babel/generator').default;
+
+const sourceCode = "const hello = () => {};"
+
+// 1. 生成ast
+const ast = parser.parse(sourceCode);
+
+const visitor = {
+  // traverse 会遍历树节点，只要节点的type再visitor对象中出现，变化调用该方法
+  Identifier(path) {
+    const { node } = path; // 从path中解析出当前AST节点
+    if (node.name === 'hello') {
+      node.name = 'world'; // 找到hello的节点，替换成world
+    }
+  }
+}
+
+// 2. 遍历
+traverser(ast, visitor);
+
+// 3. 生成
+let result = generator(ast, {}, sourceCode);
+
+console.log(result)
+/**
+{
+  code: 'const world = () => {};',
+  decodedMap: undefined,
+  __mergedMap: [Getter],
+  map: [Getter/Setter],
+  rawMappings: [Getter/Setter]
+}
+ */
+```
+
+### 2. 转换箭头函数
+
 [babel-plugin-transform-es2015-arrow-functions](https://www.npmjs.com/package/babel-plugin-transform-es2015-arrow-functions)
 
+将箭头函数转换为普通函数：
 ```javascript
 // 箭头函数
 const sum = (a,b)=>a+b;
-```
-转换后
-```javascript
 // 转换后
-var sum = function sum(a, b) {
+var _this = this;
+const sum = function (a, b) {
+  console.log(_this);
   return a + b;
 };
 ```
 
+原插件使用情况：
+```javascript
+const core = require('@babel/core');
+const arrowFunctionPlugin = require('babel-plugin-transform-es2015-arrow-functions');
+
+const sourceCode = `
+const sum = (a,b)=>{
+  console.log(this);
+  return a+b
+}
+`;
+
+let targetSourceCode = core.transform(sourceCode, {
+  plugins: [arrowFunctionPlugin]
+})
+
+console.log(targetSourceCode.code)
+
+/**
+var _this = this;
+const sum = function (a, b) {
+  console.log(_this);
+  return a + b;
+};
+ */
+```
+
+我们根据依照写一个Babel插件。所谓babel插件其实就是一个对象，对象里面有个visitor属性，它是一个对象，key为类型，value为函数，接收path作为参数，也就是这样：
+
+```javascript
+const arrowFunctionPlugin = {
+  visitor: {
+    [type]:(path) =>{ }
+  }
+}
+```
+
+如果现在要求修改函数名，就简单很多，可以这样修改：
+
+```javascript
+const core = require('@babel/core');
+const sourceCode = `
+const sum = (a,b)=>{
+  console.log(this);
+  return a+b
+}
+`;
+const nameChangePlugin = {
+  visitor: {
+    Identifier: (path) => {
+      const { node } = path;
+      if (node.name === 'sum') {
+        node.name = 'add'
+      }
+    }
+  }
+}
+let targetSourceCode = core.transform(sourceCode, {
+  plugins: [nameChangePlugin]
+})
+
+console.log(targetSourceCode.code)
+/**
+const add = (a, b) => {
+  console.log(this);
+  return a + b;
+};
+ */
+```
+
+转换过程需要注意：
+1. this存在时，对this的处理
+2. 使用工具函数babel-types的方法，如生成ast节点、节点替换
+
+this处理的思路：
+1. 找到当前箭头函数要使用哪个作用域内的this，暂时称为父作用域
+2. 往父作用域中加入_this变量，也就是添加语句：var _this = this
+3. 找出当前箭头函数内所有用到this的地方
+4. 将当前箭头函数中的this，统一替换成_this
+
+
+安装插件：
 ```javascript
 npm i @babel/core@7.21.3 babel-types@6.26.0 -D
 ```
@@ -166,7 +377,7 @@ let BabelPluginTransformEs2015ArrowFunctions2 = {
     ArrowFunctionExpression(nodePath) { // 如果是箭头函数，就进入，参数是节点的路径
       let node = nodePath.node; // 获取当前路径上的节点
       // 处理this指针的问题
-      const thisBinding = hoistFunctionEnviroment(nodePath); // 提升函数作用域
+       hoistFunctionEnviroment(nodePath); // 提升函数作用域
       node.type = 'FunctionExpression';
     }
   }
@@ -186,29 +397,37 @@ function findParent(fnPath) {
  * @param {*} fnPath 
  */
 function hoistFunctionEnviroment(fnPath) {
-  // thisEnvFn=Program节点
-  // const thisEnvFn = fnPath.findParent(p => { // 找父节点
-  //   // 如果是函数则不能是箭头函数，或者是Program或者是类的属性
-  //   return (p.isFunction() && !p.isArrowFunctionExpression()) || p.isProgram();
-  // });
-  const thisEnvFn = findParent(fnPath);
-  // thisPaths就是放着那些地方用到了this
+  // 1. 从当前节点开始向上查找，知道找到一个不是箭头函数的函数，最后找不到那就是根节点
+  // 确定箭头函数要使用哪个地方的this
+  const thisEnvFn = fnPath.findParent(p => { // 找父节点
+    // 如果是函数且不能是箭头函数，或者Program根节点
+    return (p.isFunction() && !p.isArrowFunctionExpression()) || p.isProgram();
+  });
+
+  // const thisEnvFn = findParent(fnPath); // 自己重写的findParent方法
+  // 3. 找到当前箭头函数内所有用到this的地方。thisPaths就是存放用到了this的节点
   let thisPaths = getScopeInfoInformation(fnPath); // 找到作用域信息
   let thisBinding = '_this'; // 把this变量重定向的变量名
-  // 如果有地方用到了，则需要在thisEnvFn环境上添加一个语句 let _this = this
+
+  // 如果有地方用到了，则需要在thisEnvFn环境上添加一个语句 var _this = this
   if (thisPaths.length > 0) {
-    // 表示在this函数环境中添加一个变量id_this=初始值 this为thisExpression
+    // 2. 向父作用域内放入一个_this变量
     thisEnvFn.scope.push({
-      id: types.identifier('_this'), 
-      init: types.thisExpression()
+      id: types.identifier('_this'), // 生成标识符节点，也就是变量名
+      init: types.thisExpression() // 生成this节点，也就是变量值
     })
+
+    // 4. 将当前箭头函数中的this，统一替换成 _this
     // 遍历所有使用到this的路径节点，把所有thisExpression全变成_this标识符
     thisPaths.forEach(thisChild => {
       let thisRef = types.identifier(thisBinding);
-      thisChild.replaceWith(thisRef);
+      thisChild.replaceWith(thisRef); // 替换
     })
   }
 }
+
+// 找到当前箭头函数内所有使用到this的地方
+// 思路：遍历所有当前节点的子节点，如果有this变量，就收集起来
 function getScopeInfoInformation(fnPath) {
   let thisPaths = [];
   // 遍历当前的path的所有子节点，看谁的类型是ThisExpression
@@ -230,7 +449,29 @@ let targetCode = core.transform(sourceCode, {
 console.log(targetCode.code);
 ```
 
-#### 2.2 把类编译为Function
+### 4， 手写一个console.log插件
+
+场景：在开发阶段，我们通常会打印一些console.log进行调试。但随着项目的迭代，console.log也越来越多，不能快速的定位到想要的日志。我们希望可以通过一个插件强化console，让其也打印出文件名，以及打印地方的行和列等代码信息。
+
+```javascript
+// 源代码
+console.log('hello world');
+// 变成
+console.log("hello world","当前文件名","具体代码位置信息")
+```
+
+比较两者的ast树发现，找到的只是arguments略有不同。所以我们只需要对这一块进行处理。
+
+思路：
+
+1. 先找到console节点部分
+2. 判断是否是这几个放名中的某一个："log", "info", "warn", "error"
+3. 往节点的arguments中添加参数
+
+
+
+
+### 3. 把类编译为Function
 
 ```javascript
 npm i babel-plugin-transform-es2015-classes

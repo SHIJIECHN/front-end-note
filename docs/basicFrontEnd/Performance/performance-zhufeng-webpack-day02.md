@@ -511,6 +511,10 @@ module.exports = {
 
 ## 4. 异步加载代码块
 
+1. 先通过jsonp的方式取加载hello.js模块所对应的文件
+2. 加载回来后再浏览器中执行此脚本，将请求过来的模块合并到main.js中的modules中去
+3. 合并完成后，取加载这个模块
+4. 拿到模块导出的内容
 
 :::: tabs
 ::: tab webpack.config.js
