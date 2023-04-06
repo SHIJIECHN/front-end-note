@@ -4,7 +4,7 @@ sidebarDepth: 3
 title:  Cookie和Session
 ---
 
-## 信息存储
+## 前端存储
 localstorage、sessionStorage、cookie、session的区别：
 
 |类型|说明|
