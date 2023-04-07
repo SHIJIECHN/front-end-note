@@ -11,7 +11,9 @@ title: webpack工作流程
 npm init -y
 npm i webpack webpack-cli -D
 ```
+
 webpack.config.js配置文件。
+
 ```javascript
 const path = require('path');
 module.exports = {
@@ -174,7 +176,22 @@ eventEmitter.emit('a');
 eventEmitter.emit('b');
 ```
 
-## webpack 编译流程
+## webpack 
+
+Webpack本质上是一个函数，它接受配置信息作为参数，执行后返回一个compiler对象，调用compiler对象中的run方法就会启动编译。run方法接受一个回调，可以用来查看编译过程中的错误信息或编译信息。
+
+webpack 打包流程可以分成三个阶段：
+
+- 打包前，如参数合并、插件加载
+- 打包过程中，也就是编译阶段
+- 打包结束，包括打包成功和打包失败
+
+compiler就是个大管家，它代表上面说的三个阶段，在它上面挂载各种生命周期函数。而compilation就是专门负责编译相关的工作，也就是打包过程中这个阶段。
+
+<img :src="$withBase('/basicFrontEnd/Performance/webpack-flow1.jpg')" alt="工作流" />
+
+
+## 编译流程
   
 1. 初始化参数：从配置文件和Shell语句中读取并合并参数，得到最终的配置结果
 2. 用上一步得到的参数初始化Compiler对象
@@ -190,6 +207,9 @@ eventEmitter.emit('b');
 在以上过程中，Webpack 会在特定的时间点广播出特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果.
 
 <img :src="$withBase('/basicFrontEnd/Performance/webpack-flow.jpg')" alt="工作流" />
+
+
+## 流程总结
 
 目录结构：
 ```javascript
@@ -333,7 +353,7 @@ class Compiler {
     this.files = []; // 表示本次编译的所有产出的文件名
   }
 
-  // 4. 执行对象的 run 方法开始执行编译
+  // 4. 执行Compiler对象的 run 方法开始执行编译
   run(callback) {
     // SyncHook 实例有call、tap方法
     // 这里先触发run钩子，再触发done钩子
@@ -350,11 +370,11 @@ class Compiler {
     } else {
       entry = this.options.entry; // {page1: './src/page1.js', page2:'./src/page2.js'}
     }
+
+    // 6. 从入口文件出发,调用所有配置的Loader对模块进行编译
     for (let entryName in entry) {
       // 统一路径分隔符
       let entryPath = toUnixPath(path.join(this.options.context, entry[entryName]));
-
-      // 6. 从入口文件出发,调用所有配置的Loader对模块进行编译
       // entryModule = { id: moduleId, dependencies: [], name, _source }
       let entryModule = this.buildModule(entryName, entryPath);
       // this.modules.push(entryModule); // 入口模块
@@ -401,7 +421,8 @@ class Compiler {
   }
 
   /** 编译模块 1. 读取模块内容 */
-  // name为模块名称./src/index.js，modulePath为模块的绝对路径C:/User/04.flow/src/index.js
+  // name为模块名称./src/index.js，
+  // modulePath为模块的绝对路径C:/User/04.flow/src/index.js
   buildModule = (name, modulePath) => {
     // 先读取原始源代码
     let targetSourceCode, originalSourceCode;

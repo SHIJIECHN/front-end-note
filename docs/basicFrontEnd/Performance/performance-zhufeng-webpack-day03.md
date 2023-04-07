@@ -449,7 +449,7 @@ let targetCode = core.transform(sourceCode, {
 console.log(targetCode.code);
 ```
 
-### 4， 手写一个console.log插件
+### 3. 手写一个console.log插件
 
 场景：在开发阶段，我们通常会打印一些console.log进行调试。但随着项目的迭代，console.log也越来越多，不能快速的定位到想要的日志。我们希望可以通过一个插件强化console，让其也打印出文件名，以及打印地方的行和列等代码信息。
 
@@ -468,10 +468,46 @@ console.log("hello world","当前文件名","具体代码位置信息")
 2. 判断是否是这几个放名中的某一个："log", "info", "warn", "error"
 3. 往节点的arguments中添加参数
 
+```javascript
+let types = require('babel-types');
+const core = require('@babel/core');
+const pathLib = require('path');
 
+const sourceCode = `
+console.log('hello world')
+`;
 
+const consoleLogPlugin = {
+  visitor: {
+    // 1. 先找CallExpression类型的节点，然后找节点中的callee.object.name属性
+    CallExpression(path, state) {
+      const { node } = path;
+      if (types.isMemberExpression(node.callee)) {
+        if (node.callee.object.name === 'console') { // 找到console
+          // 2. 判断是否时这几个方法名中的某一个 "log"、"info"、"warn"、"error"
+          if (['error', 'warn', 'log', 'info'].includes(node.callee.property.name)) {
+            const { line, column } = node.loc.start;// 找到所处位置的行和列
+            node.arguments.push(types.stringLiteral(`${line}:${column}`));// 向右边添加我们的行和列信息
+            // 找文件名。绝对路径下的文件
+            const filename = state.file.opts.filename;
+            // 输出文件的相对路径
+            const relativeName = pathLib.relative(__dirname, filename)
+              .replace(/\\/g, '/'); // 兼容window
+            node.arguments.push(types.stringLiteral(relativeName)); // 向右边添加我们的行和列信息
+          }
+        }
+      }
+    }
+  }
+}
 
-### 3. 把类编译为Function
+let targetSourceCode = core.transform(sourceCode, {
+  plugins: [consoleLogPlugin],
+  filename: 'hello.js'
+})
+```
+
+### 4. 把类编译为Function
 
 ```javascript
 npm i babel-plugin-transform-es2015-classes
@@ -548,7 +584,7 @@ Person.prototype.getName = function () {
 */
 ```
 
-#### 2.3 自动包裹trycatch
+### 5. 自动包裹trycatch
 
 ```javascript
 let core = require('@babel/core');
@@ -629,16 +665,15 @@ let targetCode = core.transform(sourceCode, {
 console.log(targetCode.code);
 ```
 
-#### 2.4 写一个插件可以自动去除代码里的console.log
+### 6. 实现按需加载插件
 
-
-### 3. webpack babel插件
 实现最简单的treeshaking。
+
 ```javascript
-// 转换前
+// 转换前（全量载入）
 import { flatten as flat, concat as con } from 'lodash' 
 
-// 转换后
+// 转换后（按需加载）
 import flat from 'lodash/flatten';
 import con from 'lodash/concat';
 ```
@@ -744,3 +779,5 @@ module.exports = {
 ```
 :::   
 ::::
+
+## Babel插件如何调试
