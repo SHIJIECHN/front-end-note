@@ -6,7 +6,7 @@ title: webpack loader
 
 ## loader
 - loader只是一个导出为函数的JS模块，它接收一个loader产生的结果或者资源文件(resource file)作为入参。也可以用多个loader函数组成loader chain，最终输出转换后的结果。
-- loader chain这样设计的好处是可以保证每个loader的职责单一，同时也方柏霓后期loader的组合和扩展
+- loader chain这样设计的好处是可以保证每个loader的职责单一，同时也方便后期loader的组合和扩展
 - compiler需要得到最后一个loader产生的处理结果。这个处理结果应该是string或者Buffer(被转换为一个string)
 
 ```javascript
@@ -293,11 +293,11 @@ module.exports = loader
 ```
 
 ### 4. 特殊配置
-|符号|含义|
-|----|:----|
-|!!|不要后置、普通、前置loader，只要内联loader|
-|-!|不要普通、前置loader|
-|!|不要普通loader|
+| 符号 | 含义                                       |
+| ---- | :----------------------------------------- |
+| !!   | 不要后置、普通、前置loader，只要内联loader |
+| -!   | 不要普通、前置loader                       |
+| !    | 不要普通loader                             |
 
 ### 5. pitch
 - a!b!c!module，正常调用顺序是c、b、a，但是真正的调用顺序是a(pitch)、b(pitch)、c(pitch)。

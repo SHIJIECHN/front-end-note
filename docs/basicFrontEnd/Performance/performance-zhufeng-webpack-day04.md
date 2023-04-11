@@ -62,7 +62,7 @@ EXIT /b
 ```javascript {8}
 const runCli = cli => {
 	const path = require("path");
-// 文件路径cli.package为 webpack-cli
+  // 文件路径cli.package为 webpack-cli
 	const pkgPath = require.resolve(`${cli.package}/package.json`); 
 	// eslint-disable-next-line node/no-missing-require
 	const pkg = require(pkgPath);
@@ -498,7 +498,7 @@ class Compiler {
       let dependencyModule = this.buildModule(name, dependency);
       this.modules.push(dependencyModule)
     })
-    return module;
+    return module; // {dependencies:[], _source:'', moduleId: ''}
   }
 
 }
