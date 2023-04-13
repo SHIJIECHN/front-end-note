@@ -13,7 +13,7 @@ import React from './react';
 import ReactDOM from './react-dom';
 
 function FunctionWelcome(props) {
-  return React.createElement('h1', {}, 'hello,', props.name)
+  return return <h1>hello, {props.name}</h1>
 }
 let element = React.createElement(FunctionWelcome, { name: 'zf' })
 console.log(element)
@@ -78,13 +78,14 @@ function mountFunctionComponent(vdom) {
 class ClassComponent extends React.Component {
   render() {
     return (
-      // <h1 className='title' style={{ color: 'red' }}><span>hello</span>{this.props.name}</h1>
-      React.createElement(
-        'h1',
-        { className: 'title', style: { color: 'red' } },
-        React.createElement('span', {}, 'hello'),
-        this.props.name
-      )
+      // 这里不写React.createElement，项目在运行的时候，会自动调用React.createElement
+      <h1 className='title' style={{ color: 'red' }}><span>hello</span>{this.props.name}</h1>
+      // React.createElement(
+      //   'h1',
+      //   { className: 'title', style: { color: 'red' } },
+      //   React.createElement('span', {}, 'hello'),
+      //   this.props.name
+      // )
     )
   }
 }
@@ -351,4 +352,89 @@ handleClick();
 console.log(state); // { number: 1 }
 ```
 
-## setState的实现
+## setState的实现组件的更新
+
+### 1. 第一步：组件更新
+
+首先我们忽略批量处理的情况，先一个一个的处理setState的结果。
+
+- 调用setState后，会执行Component类型的setState方法
+- Updater类是专门处理批量和非批量的逻辑的
+- setState就执行addState，向pendingStates更新队列中push一个state，然后触发更新emitUpdate
+- emitUpdate组件如何更新，后面会在这里判断是否批量更新。现在忽略，直接让组件更新updateComponent
+- getState返回更新后的state，将更新后的状态传给shouldUpdate
+- shouldUpdate中更新实例中state状态，并具体执行更新逻辑实例上的forceUpdate
+
+```javascript
+class Updater {
+  constructor(classInstance) {
+    this.classInstance = classInstance; // 组件的实例
+    this.pendingStates = []; // 队列。保存将要更新的队列
+    this.callbacks = [];//保存将要执行的回调函数
+  }
+
+  addState(partialState, callback) {
+    this.pendingStates.push(partialState);
+    if (typeof callback === 'function') {
+      this.callbacks.push(callback);
+    }
+    // 触发更新
+    this.emitUpdate();
+  }
+  // 不管状态变化和属性变化都会让组件刷新，都调用此方法
+  emitUpdate() {
+    // 后面会在此行加判断，判断批量更新的变量，如果是异步就先不更新，如果是同步则直接更新
+    this.updateComponent();// 让组件更新
+  }
+  updateComponent() {
+    let { classInstance, pendingStates } = this;
+    if (pendingStates.length > 0) { // 如果有等待更新
+      shouldUpdate(classInstance, this.getState()); // 参数1 组件的实例，参数2 执行getState后返回更新后的state
+    }
+  }
+  // 根据老状态和pendingStates这个更新队列，计算新状态
+  getState() {
+    let { classInstance, pendingStates } = this;
+    let { state } = classInstance; // 获取原始的组件状态
+    pendingStates.forEach(nextState => {
+      if (typeof nextState === 'function') { // setState传入的是函数
+        nextState = nextState(state); // 传入老的状态，执行后返回新的状态
+      }
+      state = { ...state, ...nextState }; // 合并状态
+    })
+    pendingStates.length = 0; // 清空队列
+    this.callbacks.forEach(callback => callback()); // 执行callback
+    this.callback.length = 0;
+    return state; // 返回新状态
+  }
+}
+
+/** 修改实例的状态并更新组件 */
+function shouldUpdate(classInstance, nextState) {
+  classInstance.state = nextState;// 真正修改实例的状态
+  classInstance.forceUpdate();// 然后调用类组件实例的forceUpdate进行更新
+}
+
+export class Component {
+  static isReactComponent = true; // 源码写法Component.prototype.isReactComponent = {}
+  constructor(props) {
+    this.props = props;
+    this.state = {};
+    // 每一个类组件的实例有一个updater更新器
+    this.updater = new Updater(this);
+  }
+
+  setState(partialState, callback) {
+    this.updater.addState(partialState, callback);
+  }
+
+  // 组件更新逻辑
+  forceUpdate() {
+    console.log('forceUpdate')
+  }
+}
+```
+
+### 3. forUpdate
+
+### 2. 第二步：合成事件以及批量更新
