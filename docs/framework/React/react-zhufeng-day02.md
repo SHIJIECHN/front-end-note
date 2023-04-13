@@ -435,6 +435,99 @@ export class Component {
 }
 ```
 
-### 3. forUpdate
+### 3. forceUpdate
+
+```javascript
+/**
+ * 组件更新逻辑。走DOM diff
+ * 1. 获取老的虚拟DOM React元素
+ * 2. 根据最新的属性和状态计算新的虚拟DOM
+ * 然后进行比较，查找差异，然后把这些差异同步到真实DOM上
+ */
+forceUpdate() {
+  let oldRenderVdom = this.oldRenderVdom; // 拿到老的虚拟DOM
+  let oldDOM = findDOM(oldRenderVdom);// 根据老的虚拟DOM，查到老的真实DOM
+  let newRenderVdom = this.render(); // 在shouldUpdate的时候，state状态已经是最新的，可以已经计算出新的虚拟DOM
+  compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom);// 比较差异，把更新同步到真实的DOM上
+  this.oldRenderVdom = newRenderVdom;// 把更新
+}
+
+// react-dom.js
+/**
+ * 根据Vdom返回真实DOM
+ */
+export function findDOM(vdom) {
+  let { type } = vdom;
+  let dom;
+  if (typeof type === 'function') { // 虚拟DOM组件的类型的话
+    // 找他的oldRenderVdom的真实DOM元素
+    dom = findDOM(vdom.oldRenderVdom);
+  } else {
+    dom = vdom.dom;
+  }
+  return dom;
+}
+
+// 比较新旧的虚拟DOM，找出差异更新到真实DOM上
+export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+  let oldDOM = findDOM(oldVdom);// 找到oldVdom对应的真实DOM
+  let newDOM = createDOM(newVdom); // 根据新的虚拟DOM变成新的DOM
+  parentDOM.replaceChild(newDOM, oldDOM);// 将来的DOM换成新的DOM
+}
+
+function mountClassComponent(vdom) {
+  // other code
+
+  //TODO 5.类组件更新
+  classInstance.oldRenderVdom = vdom.oldRenderVdom = renderVdom;//将计算出来的虚拟DOM renderVdom挂载到类的实例上
+  return createDOM(renderVdom);
+}
+
+function mountFunctionComponent(vdom) {
+  // other code
+  vdom.oldRenderVdom = renderVdom;
+  return createDOM(renderVdom);
+}
+```
+
 
 ### 2. 第二步：合成事件以及批量更新
+
+
+
+总结流程：
+1. 执行ReactDOM.render方法，传入虚拟DOM和挂载的容器。这里的虚拟DOM type是类组件或函数组件，属于外层虚拟DOM。
+2. 执行createDOM方法，并传入虚拟DOM作为参数，将虚拟DOM换成真实DOM
+  - 文本节点：创建文本节点
+  - 函数节点：类组件和函数组件，使用isReactComponent属性区分
+    - 类组件：实例化类组件classInstance，执行类组件上的render方法，返回虚拟节点renderVdom，并将节点保存在classInstance.oldRenderVdom属性和vdom.oldRenderVdom属性上。vdom是外层虚拟DOM，renderVdom是内层虚拟DOM，两者是不一样的。
+    - 函数组件：执行函数得到内层虚拟节点renderVdom，将renderVdom挂载到vdom.oldRenderVdom属性上。方便后续查找父级DOM使用。
+  - 元素节点：创建元素节点
+3. 通过参数虚拟DOM，解构出props，它是虚拟节点的属性。根据props属性为dom节点添加属性。
+4. 添加属性，执行updateProps方法，传入真实dom节点，老的属性和新的属性
+  - 遍历新的属性props，依次给dom设置属性值
+  - 当属性为样式style，使用`dom.style[key]`赋值
+  - 当属性是事件，则**合成事件**
+5. 判断props.children的值，分别处理：
+  - 对象：一个儿子节点，递归React.render函数
+  - 数组：多个儿子节点，执行reconcileChildren，取出每个节点递归调用React.render函数
+6. 得到最终的真实dom节点，让虚拟DOM的dom属性指向它的真实节点（后面DOM-DIFF会使用到），将真实节点挂载到容器中。现在页面可以呈现到浏览器中。
+7. 合成事件：实现事件委托，把所有事件都绑定到document上
+  - 执行addEvent，在原生DOM上自定义一个store属性，保存事件名与对应的事件处理函数
+  - 将使用挂载在document上：`document[eventType] = dispatchEvent`
+  - dispatchEvent是合成事件处理器，是在事件执行（被点击）的时候才会执行
+8. 当点击页面按钮时，document的onclick事件就会触发，也就是执行dispatchEvent函数
+  - 获得事件源target和事件类型click
+  - 将updateQueue.isBatchingUpdate设置为批量更新模式，执行createSyntheticEvent合成事件
+  - 模拟事件冒泡的过程，主要是执行**对应的事件处理函数**
+
+9. 执行事件处理函数
+  - 执行setState，就是执行Component中的setState方法，执行this.updater.addState，传入参数：state和callback回调函数
+  - 使用pendingStates保存state，callbacks保存callback回调函数。触发emitUpdate。
+  - emitUpdate：判断isBatchingUpdate是批量模式函数非批量模式。批量模式就使用updateQueue.updaters来保存实例，非批量模式调用updateComponent让组件更新
+  - updateComponent：getState获取最新状态，执行shouldUpdate更新组件，并将最新状态作为参数传入。
+  - shouldUpdate：将最新状态赋给类组件实例，调用forceUpdate更新组件
+  - forceUpdate：拿到老的虚拟DOM，根据老的虚拟DOM查到老的真实DOM（findDOM）。执行组件的render，得到新的虚拟DOM，比较新旧虚拟DOM并更改真实DOM节点（compareTwoVdom）
+10. 批量更新执行结束。
+11. 将updateQueue.isBatchingUpdate重置为非批量更新，执行更新updateQueue.batchUpdate()，执行批量更新的内容。
+12. 由于状态已经置成了非批量更新的内容，所有当执行setTimeout的时候，此时在emiteUpdate中updateQueue.isBatchingUpdate是false，应该直接执行updateComponent。
