@@ -66,19 +66,19 @@ const {
 
 <img :src="$withBase('/basicFrontEnd/Performance/bail-hook.jpg')" alt="" />
 
-- Loop Hook：循环类型钩子，循环类型钩子通过call调用时，如果任意一个注册的事件函数返回**非undefined**，那么会立即重头开始执行所有的注册事件函数，知道所有被注册的事件函数都返回undefined
+- Loop Hook：循环类型钩子，循环类型钩子通过call调用时，如果任意一个注册的事件函数返回**非undefined**，那么会立即重头开始执行所有的注册事件函数，直到所有被注册的事件函数都返回undefined
 
 <img :src="$withBase('/basicFrontEnd/Performance/loop-hook.jpg')" alt="" />
 
 
 ## 基本使用
 
-1. 第一步通过new实例化不同的Hook
+- 第一步通过new实例化不同的Hook
   - new Hook的时候接收一个字符串数组作为参数，数组中的值不重要，重要的是数组中对应的字符串个数。
-2. 第二步通过tap函数注册事件，注册事件时接收两个参数：
+- 第二步通过tap函数注册事件，注册事件时接收两个参数：
   - 第一个参数是字符串，没有实际意义仅仅是一个标识。这个参数还可以是一个对象为{name:xxx}
   - 第二个参数是本次注册的函数，在调用时会执行这个函数
-3. 第三步通过call方法传入对应的参数，调用注册在hook内部的事件函数进行执行
+- 第三步通过call方法传入对应的参数，调用注册在hook内部的事件函数进行执行
   - 同时在call方法执行时，会将call方法传入的参数传递给每一个注册的事件函数作为实参进行调用
 
 ### 1. SyncHook

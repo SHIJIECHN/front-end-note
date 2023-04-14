@@ -19,35 +19,35 @@ npm i webpack webpack-cli webpack-dev-server html-webpack-plugin css-loader css-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
-    mode: 'development',
-    devtool: false,
-    resolveLoader: {
-        // 先找loaders里面的模块，没有再找node_modules
-        modules: [path.resolve(__dirname, 'loaders'), 'node_modules']
-    },
-    module: {
-        rules: [
-            {
-                test: /\.css$/,
-                use: [
-                    "to-string-loader",
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            url: true,//是否解析url()
-                            import: true,//是否解析@import语法
-                            esModule: false,//不包装成ES MODULE，默认是common.js导出
-                            importLoaders: 0//在处理导入的CSS的时候(@import)，要经过几个前置loader的处理
-                        }
-                    },
-                ],
-                include: path.resolve('src')
-            },
-        ]
-    },
-    plugins: [
-        new HtmlWebpackPlugin({ template: './src/index.html' }),
+  mode: 'development',
+  devtool: false,
+  resolveLoader: {
+    // 先找loaders里面的模块，没有再找node_modules
+    modules: [path.resolve(__dirname, 'loaders'), 'node_modules']
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          "to-string-loader",
+          {
+            loader: 'css-loader',
+            options: {
+              url: true,//是否解析url()
+              import: true,//是否解析@import语法
+              esModule: false,//不包装成ES MODULE，默认是common.js导出
+              importLoaders: 0//在处理导入的CSS的时候(@import)，要经过几个前置loader的处理
+            }
+          },
+        ],
+        include: path.resolve('src')
+      },
     ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({ template: './src/index.html' }),
+  ]
 }
 ```
 :::   
@@ -77,7 +77,8 @@ module.exports = loader;
 ```javascript
 (() => {
   var __webpack_modules__ = {
-    "./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./src/global.css": (module, __unused_webpack_exports, __webpack_require__) => {
+    "./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[0].use[1]!./src/global.css": (
+        module, __unused_webpack_exports, __webpack_require__) => {
       var ___CSS_LOADER_API_IMPORT___ = __webpack_require__("./node_modules/css-loader/dist/runtime/api.js");
       var EXPORT = ___CSS_LOADER_API_IMPORT___(function (i) {
         return i[1];

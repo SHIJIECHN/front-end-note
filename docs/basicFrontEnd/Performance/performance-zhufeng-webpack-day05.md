@@ -69,6 +69,20 @@ import xxx from "inline-loader1!inline-loader2!/src/xxx.css";
 
 ### 3. loader-run执行
 
+- runLoaders第一个参数：
+  - resource：加载和转换的资源
+  - loaders：数组。loader的绝对路径组成的数组
+  - context：给loader的上下文对象
+  - readResource：读取文件的方法。一般选择fs.readFile
+- runLoaders第二个参数：
+  - 回调函数。函数的参数包括：err和stat。
+
+思路：
+1. 获取到要处理的资源的绝对路径。如果要加载的资源中有内联loader，需要内联loader进行处理成绝对路径的形式，以便后续使用。
+2. 获取文件对应的loader规则。将需要使用到的loader都变成绝对路径的形式。
+3. 处理请求资源的前缀
+4. loaders数组组装：[postLoader, inlineLoader,normalLoader, preLoader]按照放置到loaders数组中，传递给runLoaders函数
+
 目录结构
 ```javascript
 
@@ -310,7 +324,7 @@ module.exports = loader
 
 pitch内部有三个很重要的参数：previousRequest、currentRequest、remainingRequest
 
-<img :src="$withBase('/basicFrontEnd/Performance/pitch.ipg')" alt="pitch" />
+<img :src="$withBase('/basicFrontEnd/Performance/pitch.jpg')" alt="pitch" />
 
 - previousRequest代表的是之前执行过pitch阶段的loader：loader1和loader2
 - currentRequest代表的是当前正在执行pitch阶段的loader和后面未执行pitch阶段的loader：loader3、loader4、loader5、源文件
@@ -419,6 +433,10 @@ module: {
 
 ## babel-loader 
 
+流程：
+- 调用@babel/core中的transform方法，对源码source进行转换，并通过option参数设置预设@babel/preset-env解析语法
+- 得到code、ast、map。使用this.callback将结果返回
+
 环境配置：
 ```javascript
 npm i @babel/core @babel/preset-env
@@ -523,7 +541,7 @@ console.log(sum(1, 2))
 :::     
 ::::
 
-@babel.core负责把源代码转成AST抽象语法树，然后遍历语法树，生成新的代码。但@babel/core并不认识具体的方法，也不会转换任何语法，它需要依赖babel插件。比如@babel/plugin-transfor-arrow-funcyions，可以识别箭头函数语法，并且把箭头函数转换成普通函数。
+@babel/core负责把源代码转成AST抽象语法树，然后遍历语法树，生成新的代码。但@babel/core并不认识具体的方法，也不会转换任何语法，它需要依赖babel插件。比如@babel/plugin-transfor-arrow-funcyions，可以识别箭头函数语法，并且把箭头函数转换成普通函数。
 
 但是语法太多，每个语法都需要插件，我们需要把多个插件打包在一起形成预设，@babel/preset-env就是这样诞生的。
 
@@ -534,6 +552,11 @@ Function has non-object prototype 'null' in instanceof check。
 
 
 ## file-loader
+
+流程：
+- 使用工具loader-utils的方法getOptions获得loader配置的参数，interpolateName设置文件名。
+- 监听**this.emitFile**事件，当事件触发时执行将文件放入this.assets资源列表中
+- 通过参数esModule确定文件以es module方式导出还是commonjs方式导出
 
 file-loader用于处理图片。
 
@@ -670,11 +693,14 @@ module.exports = {
 }
 ```
 :::   
-:::
+::::
 
 ## less-loader & style-loader
 
 在开发环境下，.less文件解析一般会用到三个loader：less-loader、css-loader、style-loader
+
+流程：
+- 使用less模块的render方法，对源码source转换
 
 :::: tabs
 ::: tab loaders/less-loader.js
@@ -990,11 +1016,14 @@ function runSyncOrAsync(pitchFn, loaderContext, args, runCallback) {
     isDone = true; // 直接完成
     return runCallback(null, result); // 执行回调
   }
-  //如果是异步的，需要自己手动出发callback 也就是runCallback
+  //如果是异步的，需要自己手动触发callback 也就是runCallback
+  /**
+    想要异步执行，需要调用this.async()函数，然后返回innerCallback函数，在想要执行函数的时候调用innerCallback
+  */
 }
 ```
 
-### 3. 处理源文件0
+### 3. 处理源文件
 
 核心思想:拿到源文件后将其传给normal阶段的第一个loader.
 
