@@ -1,7 +1,7 @@
 ---
 autoGroup-4: React基础
 sidebarDepth: 3
-title: React
+title: 组件化与JSX
 ---
 
 ## 1. 组件化开发的概念
