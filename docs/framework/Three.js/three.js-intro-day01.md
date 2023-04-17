@@ -6,16 +6,33 @@ title: 第一个3D场景
 
 ## 三个顶层总对象
 1. 场景：THREE.Scene()
-2. 相机：THREE.OrthographicCamera()
-3. 渲染器：THREE.WebGLRenderer()
+2. 相机：如THREE.OrthographicCamera()、THREE.PerspectiveCamera()
+3. 渲染器：如THREE.WebGLRenderer()
+
 
 ## 场景
+
+场景可见元素：
+1. 几何体。如BoxGeometry（立方体）
+2. 几何体的材质（颜色、光亮程度）。如MeshBasicMaterial或MeshPhongMaterial
+3. 网格：Mesh
+4. 光源：如DirectianalLight（平行光源）
+
 THREE.Scene()
 ```javascript
 var scene = new THREE.Scene();
 ```
 
 ### 1. 网格模型
+
+网格：一种特定的几何体和材质绘制出的一个特定的几何体系。
+
+网格包含的内容为：几何体、几何体的材质、几何体的自身的网格坐标体系。
+
+在Three.js中，牢记几个概念：
+- 一个几何体或材质，可以同时被多个网格使用（引用）
+- 一个场景，可以添加多个网格
+
 ```javascript
 // var geometry = new THREE.SphereGeometry(60, 40, 40); //创建一个球体几何对象
 var geometry = new THREE.BoxGeometry(200, 200, 200); //创建一个立方体几何对象Geometry
@@ -131,7 +148,7 @@ var controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控�
 ## 场景插入新的几何体
 几何体类别
 ```javascript
-/长方体 参数：长，宽，高
+// 长方体 参数：长，宽，高
 var geometry = new THREE.BoxGeometry(100, 100, 100);
 // 球体 参数：半径60  经纬度细分数40,40
 var geometry = new THREE.SphereGeometry(60, 40, 40);
