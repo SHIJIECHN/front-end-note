@@ -115,7 +115,7 @@ console.log(arr[1]); // 23
 ```
 
 2. 对象属性的读取方式示例二
-隐式转换问题：在myObjcet\[myObject]发生了什么？   
+隐式转换问题：在`myObjcet[myObject]`发生了什么？   
 首先myObject是变量，需要寻找变量的引用{}，因为对象属性名称是字符串的形式存在的，所以需要将{}转为字符串的形式，就需要调用到Object.prototype.toString()方法，{}转为字符串是[object Object]的形式，所以对象中属性的结构应该是{ ' [object Object] ' : bar }的形式。
 
 ```js
