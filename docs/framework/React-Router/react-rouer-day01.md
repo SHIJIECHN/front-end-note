@@ -6,6 +6,10 @@ title: 路由原理
 
 ## hash路由
 
+React-Router两种路由方式，一种是hash路由，一种是browser路由，browser路由是通过监听浏览器的history对象来实现的。
+
+- hash路由是通过监听浏览器hashChange事件来实现的，当hash值改变时，就会触发hashChange事件，然后我们可以在hashChange事件中获取到hash值，根据hash值来渲染对应的组件。
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +39,10 @@ title: 路由原理
 ```
 
 ## browser路由
+
+browser路由是通过监听浏览器的history对象来实现的。
+
+- history对象是浏览器提供的一个全局对象，可以通过它来操作浏览器的历史记录，它有三个方法：pushState、replaceState、go。
 
 ```html
 <!DOCTYPE html>
@@ -90,3 +98,35 @@ title: 路由原理
 </body>
 </html>
 ```
+
+## React-Router基本使用
+
+特点：每个都要匹配到，无论第一个有没有匹配到，后面都还会继续匹配。exact={true} 精确匹配。
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { HashRouter as Router, Route} from 'react-router-dom';
+/** 路由容器 -> Router， 路由规则/路由配置 -> Route */
+import Home from './components/Home';
+import User from './components/User';
+import Profile from './components/Profile';
+
+ReactDOM.render(
+    <Router>
+        {/* exact={true} 精确匹配 */}
+        <Route exact={true} path="/" component={Home}/>
+        <Route path="/user" component={User}/>
+        <Route path="/profile" component={Profile}/>
+     </Router>
+    , 
+    document.getElementById('root'))
+```
+
+## 实现
+
+react-router-dom引用了history和react-router。
+
+- history 是history这个包实现的，内部实现的方式有两种，一种是hash，一种是html5的history
+- react-router主要实现Router和Route组件，Router组件是一个路由容器，Route组件是路由规则，它们都是通过context来实现的。
+
