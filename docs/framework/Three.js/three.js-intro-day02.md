@@ -4,7 +4,6 @@ sidebarDepth: 3
 title: 第一个3D场景
 ---
 
-
 ## Three.js基础元素
 
 基础三大元素：
@@ -96,3 +95,70 @@ const HelloWorld: React.FC = () => {
 2. 当React卸载后，一定记得移除监听window.removeEventListener('resize', xxx)
 3. 使用useRef创建一个变量指向事件处理函数，这样才可以在移除监听时找到resize事件处理函数
 
+```javascript
+const DrawingCube = () => {
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const resizeHandleRef = useRef<() => void>();
+
+	useEffect(() => {
+		if (canvasRef.current) {
+			// other code
+			const handleResize = () => {
+				const canvas = renderer.domElement; // 获取canvas
+				camera.aspect = canvas.clientWidth / canvas.clientHeight; // 设置镜头宽高比
+				camera.updateProjectionMatrix(); // 通知镜头更新视锥（视野）
+				renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+			};
+			handleResize(); // 默认打开时，即重新触发一次
+			resizeHandleRef.current = handleResize; // 将resizeHandleRef.current于useEffect中声明的函数进行绑定
+			window.addEventListener("resize", handleResize); // 添加窗口resize事件处理函数
+
+			return () => {
+				if (resizeHandleRef && resizeHandleRef.current) {
+					window.removeEventListener("resize", resizeHandleRef.current);
+				}
+			};
+		}
+	}, [canvasRef]);
+
+	return <canvas ref={canvasRef} />;
+};
+```
+
+更多时候，`<canvas>`标签仅仅只占document.body中的一部分，造成画布（canvas）尺寸发生变化可能是修改`<canva>`标签的宽高，通过css的变化造成画布尺寸宽高，和window.resize完全不相关。此时可以通过浏览器罪行的ResizeObserver来监听canvas尺寸变化。
+
+```javascript
+const DrawingCube = () => {
+	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const resizeHandleRef = useRef<() => void>();
+
+	const width = window.innerWidth - 325;
+	const height = window.innerHeight - 20;
+
+	useEffect(() => {
+		if (canvasRef.current) {
+			// other code
+
+			handleResize(); // 默认打开时，即重新触发一次
+
+			resizeHandleRef.current = handleResize; // 将resizeHandleRef.current于useEffect中声明的函数进行绑定
+			// window.addEventListener("resize", handleResize); // 添加窗口resize事件处理函数
+
+			// 修改为使用ResizeObserver来监听尺寸变化
+			const resizeObserver = new ResizeObserver(()=>{
+				handleResize();
+			})
+			resizeObserver.observe(canvasRef.current)
+
+			return () => {
+				if (resizeHandleRef && resizeHandleRef.current) {
+					// window.removeEventListener("resize", resizeHandleRef.current);
+					resizeObserver.disconnect();
+				}
+			};
+		}
+	}, [canvasRef]);
+
+	return <canvas ref={canvasRef} />;
+};
+```
