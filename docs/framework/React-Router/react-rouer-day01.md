@@ -130,3 +130,33 @@ react-router-dom引用了history和react-router。
 - history 是history这个包实现的，内部实现的方式有两种，一种是hash，一种是html5的history
 - react-router主要实现Router和Route组件，Router组件是一个路由容器，Route组件是路由规则，它们都是通过context来实现的。
 
+createHashHistory方法返回一个对象，包含属性：
+- action：当前的动作
+- location
+- go()
+- goBack()：回退方法。内部实现是go(-1)
+- goForward()：前进方法。内部实现是go(1)
+- listen(): 监听方法，返回一个取消监听的方法
+监听hash值的变化hashChange事件，如果hash值发生改变，就执行回调函数。hash路由需要自己维护栈和state。
+
+HashRouter组件实现：调用createHashHistory方法，返回一个history对象，将history对象传递给Router组件。
+
+Router组件实现，主要是render时使用Provider，传递value，value包含属性：history和location
+
+Route组件实现，通过contextType获得Router组件传递的value，value包含history和location。通过比较路径path，得到match值。将三个属性：
+- location
+- history
+- match
+组装成props传递给路由。
+
+createBrowserHistory实现：
+1. 定义一个globalHistory对象，是原生的window.history
+2. go调用的原生方法
+3. notify主要是为了更新location和action，让页面更新
+4. push方法中  
+   1. 调用原生的pushState方法，更新地址栏 
+   2. 调用notify方法，更新location和action
+5. 监听onpopstate事件，当你回退（goBack）或前进的时候会执行，这个监听是浏览器自带的，默认支持。再调用notify方法，更新location和action。
+
+
+
