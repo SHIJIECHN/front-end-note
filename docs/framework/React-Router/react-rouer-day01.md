@@ -159,4 +159,6 @@ createBrowserHistory实现：
 5. 监听onpopstate事件，当你回退（goBack）或前进的时候会执行，这个监听是浏览器自带的，默认支持。再调用notify方法，更新location和action。
 
 
+路径正则匹配
 
+Switch：如果路径匹配上了，后面的就不再匹配
