@@ -40,13 +40,35 @@ title: 光照
 
 光的辅助对象就是在渲染后出现的一些白色细线，这些白色细线指示出光源的位置、大小、以及光发射的方向。
 
+光的辅助对象用法：
+1. 先创建光的实例
+2. 将创建好的光的 实例作为辅助对象构造函数的参数
+3. 场景中添加辅助对象即可
+
+```javascript
+// 创建并设置平行光
+const directionalLight = new DirectionalLight(0xFFFFFF, 1);
+directionalLight.position.set(0, 10, 0); // 灯光所在位置
+directionalLight.target.position.set(-5, 0, 0); // 目标所在位置
+
+// 将平行光添加到场景中
+newScene.add(directionalLight);
+newScene.add(directionalLight.target);
+
+// 根据平行光实例，创建对应的辅助对象，并将辅助对象添加到场景中
+const directionalLightHelper = new DirectionalLightHelper(directionalLight);
+newScene.add(directionalLightHelper);
+```
+
 
 ## OrbitControl
 
 基本用法：
 
 ```javascript
-
+const controls = new OrbitControls(camera, canvasRef.current); // 实例化OrbitControls
+controls.target.set(0, 5,0);
+controls.update();
 ```
 
 onchang事件：监听鼠标或键盘的操作来修改镜头轨道
