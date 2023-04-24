@@ -61,14 +61,16 @@ newScene.add(directionalLightHelper);
 ```
 
 
-## OrbitControl
+## OrbitControls
+
+鼠标镜头轨道控件，可以通过鼠标来配置镜头的运动轨道，例如 缩放、平移、旋转。通过鼠标来改变镜头，以便查看不同角度下的场景。
 
 基本用法：
 
 ```javascript
 const controls = new OrbitControls(camera, canvasRef.current); // 实例化OrbitControls
-controls.target.set(0, 5,0);
-controls.update();
+controls.target.set(0, 5,0);// controls.target为镜头的坐标系统。意思时设置原点Y轴的坐标（以高出5米的轨道运行）
+controls.update(); // 使空间使用新目标
 ```
 
 onchang事件：监听鼠标或键盘的操作来修改镜头轨道

@@ -31,8 +31,14 @@ title: 镜头
 镜头辅助对象来观察镜头。
 
 ```javascript
-const helper = new CameraHelper(leftCamera);
-scene.add(helper);
+// 定义一个helperCamer，它的截面于相机camera相同
+const helperCamera = new PerspectiveCamera(45, 2, 5, 100);
+helperCamera.position.set(20, 10, 20);
+helperCamera.lookAt(0,5,0);
+scene.add(helperCamera)
+
+const cameraHhelper = new CameraHelper(helperCamera);
+scene.add(cameraHhelper);
 ```
 
 - 统一个场景渲染2个不同的画面
