@@ -60,7 +60,7 @@ export function quickSort1(arr: number[]): number[] {
 
     const midIndex = Math.floor(length / 2);
     const midValue = arr.splice(midIndex, 1)[0]; 
-    // arr.splice(midIndex, 1)返回的是一个数组, 1是只有一个元素，[0]是取出里面的值
+    // arr.splice(midIndex, 1)返回的是一个数组，里面只有一个值，如[2], 1是只有一个元素，[0]是取出里面的值
 
     const left: number[] = [];
     const right: number[] = [];

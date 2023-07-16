@@ -67,6 +67,9 @@ export const createStore = (reducer)=>{
         └── index.js
 ```
 
+1. 组件挂载完成后，触发store.subscribe()方法，将回调函数放入listeners数组中
+2. 点击“+” 会触发 dispatch方法，执行回调函数
+
 :::: tabs
 ::: tab index.js
 ```javascript
@@ -177,3 +180,238 @@ export const createStore = (reducer)=>{
 :::   
 ::::
 
+
+## bindActionCreators
+
+就是将actionCreator和dispatch绑定在一起，返回一个新的函数，新的函数可以直接调用dispatch
+
+- 使用方式有两种：
+  - 第一个参数是对象，里面有多个actionCreator
+  - 第一个参数是actionCreator
+
+```javascript
+<button onClick={()=> store.dispatch({type: 'ADD'})}>+</button>
+// 变成下面的写法
+ <button onClick={bindActions.add}>+</button>
+```
+
+```javascript
+// 用来创建action的工厂函数actionCreator，返回action
+function add(){
+    return {type: 'ADD'}
+}
+function minus(){
+    return {type: 'MINUS'}
+}
+
+const actions = {add, minus};
+
+// bindActionCreaters的使用：
+// 1. 第一个参数是对象
+const bindActions = bindActionCreators(actions, store.dispatch);// 将action和dispatch绑定在一起
+//2. 第一个参数是个函数
+const bindAdd = bindActionCreators(add, store.dispatch);
+const bindMinus = bindActionCreators(minus, store.dispatch);
+
+// 组件中使用
+<button onClick={bindActions.add}>+</button>
+<button onClick={bindActions.minus}>-</button>
+
+<button onClick={bindAdd}>+</button>
+<button onClick={bindMinus}>-</button>
+```
+
+bindActionCreaters的实现：
+
+```javascript
+/**
+ * 传入老的actionCreator，返回一个新的actionCreator。{type: 'ADD'}
+ * @param {*} actionCreator 
+ * @param {*} dispatch 
+ * @returns 
+ */
+function bindActionCreator(actionCreator, dispatch){
+    // 返回一个函数，这个函数会调用actionCreator，然后将结果传递给dispatch
+    return function(...args){
+        return dispatch(actionCreator.apply(this, args))
+    }
+}
+
+/**
+ * 绑定action的创建者和dispatch
+ * 1. 创建一个对象boundActionCreators, 最后返回的就是这个对象
+ * 2. 遍历actionCreators，得到每个actionCreator.对每个actionCreator调用bindActionCreator进行绑定，
+ * @param {*} actionCreators action的创建者对象 {add：add函数, minus：minus函数}
+ * @param {*} dispatch 派发动作的方法
+ */
+const bindActionCreators = (actionCreators, dispatch)=>{
+    if(typeof actionCreators === 'function'){ // actionCreators是个函数
+        return bindActionCreator(actionCreators, dispatch);
+    }
+    // actionCreators是个对象
+    const boundActionCreators = {};
+    for(const key in actionCreators){
+        const actionCreator = actionCreators[key]; // key = add minus，actionCreator = add函数 minus函数
+        if(typeof actionCreator === 'function'){// 如果是函数
+            // bindActionCreator返回一个函数，就是返回dispatch({type: 'ADD'}}})
+            // 得到的结果就是：{add: ()=>dispatch({type: 'ADD'}})}
+            boundActionCreators[key] = bindActionCreator(actionCreator, dispatch);
+        }
+    }
+    return boundActionCreators;
+}
+export default bindActionCreators;
+```
+
+## combindReducers
+
+可能会有很多的组件，每个组件都有自己的状态和动作。规定redux只能有一个仓库，只能有一个reducer，只有一个状态，放在一起会很混乱。因此我们需要将reducer放在不同的文件夹中，然后再使用combindReducers将所有的reducer连接起来组成一个reducers，然后再创建仓库的时候传入这个reducers。
+
+```javascript
+/**
+ * 合并reducers
+ * @param {*} reducers 对象，里面有很多reducer {counter1: reducer1, counter2: reducer2}
+ */
+const combineReducers = reducers => {
+    // 调用时传入老状态state和动作对象action，返回合并后的新reducer
+    return function combineReducer(state={},action){
+        let nextState = {};
+        for(let key in reducers){
+            // nextState['counter1']=counter1(counter1State, action)
+            nextState[key] = reducers[key](state[key], action);// 调用counter1的reducer，根据action={type:..}得到新的状态
+        }
+        return nextState;
+    }
+    /**
+     * nextState = {
+     *  counter1: {number: 0},
+     *  counter1: {number: 0},
+     * }
+     */
+}
+export default combineReducers;
+```
+
+store中使用
+
+```javascript
+import {createStore} from '../redux';
+import combinedReducers from './reducers';
+
+let store = createStore(combinedReducers);
+
+export default store;
+```
+
+组件中使用
+
+```javascript
+import React from 'react'
+import store from '../store'
+import {bindActionCreators} from 'redux'
+import actions from '../store/actions/counter2'
+
+// 第一个参数是对象
+const bindActions = bindActionCreators(actions, store.dispatch);// 将action和dispatch绑定在一起
+
+class Counter1 extends React.Component{
+    state = {
+        number: 0
+    }
+    componentDidMount(){
+        this.unsubscribe = store.subscribe(()=>{
+            this.setState({
+                number: store.getState().counter2.number
+            })
+        })
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    render(){
+        return (
+            <div>
+                <p>{this.state.number}</p>
+                {/* <button onClick={()=> store.dispatch({type: 'ADD'})}>+</button> */}
+                <button onClick={bindActions.add2}>+</button>
+                <button onClick={bindActions.minus2}>-</button>
+            </div>
+        )
+    }
+}
+
+export default Counter1;
+```
+
+## react-redux
+
+react-redux是一个react的插件，用来连接react和redux的，主要解决代码冗余的问题，
+
+现在每个文件中都引入需要action、bindActions
+```javascript
+import {bindActionCreators} from '../redux'
+import actions from '../store/actions/counter1'
+
+const bindActions = bindActionCreators(actions, store.dispatch);// 将action和dispatch绑定在一起
+```
+
+组件在使用仓库的时候：
+
+1. 输入。从仓库的装呀中获取状态，在组件中进行显示
+2. 输出。可以在组件中派发动作，修改仓库中的状态。
+
+它提供了Provider和connect，Provider用来向组件提供仓库，connect用来连接组件和仓库。
+
+### 使用
+
+引入Provider和store，然后在根组件中使用Provider包裹，将store传入Provider中。
+
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import Counter1 from './components/Counter1';
+import Counter2 from './components/Counter2';
+import { Provider } from './react-redux';
+import store from './store'
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <Provider store={store}>
+    <Counter1/>
+    <Counter2/>
+  </Provider>
+);
+```
+
+在组件中引入connect，执行connect并将组件传入，返回一个新的组件，这个新的组件就是连接了仓库的组件。
+
+```javascript
+import React from 'react'
+import actions from '../store/actions/counter1'
+import {connect} from './react-redux'
+
+class Counter1 extends React.Component{
+    render(){
+        return (
+            <div>
+                <p>{this.props.number}</p>
+                <button onClick={this.props.add1}>+</button>
+                <button onClick={this.props.minus1}>-</button>
+            </div>
+        )
+    }
+}
+// 输入：把仓库中的状态输入到组件中
+// 传入state总状态，返回新的状态，state.counter1将会成为Counter1组件的属性对象
+const mapStateToProps = (state) => state.counter1;
+
+// 输出：把动作进行派发到仓库中，改变状态的值
+// 经过绑定后，也会成为Counter1的属性对象
+const mapDispatchToProps = actions;
+// Counter1.props = {...state.counter1, ...actions}
+// connect执行两次，传入参数mapStateToProps和mapDispatchToProps
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Counter1);
+```

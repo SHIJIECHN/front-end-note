@@ -128,6 +128,7 @@ export function moveZero2(arr: number[]):void {
 
         // j已经指向第一个0
         if(arr[i] !== 0 && j >=0){
+            // i和j位置上的数交换位置
             const n = arr[i];
             arr[i] = arr[j];
             arr[j] = n;
