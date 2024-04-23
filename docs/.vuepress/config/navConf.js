@@ -43,5 +43,11 @@ module.exports = [
       { text: "浏览器", link: "/operationEnv/Browser/", },
       { text: "Node", link: "/operationEnv/Node/", },
     ],
+  },
+  {
+    text: "项目实战",
+    items: [
+      { text: "ChatApp", link: "/project/ChatApp/", },
+    ],
   }
 ];

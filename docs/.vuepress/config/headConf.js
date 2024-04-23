@@ -1,6 +1,3 @@
-// const secretKeyConf = require('./secretKeyConf.js');
-const ga = require('./secretKeyConf.js')
-
 module.exports = [
   ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
   ['link', { rel: 'shortcut icon', href: '/favicon.ico' }],
@@ -23,5 +20,4 @@ module.exports = [
 
   //   gtag('config', ${ga.googleAnalytics});
   // `]
-  // ['meta', { name: 'google-site-verification', content: secretKeyConf.googleSearchConsole}],
 ];
