@@ -14,9 +14,6 @@ https://www.acwing.com/file_system/file/content/whole/index/content/4789/
 
 ## 1. 排序
 
-1. 算法思想
-2. 
-
 ### 1.1 快速排序
 
 主要思想：分治法
@@ -70,6 +67,8 @@ process.stdin.on('end', () => {
     })
 })
 ```
+- do...while循环：先执行一次循环体（do部分），然后检查循环条件（while部分）。如果条件为真，循环继续执行，直到条件为假。
+- do...while(q[i] < x): 循环会一直执行，直到找一个大于或等于x的元素，在每次循环中，它都会增加i的值。
 
 
 ### 1.2 归并排序
