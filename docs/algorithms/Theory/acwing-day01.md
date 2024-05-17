@@ -90,7 +90,6 @@ process.stdin.on('end', () => {
 ```js
 let temp = [];
 function merge_sort(q, l,r){
-    console.log(`merge([${q}],${l}, ${r})`)
     if(l >= r) return;
     let mid = l + r >> 1; // 中点
     merge_sort(q, l, mid);
@@ -122,6 +121,67 @@ console.log(temp);
 ## 2. 二分
 
 ### 2.1 整数二分
+
+1. 找中间值：mid = (l+r+1)/2，if(check(mid))
+    - 为true时，答案在[mid, r]，更新方式就是 l = mid
+    - 为false时，答案在[l, mid - 1]，更新方式就是 r = mid -1
+
+ <img :src="$withBase('/algorithms/Theory/acwing-整数二分.png')" alt="acwing-整数二分" />
+
+```js
+/**
+ * 1. 先写mid
+ * 2. 再写check函数，确定如何更新l和r，就是看l=mid还是r=mid，l=mid的话mid计算就是要+1，r=mid的话mid计算不+1
+ */
+// 区间[l, r]被划分为[l, mid]和[mid+1, r]时使用
+function bsearch_1(l, r){
+    while( l < r){
+        let mid = l + r >>1;
+        if(check(mid)) r = mid; // check()判断mid是否满足性质
+        else l = mid + 1;
+    }
+    return l;
+}
+
+// 区间[l, r]被划分为[l, mid-1]和[mid, r]时使用
+function bsearch_2(l, r){
+    while(l < r){
+        let mid = l + r + 1 >> 1;
+        if(check(mid)) l = mid;
+        else r = mid - 1;
+    }
+    return l;
+}
+
+
+function bsearch(q, x){
+    let left = right = 0;
+    let l = 0, r = q.length -1;
+    while( l < r){
+        let mid = l + r >> 1
+        if(q[mid] >= x) r = mid;
+        else l = mid + 1;
+    }
+    left = l = r;
+    if(q[l] !==x){
+        left = right = -1; 
+    }else{
+        let l = 0, r = q.length -1;
+        while(l < r){
+            let mid = l + r + 1 >>1;
+            if(q[mid] <= x) l = mid;
+            else r = mid - 1
+        }
+       right = l = r;
+    }
+    return [left, right];
+}
+
+let  arr = [1,2,2,3,3,4];
+let target = 3;
+let res = bsearch(arr, target);
+console.log(res); // [3, 4]
+```
 
 
 ### 2.2 浮点数二分
