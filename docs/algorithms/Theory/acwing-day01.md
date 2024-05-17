@@ -14,7 +14,7 @@ https://www.acwing.com/file_system/file/content/whole/index/content/4789/
 
 ## 1. 排序
 
-### 1.1 快速排序
+### 1.1 快速排序 O(logn)
 
 主要思想：分治法
 1. 确定分界点：左边界q[l], 中间q[(l+r)/2], 右边界q[r]
@@ -70,8 +70,53 @@ process.stdin.on('end', () => {
 - do...while循环：先执行一次循环体（do部分），然后检查循环条件（while部分）。如果条件为真，循环继续执行，直到条件为假。
 - do...while(q[i] < x): 循环会一直执行，直到找一个大于或等于x的元素，在每次循环中，它都会增加i的值。
 
+习题：786. 第k个数
 
-### 1.2 归并排序
+
+### 1.2 归并排序 O(nlogn)
+
+主要思想：分治法
+1. 确定分界点：mid = (l+r)/2。以中心掉为界，将数组分为两部分（left, right）。
+2. 递归排序：left，right
+2. 归并：合二为一（难点）
+
+归并方法：
+1. 声明一个临时数组temp[]，用于存放合并后的数组
+2. 两个指针i, j，分别指向left, right的起始位置
+3. 比较left[i]和right[j]的大小，将较小的数放入temp[]中
+4. 重复3，直到i或j到达边界
+5. 将剩余的元素放入temp[]中
+
+```js
+let temp = [];
+function merge_sort(q, l,r){
+    console.log(`merge([${q}],${l}, ${r})`)
+    if(l >= r) return;
+    let mid = l + r >> 1; // 中点
+    merge_sort(q, l, mid);
+    merge_sort(q, mid + 1, r);
+
+    let k = 0, i = l, j = mid + 1;
+    while( i <= mid && j <= r){
+        if(q[i] <= q[j]){
+            temp[k++] = q[i++];
+        }else {
+            temp[k++] = q[j++];
+        }
+    }
+
+    while(i <= mid) temp[k++] = q[i++];
+    while(j <= r) temp[k++] = q[j++];
+
+    for(i = l, j = 0; i <= r; i++, j++){
+        q[i] = temp[j];
+    }
+}
+
+let arr = [6, 3, 2, 1, 4, 7, 5]
+merge_sort(arr, 0, arr.length - 1);
+console.log(temp);
+```
 
 
 ## 2. 二分
