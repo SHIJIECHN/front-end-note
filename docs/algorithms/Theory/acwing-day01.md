@@ -30,8 +30,9 @@ https://www.acwing.com/file_system/file/content/whole/index/content/4789/
 1. 两个指针i, j，左侧i指向l，右侧j指向r
 2. 移动指针i，判断当前q[i]是否小于等于x，如果是，i++ 直到找到一个大于x的数, q[i] > x, i停止移动；开始移动j，判断当前q[j]是否大于x，如果是，j-- 直到找到一个小于等于x的数, q[j] <= x, j停止移动；交换q[i], q[j]，继续移动i, j；直到i >= j
 
+<img :src="$withBase('/algorithms/Theory/acwing-快速排序.png')" alt="acwing-快速排序" />
 
-787. 归并排序
+785. 快速排序
 ```js
 function quick_sort(q, l, r){
     if(l >= r) return; // 如果没有元素或者只有一个元素，就不用排序了
@@ -92,18 +93,20 @@ let temp = [];
 function merge_sort(q, l,r){
     if(l >= r) return;
     let mid = l + r >> 1; // 中点
+    // 先把两边的排好序，然后合并两边的有序数列
     merge_sort(q, l, mid);
     merge_sort(q, mid + 1, r);
 
+    // 使用双指针合并有序数列
     let k = 0, i = l, j = mid + 1;
-    while( i <= mid && j <= r){
-        if(q[i] <= q[j]){
+    while( i <= mid && j <= r){ // 当两边都没有到头的时候
+        if(q[i] <= q[j]){ // 如果q[i]小，拷贝q[i]，并自增 i++，k++
             temp[k++] = q[i++];
-        }else {
+        }else { // 如果q[j]小，拷贝q[j]，并自增 j++，k++
             temp[k++] = q[j++];
         }
     }
-
+    // 如果还有剩余，接着copy
     while(i <= mid) temp[k++] = q[i++];
     while(j <= r) temp[k++] = q[j++];
 
@@ -116,6 +119,10 @@ let arr = [6, 3, 2, 1, 4, 7, 5]
 merge_sort(arr, 0, arr.length - 1);
 console.log(temp);
 ```
+
+习题：
+- 787. 归并排序
+- 788. 逆序对的数量
 
 
 ## 2. 二分
@@ -153,28 +160,33 @@ function bsearch_2(l, r){
     return l;
 }
 
-
-function bsearch(q, x){
-    let left = right = 0;
-    let l = 0, r = q.length -1;
-    while( l < r){
-        let mid = l + r >> 1
+/**
+ * q: 数组
+ * n: 数组长度
+ * x: 目标值
+ */
+function bsearch(q, n, x){
+    let l = 0, r = n -1;
+    let left = 0, right = n -1;
+    while(l < r){
+        let mid = l + r >>1;
         if(q[mid] >= x) r = mid;
-        else l = mid + 1;
+        else l = mid+1;
     }
-    left = l = r;
-    if(q[l] !==x){
-        left = right = -1; 
-    }else{
-        let l = 0, r = q.length -1;
+    
+    left = l;
+    if(q[l] !== x){
+        left = right = -1;
+    }else {
+        let l = 0, r = n-1;
         while(l < r){
-            let mid = l + r + 1 >>1;
+            let mid = l + r + 1 >> 1;
             if(q[mid] <= x) l = mid;
-            else r = mid - 1
+            else r = mid -1;
         }
-       right = l = r;
+        right = l;
     }
-    return [left, right];
+    return [left, right]
 }
 
 let  arr = [1,2,2,3,3,4];
@@ -183,5 +195,97 @@ let res = bsearch(arr, target);
 console.log(res); // [3, 4]
 ```
 
+习题：789. 数的范围
+
 
 ### 2.2 浮点数二分
+
+790. 数的三次方根
+```js
+function n3(x){
+    let l = 0, r = x; // 0~x
+    while( r -l > 1e-8){ // 精度
+        let mid = l + r >> 1;
+        if(mid * mid * mid >= x) r = mid; // 如果mid的立方大于x，说明mid太大了，r=mid
+        else l = mid;
+    }
+    
+    return l.toFixd(6); // 保留6位小数
+}
+```
+
+## 高精度
+
+### 3.1 高精度加法
+
+791. 高精度加法
+```js
+function highPrecisionSum(aArr, bArr){
+    let result = [];
+    let len = Math.max(aArr.length, bArr.length); // 取最大长度
+    let t = 0;
+    for(let i = 0;  i < len; i++){
+        if(i < aArr.length) t += parseInt(aArr[i]); // 如果i小于aArr的长度，t加上aArr[i]的值
+        if(i < bArr.length) t += parseInt(bArr[i]); // 如果i小于bArr的长度，t加上bArr[i]的值
+        result.push(t % 10); // t = 12, result = [2],t如果大于10，取余数
+        t = Math.floor(t / 10); // t = 1
+    }
+    if(t) result.push(t); //如果t不为0，将t加入result
+    return result;
+}
+
+let a = '12';
+let b = '34';
+let aArr = a.split('').reverse(); // aArr = ['2', '1'] ，将字符串转换成数组，再反转。个位存在数组的第一个元素
+let bArr = b.split('').reverse();
+
+let cArr = highPrecisionSum(aArr, bArr);
+console.log(cArr); // [6, 4]
+let c = cArr.reverse().join('');
+console.log(c); // 46
+```
+
+### 3.1 高精度减法
+
+```js
+function highPrecisionSub(aArr, bArr){
+    let result = [];
+    let t = 0;
+    for(let i = 0;  i < aArr.length; i++){ // 输入时保证了aArr的长度大于等于bArr的长度
+        t = aArr[i] - t; 
+        if(i < bArr.length) t -= parseInt(bArr[i]); // 如果i小于bArr的长度,bArr没有越界。t减去bArr[i]的值
+        result.push((t + 10) % 10); //合并了两种情况：1. t如果小于0，t加10；2. t如果大于10，就是t
+        if(t < 0) t = 1; //如果t小于0，t=1
+        else t = 0; //否则t为0
+    }
+    // 123-120=003，去掉高位的0
+    while(result.length > 1 && result[result.length - 1] == 0) result.pop(); // 去掉高位的0
+    return result;
+}
+
+// 判断是否有 A >= B 
+function cmp(aArr, bArr){
+    if(aArr.length != bArr.length) return aArr.length > bArr.length; //如果位数不相等，则返回位数比较的结果
+    for(let i = aArr.length - 1; i >= 0; i--){
+        if(aArr[i] != bArr[i]) return aArr[i] > bArr[i]; // 从高位开始比较，找到第一个aArr[i]不等于bArr[i]的位置，返回高位比较结果
+    }
+    return true; // 如果所有位数都相等，则返回true
+}
+
+let a = '12';
+let b = '34';
+let aArr = a.split('').reverse(); // aArr = ['2', '1'] ，将字符串转换成数组，再反转。个位存在数组的第一个元素
+let bArr = b.split('').reverse();
+
+let cArr = [];
+let c = '';
+if(cmp(aArr, bArr)){ // 比较aArr和bArr的大小
+    cArr = highPrecisionSub(aArr, bArr);
+    c = cArr.reverse().join('');
+}else {
+    cArr = highPrecisionSub(bArr, aArr);
+    c = '-'+ cArr.reverse().join('');
+}
+console.log(cArr);
+console.log(c); 
+```
