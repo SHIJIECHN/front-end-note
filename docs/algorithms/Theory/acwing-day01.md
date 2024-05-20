@@ -245,7 +245,7 @@ let c = cArr.reverse().join('');
 console.log(c); // 46
 ```
 
-### 3.1 高精度减法
+### 3.2 高精度减法
 
 ```js
 function highPrecisionSub(aArr, bArr){
@@ -288,4 +288,58 @@ if(cmp(aArr, bArr)){ // 比较aArr和bArr的大小
 }
 console.log(cArr);
 console.log(c); 
+```
+
+### 3.3 高精度乘法
+
+```js
+// Description: 高精度乘法
+// C = A * b
+function hightPrecisionMulti(A, b){
+    let C = [];
+    let t = 0;
+    for(let i = 0; i < A.length; i++){
+        t += parseInt(A[i]) * b; // 2 * 12 = 24
+        C.push(t % 10); // 4
+        t = Math.floor(t / 10); // 2
+    }
+    while(t){ // 如果t有值
+        C.push(t % 10);
+        t = Math.floor(t / 10);
+    }
+    return C;
+}
+
+let a = '123';
+let b = 12;
+let A = a.split('').reverse();
+let C = hightPrecisionMulti(A, b);
+let result = C.reverse().join('');
+console.log(result);
+```
+
+### 3.4 高精度除法
+
+```js
+// Description: 高精度除法
+// C = A / b，商为C，余数为r
+function div(A, b){
+    let C = []; // C0是最低位
+    let r = 0;
+    for(let i = A.length -1; i >=0; i--){
+        r = r * 10 + parseInt(A[i]);
+        C.push(Math.floor(r / b)); // 商
+        r %= b; // 余数
+    }
+    C.reverse(); // 反转
+    while(C.length > 1 && C[C.length - 1] == 0) C.pop(); // 去掉高位的0
+    return C;
+}
+
+let a = '10000';
+let b = 9;
+let A = a.split('').reverse();
+let cDiv = div(A, b, r);
+let res = cDiv.reverse().join('');
+console.log(res);
 ```
