@@ -343,3 +343,32 @@ let cDiv = div(A, b, r);
 let res = cDiv.reverse().join('');
 console.log(res);
 ```
+
+## 4. 前缀和、差分
+
+### 4.1 前缀和
+定义一个数组[a1, a2, a3,..., an]（下标从1开始），前缀和数组是一个新的数组，数组的第i个元素是原数组的前i个元素的和。
+si = a1 + a2 + ... + ai。si是前i个元素的和。s0 = 0
+
+问题1：如何求si
+问题2：如何求区间[l, r]的和
+
+795. 前缀和
+```js
+function runningSum(a, l, r){
+    let len = a.length; // 数组长度
+    a.unshift(0); // 为了方便计算，数组的下标从1开始[a1, a2, ..., an]
+    let s = new Array(len); // s[i]表示前i个元素的和
+    s[0] = 0; 
+    for(let i = 1; i <= len; i++){ // 计算前i个元素的和
+        s[i] = s[i-1] + a[i]; // s[i] = a1 + a2 + ... + ai
+    }
+    return s[r] - s[l-1]; // 返回区间和
+}
+
+let a = [2,1,3,6,4];
+let l = 1;
+let r = 5;
+let result = runningSum(a, l, r);
+console.log(result);// 16
+```
