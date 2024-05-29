@@ -347,7 +347,7 @@ console.log(res);
 ## 4. 前缀和、差分
 
 ### 4.1 前缀和
-定义一个数组[a1, a2, a3,..., an]（下标从1开始），前缀和数组是一个新的数组，数组的第i个元素是原数组的前i个元素的和。
+一维前缀和：定义一个数组[a1, a2, a3,..., an]（下标从1开始, 下标0补充0），前缀和数组是一个新的数组，数组的第i个元素是原数组的前i个元素的和。
 si = a1 + a2 + ... + ai。si是前i个元素的和。s0 = 0
 
 问题1：如何求si
@@ -361,9 +361,17 @@ function runningSum(a, l, r){
     let s = new Array(len); // s[i]表示前i个元素的和
     s[0] = 0; 
     for(let i = 1; i <= len; i++){ // 计算前i个元素的和
-        s[i] = s[i-1] + a[i]; // s[i] = a1 + a2 + ... + ai
+        s[i] = s[i-1] + a[i]; // s[i] 的和等于前i-1的和加上a[i]
     }
     return s[r] - s[l-1]; // 返回区间和
+
+    // 或者
+    let n = a.length;
+    let s = new Array(n + 1).fill(0); // 填充0
+    for(let i = 1; i <= n; i++){
+        s[i] = s[i - 1] + a[i - 1]; // s[1] = s[0] + a[0]
+    }
+    return s[r] - s[l - 1];
 }
 
 let a = [2,1,3,6,4];
@@ -371,4 +379,47 @@ let l = 1;
 let r = 5;
 let result = runningSum(a, l, r);
 console.log(result);// 16
+```
+
+二维前缀和：Sij表示左上角为(1,1)，右下角为(i,j)的矩形内所有元素的和。求解Sij的方法是：Sij = S[i-1][j] + S[i][j-1] - S[i-1][j-1] + a[i][j]。 求解区间[(x1, y1), (x2, y2)]的和：S[x2][y2] - S[x1-1][y2] - S[x2][y1-1] + S[x1-1][y1-1]。
+
+ <img :src="$withBase('/algorithms/Theory/acwing-前缀和.png')" alt="acwing-前缀和" />
+
+ <img :src="$withBase('/algorithms/Theory/acwing-前缀部分和.png')" alt="acwing-前缀部分和" />
+
+796. 二维前缀和
+```js
+function runningSum_2(arr, xy){
+    let n = arr.length;
+    let m = arr[0].length;
+    let s = new Array(n+1).fill(0).map(()=> new Array(m+1).fill(0));
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            s[i][j] = s[i-1][j] + s[i][j-1] - s[i-1][j-1]+arr[i-1][j-1]; // 求前缀和
+        }
+    }
+    let result = [];
+    let q = 3;
+    for(let i = 0; i < q; i++){
+        let [x1, y1, x2, y2] = xy[i];
+        result.push(s[x2][y2] - s[x2][y1-1] - s[x1-1][y2] + s[x1-1][y1-1]); // 求区间和
+    }
+    return result;
+}
+
+let arr = [
+    [1,7,2,4],
+    [3,6,2,6],
+    [2,1,2,3],
+]
+
+// x y 坐标集合
+let xy = [
+    [1,1,2,3],
+    [2,1,3,3],
+    [1,2,2,4],
+]
+
+let result = runningSum_2(arr, xy);
+console.log(result);// [ 21, 16, 27 ]
 ```
