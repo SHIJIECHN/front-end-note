@@ -423,3 +423,106 @@ let xy = [
 let result = runningSum_2(arr, xy);
 console.log(result);// [ 21, 16, 27 ]
 ```
+
+### 4.2 差分
+
+差分数组：差分数组d[i]第i个数即为原数组的第i个数和第i-1个数的差值。即：d[i] = a[i] -a[i -1]，此时也可以表示为a1 = b1, a2 = b1+b2, a3 = b1+b2+b3, ..., an = b1+b2+...+bn。
+
+差分数组的性质：对于区间[l, r]的所有数加上c，只需对差分数组d[l]加上c，对差分数组d[r+1]减去c。对于区间[l, r]的所有数加上c，只需对差分数组d[l]加上c，对差分数组d[r+1]减去c。
+
+ <img :src="$withBase('/algorithms/Theory/acwing-差分.png')" alt="acwing-差分" />
+
+370. 区间加法
+```js
+function intert(arr, operation){
+    // 差分
+    let n = arr.length;
+    let b = new Array(n).fill(0);
+    // 差分数组
+    for(let i = 0; i < n; i++){
+        if(i ==0) b[i] = arr[i];
+        else b[i] = arr[i] - arr[i-1];
+    }
+
+    for(let i = 0; i < operation.length; i++){
+        let [l,r,c] = operation[i];
+        b[l - 1] += c; // 差分数组的第l个元素加上c，注意这里的下标时从0开始的
+        if(r < n) b[r] -= c;
+    }
+    
+    // 前缀和
+    let result = new Array(n).fill(0);
+    result[0] = b[0];
+    for(let i = 1; i < n; i++){
+        result[i] = result[i-1] + b[i];
+    }
+    return result;
+}
+
+let arr = [1,2,2,1,2,1];
+let operation = [[1,3,1],[3,5,1],[1,6,1]]; //[3, 5, 1]
+console.log(intert(arr, operation)); // [ 3, 4, 5, 3, 4, 2 ]
+```
+
+二维差分
+
+```js
+function insert_2(arr, operation){
+    let n = arr.length;
+    let m = arr[0].length;
+    let a = new Array(n+1).fill(0).map(()=> new Array(m+1).fill(0));
+    let b = new Array(n+2).fill(0).map(()=> new Array(m+2).fill(0));
+    // 构造一个（n+1， m+1）的二维数组a
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            a[i][j] = arr[i-1][j-1];
+        }
+    }
+    // 差分数组
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            diff(i, j, i, j, a[i][j]);
+        }
+    }
+
+    function diff(x1, y1, x2, y2, c){
+        b[x1][y1] += c;
+        b[x2+1][y1] -= c;
+        b[x1][y2+1] -= c;
+        b[x2+1][y2+1] += c;
+    }
+
+    for(let i = 0; i < operation.length; i++){
+        let [x1, y1, x2, y2, c] = operation[i];
+        diff(x1, y1, x2, y2, c); 
+    }
+
+    // 前缀和
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            b[i][j] = b[i-1][j] + b[i][j-1] + b[i][j] - b[i-1][j-1];
+        }
+    }
+
+    let result = new Array(n).fill(0).map(()=> new Array(m).fill(0));
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            result[i-1][j-1] = b[i][j];
+        }
+    }
+    return result;
+}
+
+let arr  = [
+    [1,2,2,1],
+    [3,2,2,1],
+    [1,1,1,1]
+]
+
+let operation = [
+    [1,1,2,2,1],
+    [1,3,2,3,2],
+    [3,1,3,4,1]
+]
+console.log(insert_2(arr, operation)); // [ [ 2, 3, 4, 1 ], [ 4, 3, 4, 1 ], [ 2, 2, 2, 2 ] ]
+```
