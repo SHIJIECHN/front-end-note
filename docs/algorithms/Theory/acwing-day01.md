@@ -526,3 +526,116 @@ let operation = [
 ]
 console.log(insert_2(arr, operation)); // [ [ 2, 3, 4, 1 ], [ 4, 3, 4, 1 ], [ 2, 2, 2, 2 ] ]
 ```
+
+## 5. 双指针算法
+
+核心思想：将暴力做法O(n^2)优化到O(n)。
+```js
+for(let i = 0; i < n; i++){
+    for(let j = 0; j < n; j++){
+        // 时间复杂度O(n^2)
+    }
+}
+```
+
+双指针模板：
+```js
+for(let i = 0, j = 0; i < n; i++){
+    while(j < n && check(i, j)) j++;
+    // 具体逻辑
+}
+```
+
+习题：
+```js
+/**
+ * 给定字符串 str = 'abc def ghi';输出：
+ * abc
+ * def
+ * ghi
+ */
+
+function word(str){
+    let n = str.length;
+    for(let i = 0; i< n; i++){
+        let  j = i;
+        while(j < n && str[j] != ' ') j++;
+
+        // 具体逻辑
+        console.log(str.slice(i,j))
+        i = j;
+    }
+}
+let str = 'abc def ghi';
+word(str)
+
+```
+
+799. 最长连续不重复子序列
+1. 遍历数组a中的每一个元素a[i], 对于每一个i，找到j使得双指针[j, i]维护的是以a[i]结尾的最长连续不重复子序列，长度为i - j + 1, 将这一长度与r的较大者更新给max
+2. 对于每一个i，如何确定j的位置：由于[j, i - 1]是前一步得到的最长连续不重复子序列，所以如果[j, i]中有重复元素，一定是a[i]，因此右移j直到a[i]不重复为止（由于[j, i - 1]已经是前一步的最优解，此时j只可能右移以剔除重复元素a[i]，不可能左移增加元素，因此，j具有“单调性”
+3. 用数组s记录子序列a[j ~ i]中各元素出现次数，遍历过程中对于每一个i有四步操作：
+    - 将a[i]出现次数s[a[i]]加1 
+    - 若a[i]重复则右移j（s[a[j]]要减1）
+    - 确定j及更新当前长度i - j + 1给 max。
+```js
+function maxLengthSub(arr){
+    let max = 0;
+    let n = arr.length;
+    let a = arr;;
+    let s = new Array(10).fill(0); // j~i区间每个数出现的次数
+    for(let i  = 0, j=0; i < n; i++){
+        s[a[i]]++; // 每次i移动一格
+
+        while(s[a[i]] > 1){
+            s[a[j]]--;
+            j++;
+        }
+        max = Math.max(max, i - j + 1);
+    }
+    return max;
+}
+
+let str = [1,2,2,3,5];
+console.log(maxLengthSub(str))
+```
+
+## 6. 位运算
+n的二进制表示中第k位是几？
+1. 先把第k位移到最后一位 n >> k
+2. 看个位是几L n & 1
+
+lowbit(x): 返回x的最后一位1. 例如：x = 1010, lowbit(x) = 10; x = 101000, lowbit(x) = 1000。
+
+实际上实现的是：x & -x，-x是x的补码，-x = ~x + 1，~x是x的取反，+1是x的补码。x & -x 等于 x & （~x + 1）。
+
+为什么能够得到最后一个1呢？
+x =    1010...1000..0
+~x =   0101...0111..1
+~x+1 = 0101...1000..0
+x & (~x + 1) = 0000...1000..0
+
+应用：统计一个数的二进制表示中1的个数。
+801. 二进制中1的个数
+```js
+function fn7(a){
+    let n = a.length;
+    for(let i =0; i< n; i++){
+        let x = a[i];
+        let res = 0;
+        // 统计1的个数：当x不为0时
+        while(x){
+            x -= lowbit(x); // 每次减去x的最后一位1
+            res++;
+        }
+        console.log(res)
+    }
+
+}
+
+function lowbit(x){
+    return x & (~x + 1);
+}
+let arr = [25]
+fn7(arr)
+```
