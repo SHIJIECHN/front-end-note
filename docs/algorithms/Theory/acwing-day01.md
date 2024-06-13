@@ -639,3 +639,95 @@ function lowbit(x){
 let arr = [25]
 fn7(arr)
 ```
+
+## 7. 离散化
+离散化：将一个区间的数映射到一个连续的区间上。例如：[3, 5, 7, 9] 映射到 [1, 2, 3, 4]。
+思考：如何将一个区间的数映射到一个连续的区间上？
+1. 区间是有序的，但可能有重复元素，需要去重 --> sort、filter和indexOf
+```js
+let b = arr.slice().sort((a, b) => a - b).filter((v, i, a) => a.indexOf(v) === i); // 去重
+```
+2. 如何算出x离散化后的值--->二分查找
+```js
+function find(x){
+    let l = 0, r = b.length - 1;
+    while(l < r){
+        let mid = l + r >> 1;
+        if(b[mid] >= x) r = mid;
+        else l = mid + 1;
+    }
+    return l + 1; // 映射到1，2，....，n
+}
+```
+
+802. 离散化
+
+```js
+function fn8(n, m, arrXC, arrMN){
+    let N = 300010;
+
+    let add = []; // 所有添加的数据对
+    let query = []; // 所有查询的数据对
+    let alls = []; // 所有下标（数据下标 + query下标）
+
+    let a = new Array(N).fill(0); // 将alls中的真实数据，复制到a对应的位置
+    let s = new Array(N).fill(0); // a的前缀和
+
+    for(let i = 0; i < n; i++){
+        add.push([arrXC[i][0], arrXC[i][1]]);
+        alls.push(arrXC[i][0]);
+    }
+    
+    for(let i = 0; i < m; i++){
+        query.push([arrMN[i][0], arrMN[i][1]]);
+        alls.push(arrMN[i][0]);
+        alls.push(arrMN[i][1]);
+    }
+
+    // 去重
+    alls = [...new Set(alls.sort((a, b) => a - b))];
+
+    for(let data of add){
+        const [idx, value] = data;
+        const index = find(idx);
+        a[index] += value;
+    }
+
+    for(let i = 1; i <= alls.length; i++) s[i] = s[i-1] + a[i];
+
+    for(let queryData of query){
+        const [left, right] = queryData;
+        let l = find(left)
+        let r = find(right)
+        console.log(s[r] - s[l-1]);
+    }
+
+    function find(x){
+        let l = 0, r = alls.length - 1;
+        while(l < r){
+            const mid = l + r >> 1;
+            if(alls[mid] >= x) r = mid;
+            else l = mid + 1;
+        }
+        return r + 1;
+    }
+
+}
+
+
+
+let n = 3;
+let m = 3;
+let arrXC = [
+    [1,2],
+    [3,6],
+    [7,5]
+];
+let arrMN = [
+    [1,3],
+    [4,6],
+    [7,8]
+];
+fn8(n, m, arrXC, arrMN); // 8 0 5
+
+```
