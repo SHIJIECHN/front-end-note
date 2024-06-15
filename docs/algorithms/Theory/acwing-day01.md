@@ -816,10 +816,7 @@ function fn8(n, m, arrXC, arrMN){
         }
         return r + 1;
     }
-
 }
-
-
 
 let n = 3;
 let m = 3;
@@ -834,5 +831,4 @@ let arrMN = [
     [7,8]
 ];
 fn8(n, m, arrXC, arrMN); // 8 0 5
-
 ```
