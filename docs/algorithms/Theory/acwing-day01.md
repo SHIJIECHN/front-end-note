@@ -356,22 +356,13 @@ si = a1 + a2 + ... + ai。si是前i个元素的和。s0 = 0
 795. 前缀和
 ```js
 function runningSum(a, l, r){
-    let len = a.length; // 数组长度
-    a.unshift(0); // 为了方便计算，数组的下标从1开始[a1, a2, ..., an]
-    let s = new Array(len); // s[i]表示前i个元素的和
-    s[0] = 0; 
+    let n = a.length; // 数组长度
+    a.unshift(0); // 为了方便计算，数组的下标从1开始[a1, a2, ..., an]，下标0补充0
+    let s = new Array(n).fill(0); // s[i]表示前i个元素的和 
     for(let i = 1; i <= len; i++){ // 计算前i个元素的和
         s[i] = s[i-1] + a[i]; // s[i] 的和等于前i-1的和加上a[i]
     }
-    return s[r] - s[l-1]; // 返回区间和
-
-    // 或者
-    let n = a.length;
-    let s = new Array(n + 1).fill(0); // 填充0
-    for(let i = 1; i <= n; i++){
-        s[i] = s[i - 1] + a[i - 1]; // s[1] = s[0] + a[0]
-    }
-    return s[r] - s[l - 1];
+    return s[r] - s[l-1]; // 返回区间和，注意：左左侧下标需要减去1
 }
 
 let a = [2,1,3,6,4];
@@ -381,7 +372,10 @@ let result = runningSum(a, l, r);
 console.log(result);// 16
 ```
 
-二维前缀和：Sij表示左上角为(1,1)，右下角为(i,j)的矩形内所有元素的和。求解Sij的方法是：Sij = S[i-1][j] + S[i][j-1] - S[i-1][j-1] + a[i][j]。 求解区间[(x1, y1), (x2, y2)]的和：S[x2][y2] - S[x1-1][y2] - S[x2][y1-1] + S[x1-1][y1-1]。
+二维前缀和：Sij表示左上角为(1,1)，右下角为(i,j)的矩形内所有元素的和。求解Sij的方法是：
+Sij = S[i-1][j] + S[i][j-1] - S[i-1][j-1] + a[i][j]。 求解区间[(x1, y1), (x2, y2)]的和：S[x2][y2] - S[x1-1][y2] - S[x2][y1-1] + S[x1-1][y1-1]。
+
+实际过程中往往补充第0行、第0列来减少条件判断。
 
  <img :src="$withBase('/algorithms/Theory/acwing-前缀和.png')" alt="acwing-前缀和" />
 
@@ -424,6 +418,48 @@ let result = runningSum_2(arr, xy);
 console.log(result);// [ 21, 16, 27 ]
 ```
 
+还可以有另一种形式：将矩阵 arr 转换为前缀和矩阵 s 的过程如下：
+```js
+let n = arr.length; // row
+let m = arr[0].length; // col
+let s = new Array(n + 1).fill(0).map(()=> new Array(m+1).fill(0));
+// 将a拷贝到s中，将s第一行和第一列为0
+for(let a = 1, c = 0; c < n; a++, c++){
+    for(let b = 1, d = 0; d < m; b++, d++){
+        s[a][b] = arr[c][d]
+    }
+}
+```
+s的前缀和计算可以下成如下形式：
+```js
+s[i][j] = s[i-1][j] + s[i][j-1] - s[i-1][j-1] + s[i][j];
+```
+整体写法如下：
+```js
+function runningSum_2(matrix, xy){
+    let n = matrix.length; // row
+    let m = matrix[0].length; // col
+    let s = new Array(n + 1).fill(0).map(()=> new Array(m+1).fill(0));
+    // 将a拷贝到s中，将s第一行和第一列为0
+    for(let a = 1, c = 0; c < n; a++, c++){
+        for(let b = 1, d = 0; d < m; b++, d++){
+            s[a][b] = matrix[c][d];// 将matrix拷贝到s中
+        }
+    }
+    
+    for(let i = 1; i <= n; i++){
+        for(let j = 1; j <= m; j++){
+            s[i][j] = s[i-1][j] + s[i][j-1] - s[i-1][j-1] + s[i][j];
+        }
+    }
+
+    for(let i = 0; i < xy.length; i++){
+        let [x1, y1, x2, y2] = xy[i];
+        console.log(s[x2][y2] - s[x2][y1-1]- s[x1-1][y2] + s[x1-1][y1-1]);
+    }
+}
+```
+
 ### 4.2 差分
 
 差分数组：差分数组d[i]第i个数即为原数组的第i个数和第i-1个数的差值。即：d[i] = a[i] -a[i -1]，此时也可以表示为a1 = b1, a2 = b1+b2, a3 = b1+b2+b3, ..., an = b1+b2+...+bn。
@@ -464,27 +500,31 @@ let operation = [[1,3,1],[3,5,1],[1,6,1]]; //[3, 5, 1]
 console.log(intert(arr, operation)); // [ 3, 4, 5, 3, 4, 2 ]
 ```
 
-二维差分
+二维差分：在二维数组中，如果经理如下的过程：
+1. 批量的做如下的操作，每个操作都有独立的a, b, c, d, v，add(a, b, c, d, v)：左上角(a,b)到右下角(c,d)的矩形区域内的所有元素加上v。怎么快速处理？
+2. 操作完后，如何正确得到二维数组中每个位置的值？
+
+二维差分的工作：add的时候快速处理，最后build得到每个位置的值，修改操作必须集中在一起，不能边修改边查询。
+1） add方法的实现比较巧妙
+2）build方法的实现，和处理前缀和类似
+3）真实数据用一圈0包裹起来，可以减少很多边界讨论
+
+ <img :src="$withBase('/algorithms/Theory/acwing-二维差分.png')" alt="acwing-二维差分" />
 
 ```js
 function insert_2(arr, operation){
     let n = arr.length;
     let m = arr[0].length;
-    let a = new Array(n+1).fill(0).map(()=> new Array(m+1).fill(0));
-    let b = new Array(n+2).fill(0).map(()=> new Array(m+2).fill(0));
-    // 构造一个（n+1， m+1）的二维数组a
+    let b = new Array(n+2).fill(0).map(()=> new Array(m+2).fill(0)); // 差分数组
+
+    // 计算得到差分数组 b, 也就是在原数组上包裹一圈0
     for(let i = 1; i <= n; i++){
         for(let j = 1; j <= m; j++){
-            a[i][j] = arr[i-1][j-1];
-        }
-    }
-    // 差分数组
-    for(let i = 1; i <= n; i++){
-        for(let j = 1; j <= m; j++){
-            diff(i, j, i, j, a[i][j]);
+            diff(i, j, i, j, arr[i-1][j-1]);
         }
     }
 
+    // 差分数组需要执行的操作
     function diff(x1, y1, x2, y2, c){
         b[x1][y1] += c;
         b[x2+1][y1] -= c;
@@ -492,12 +532,13 @@ function insert_2(arr, operation){
         b[x2+1][y2+1] += c;
     }
 
+    // 执行操作
     for(let i = 0; i < operation.length; i++){
         let [x1, y1, x2, y2, c] = operation[i];
         diff(x1, y1, x2, y2, c); 
     }
 
-    // 前缀和
+    // 差分数组的前缀和计算
     for(let i = 1; i <= n; i++){
         for(let j = 1; j <= m; j++){
             b[i][j] = b[i-1][j] + b[i][j-1] + b[i][j] - b[i-1][j-1];
@@ -525,6 +566,69 @@ let operation = [
     [3,1,3,4,1]
 ]
 console.log(insert_2(arr, operation)); // [ [ 2, 3, 4, 1 ], [ 4, 3, 4, 1 ], [ 2, 2, 2, 2 ] ]
+```
+
+解法二：
+
+```js
+class Diff{
+    constructor(options){
+        this.arr = options.arr;
+        this.n = this.arr.length;
+        this.m = this.arr[0].length; 
+        this.diff = new Array(this.n+2).fill(0).map(()=>new Array(this.m+2).fill(0)); // 原数组包裹一圈0
+    }
+
+    // 将arr数组读入diff数组，后面的所有操作都在diff数组上进行
+    read(){
+        for(let i = 1; i <=this.n; i++){
+            for(let j = 1; j <= this.m; j++){
+                this.add(i,j,i,j,this.arr[i-1][j-1])
+            }
+        }
+    }
+    
+    // 求diff矩阵的前缀和
+    build(){
+        for(let i = 1; i<= this.n; i++){
+            for(let j = 1; j<= this.m; j++){
+                this.diff[i][j] = this.diff[i-1][j] + this.diff[i][j-1] - this.diff[i-1][j-1] + this.diff[i][j];
+            }
+        }
+    }
+
+    // 执行操作
+    add(a, b, c, d, v){
+        this.diff[a][b] += v;
+        this.diff[a][d+1] -= v;
+        this.diff[c+1][b] -= v;
+        this.diff[c+1][d+1] += v;
+    }
+}
+
+let arr  = [
+    [1,2,2,1],
+    [3,2,2,1],
+    [1,1,1,1]
+]
+
+let operation = [
+    [1,1,2,2,1],
+    [1,3,2,3,2],
+    [3,1,3,4,1]
+]
+
+let diff = new Diff({arr});
+diff.read(); 
+// 在差分数组上执行操作
+for(let i = 0; i < operation.length; i++){
+    diff.add(...operation[i]);
+}
+diff.build();
+let result = diff.diff;
+for(let i = 1; i <= arr.length; i++){
+    console.log(result[i].slice(1, arr[0].length+1));
+}
 ```
 
 ## 5. 双指针算法
@@ -684,7 +788,7 @@ function fn8(n, m, arrXC, arrMN){
         alls.push(arrMN[i][1]);
     }
 
-    // 去重
+    // 排序和去重
     alls = [...new Set(alls.sort((a, b) => a - b))];
 
     for(let data of add){
@@ -702,6 +806,7 @@ function fn8(n, m, arrXC, arrMN){
         console.log(s[r] - s[l-1]);
     }
 
+    // 二分查找，根据实际的x值找到映射后的值，也就是下标 + 1
     function find(x){
         let l = 0, r = alls.length - 1;
         while(l < r){
