@@ -119,11 +119,89 @@ let arr = [6, 3, 2, 1, 4, 7, 5]
 merge_sort(arr, 0, arr.length - 1);
 console.log(temp);
 ```
+左神版：
+```js
+let arr = [6, 3, 2, 1, 4, 7, 5];
+merge_sort(0, arr.length - 1);
+console.log(arr);
+
+/**
+ * 假设l...r一共n个数
+ * T(n) = 2T(n/2) + O(n)
+ * a = 2, b = 2, c = 1
+ * 时间复杂度O(n * logn)
+ */
+function merge_sort(l, r){
+    if(l == r) return;
+    let mid = l + r >> 1;
+    merge_sort(l, mid);
+    merge_sort(mid + 1, r);
+    merge(l, mid, r);
+}
+
+// l...r 一共有n个数，时间复杂度O(n)
+function merge(l, mid, r){
+    let i = l, a = l, b = mid +1;
+    while(a<= mid && b <= r){ // 左右范围都没有靠近边界
+        help[i++] = arr[a] <= arr[b] ? arr[a++] : arr[b++]; // 小的先放进help
+    }
+
+    // 左侧指针、右侧指针，必有一个越界、另一个不越界
+    while(a <= mid) help[i++] = arr[a++];
+    while(b <= r) help[i++] = arr[b++];
+
+    for(let k = l; k <= r; k++) arr[k] = help[k]; // help数组的值，复制到arr数组
+}
+
+```
+非递归版：
+```js
+let MAX = 501;
+let help = new Array(MAX).fill(0);
+
+let arr = [6, 3, 2, 1, 4, 7, 5];
+merge_sort();
+console.log(arr);
+
+// 时间复杂度O(nlogn)
+function merge_sort(){
+    let l, m, r, n = arr.length;
+    for(let step = 1; step < n; step *= 2){ // 或者step <<= 1
+        // 内部分组merge。时间复杂度O(n)
+        l = 0; 
+        while( l < n){
+            m = l + step -1;
+            if(m + 1 >= n){
+                // 已经没有右侧了
+                break;
+            }
+            // 有右侧，求右侧的右边界
+            r = Math.min(l + 2 * step - 1, n - 1); // 右侧右边界
+            merge(l, m, r);// l...m, m+1...r
+            l = r + 1; // 下一组
+        }
+    }
+}
+
+// l...r 一共有n个数，时间复杂度O(n)
+function merge(l, mid, r){
+    let i = l, a = l, b = mid +1;
+    while(a<= mid && b <= r){ // 左右范围都没有靠近边界
+        help[i++] = arr[a] <= arr[b] ? arr[a++] : arr[b++]; // 小的先放进help
+    }
+
+    // 左侧指针、右侧指针，必有一个越界、另一个不越界
+    while(a <= mid) help[i++] = arr[a++];
+    while(b <= r) help[i++] = arr[b++];
+
+    for(let k = l; k <= r; k++) arr[k] = help[k]; // help数组的值，复制到arr数组
+}
+```
 
 习题：
 - 787. 归并排序
 - 788. 逆序对的数量
-
+ 
 
 ## 2. 二分
 
@@ -779,7 +857,7 @@ function fn8(n, m, arrXC, arrMN){
 
     for(let i = 0; i < n; i++){
         add.push([arrXC[i][0], arrXC[i][1]]);
-        alls.push(arrXC[i][0]);
+        alls.push(arrXC[i][0]); // 下标
     }
     
     for(let i = 0; i < m; i++){
@@ -791,14 +869,17 @@ function fn8(n, m, arrXC, arrMN){
     // 排序和去重
     alls = [...new Set(alls.sort((a, b) => a - b))];
 
+    // 加
     for(let data of add){
         const [idx, value] = data;
-        const index = find(idx);
+        const index = find(idx); // 二分查找，找到映射后的下标
         a[index] += value;
     }
 
+    // 求前缀和 1....n
     for(let i = 1; i <= alls.length; i++) s[i] = s[i-1] + a[i];
 
+    // 查询
     for(let queryData of query){
         const [left, right] = queryData;
         let l = find(left)
@@ -831,4 +912,43 @@ let arrMN = [
     [7,8]
 ];
 fn8(n, m, arrXC, arrMN); // 8 0 5
+```
+
+## 8. 区间合并
+区间合并：给定n个区间，合并所有有交集的区间。
+
+1. 按区间左端点排序
+2. 依次合并区间，如果当前区间的左端点大于上一个区间的右端点，则合并区间，否则不合并。
+
+803. 区间合并
+```js
+let arr = [
+    [1,2],
+    [2,4],
+    [5,6],
+    [7,8],
+    [7,9]
+];
+let res = fn9(arr);
+console.log(res);
+
+function fn9(arr){
+    let result = [];
+    // 排序
+    arr.sort((a, b) => a[0] - b[0]); // 数组首位进行排序
+    let cache = arr[0]; // 排序后的第一个数组
+    for(let i = 1; i < arr.length; i++){
+        let cur = arr[i]; // 从第二个开始去cur
+        if(cur[0] > cache[1]){ 
+            // 当前数组的左边界大于上一个数组的右边界, 不重合，不能合并
+            result.push(cache);
+            cache = cur;
+        }else{
+            // 当前数组的左边界小于等于上一个数组的右边界
+            cache[1] = Math.max(cache[1], cur[1]); // 左端不变，右端取大的
+        }
+    }
+    result.push(cache); // 最后一个数组
+    return result;
+}
 ```
