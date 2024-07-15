@@ -56,7 +56,7 @@ const N = 100010;
 let e = new Array(N).fill(0); // e[i]节点i的值
 let l = new Array(N).fill(0); // l[i]节点i的左指针
 let r = new Array(N).fill(0); // r[i]节点i的右指针
-let idx;; // 当前用到了哪个点
+let idx; // 当前用到了哪个点
 
 // 初始化
 function init(){
@@ -85,6 +85,60 @@ function remove(k){
 ```
 
 ## 2. 栈约队列
+
+### 2.1 栈
+
+```js
+const N= 100010;
+let stk = new Array(N).fill(0);
+let tt; // 栈顶指针
+
+// 插入
+function push(x){
+    stk[++tt] = x;
+}
+
+// 弹出
+function pop(){
+    tt--;
+}
+
+// 获取栈顶元素
+function top(){
+    return stk[tt];
+}
+
+// 判断栈是否为空
+function empty(){
+    return tt > 0;
+}
+```
+
+单调栈
+
+```js
+function fn14(arr){
+    let n = 1000010;
+    let stk = new Array(n).fill(0);
+    let tt = 0
+    // 遍历
+    for(let i = 0; i < arr.length; i++){
+        let x = arr[i];
+        while( tt && stk[tt] >= x){ // 栈不为空且栈顶元素大于等于当前元素
+            tt--; // 栈顶元素出栈
+        }
+        if(tt){ // 栈不为空
+            console.log(stk[tt], ' ');  
+        }else{ // 栈为空
+            console.log(-1, ' ');
+        }
+        stk[++tt] = x; // 当前元素入栈
+    }
+}
+
+let arr = [2, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+fn14(arr); // -1 2 1 2 3 4 5 6 7 8
+```
 
 ## 3. KMP
 
