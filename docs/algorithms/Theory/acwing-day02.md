@@ -84,7 +84,7 @@ function remove(k){
 }
 ```
 
-## 2. 栈约队列
+## 2. 栈与队列
 
 ### 2.1 栈
 
@@ -114,7 +114,9 @@ function empty(){
 }
 ```
 
-单调栈
+### 2.2 单调栈
+
+保证stk中元素单调递增或单调递减
 
 ```js
 function fn14(arr){
@@ -139,6 +141,36 @@ function fn14(arr){
 let arr = [2, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 fn14(arr); // -1 2 1 2 3 4 5 6 7 8
 ```
+
+### 2.3 单调队列
+滑动窗口的最大值和最小值。
+
+队列保存的是元素的下标，而不是元素本身。
+```js
+function fn15(a){
+    let N = 100010;
+    let q = new Array(N).fill(0); // 保存的是下标
+    let hh =0, tt = -1; // hh 队头 tt 队尾
+    let k = 3; // 窗口大小
+    for(let i =0; i < a.length;i++){
+        // 判断队头是否滑出窗口
+        if(hh <= tt && i - k + 1 > q[hh] ){ // hh<=tt 队列不为空 i-k+1>q[hh] 队头滑出窗口
+            hh++;
+        }
+        while(hh <= tt && a[q[tt]] >= a[i]){ // 队尾元素大于等于当前元素
+            tt--;
+        }
+        q[++tt] = i; // 当前元素入队
+        if(i >= k - 1){
+            console.log(a[q[hh]]); // 输出队头元素
+        }
+        
+    }
+}
+let a = [1,3,-1,-3,5, 3, 6, 7];
+console.log(fn15(a)); // [-1，-3，-3，-3，3，3]
+```
+
 
 ## 3. KMP
 
