@@ -91,11 +91,84 @@ function remove(k){
 ```js
 const N= 100010;
 let stk = new Array(N).fill(0);
-let tt; // 栈顶指针
+let tt = 0; // 栈顶指针
 
 // 插入
 function push(x){
-    stk[++tt] = x;
+    stk[tt++] = x;
+}
+
+// 弹出
+function pop(){
+    return stk[--tt];
+}
+
+// 获取栈顶元素
+function top(){
+    return stk[tt - 1];
+}
+
+// 判断栈是否为空
+function empty(){
+    return tt == 0;
+}
+```
+
+当加入的数的长度是固定N时，队列的范围是[L, R)，当L == R时，队列为空。当L < R时，队列有值。R == N时，队列满了。
+1）加入x，放在R位置, arr[R] = x，R++
+2）弹出队头元素，arr[L]，L++
+
+```js
+let N = 100010;
+let q = new Array(N).fill(0), hh, tt = -1;
+
+// 插入一个数
+function add(x){
+    q[++tt] = x;
+}
+
+// 弹出一个数
+function pop(){
+    return q[hh++];
+}
+
+// 队头的值
+function head(){
+    return q[hh];
+}
+
+// 队尾的值
+function tail(){
+    return q[tt];
+}
+
+// 队列的大小
+function size(){
+    return tt - hh + 1;
+}
+
+// 判断是否为空
+function isEmpty(){
+    return hh <= tt;
+}
+```
+
+- 最小栈
+```js
+ const N= 100010;
+let stk = new Array(N).fill(0);
+let tt = 0; // 栈顶指针
+let minStk = new Array(N).fill(0); // 最小值栈
+
+// 插入
+function push(x){
+    stk[tt] = x;
+    if(empty() || x <= minStk[tt-1]){
+        minStk[tt] = x;
+    }else {
+        minStk[tt] = minStk[tt-1];
+    }
+    tt++;
 }
 
 // 弹出
@@ -105,16 +178,31 @@ function pop(){
 
 // 获取栈顶元素
 function top(){
-    return stk[tt];
+    return stk[tt - 1];
 }
 
 // 判断栈是否为空
 function empty(){
-    return tt > 0;
+    return tt === 0;
 }
+
+function getMin(){
+    return minStk[tt - 1];
+}
+
+
 ```
 
 ### 2.2 单调栈
+
+单调栈最经典的用法是解决如下问题：
+每个位置都求：
+1）当前位置的 左侧比当前位置的数字小，且距离最近的位置 在哪
+2）当前位置的 右侧比当前位置的数字小，且距离最近的位置 在哪
+
+或者 每个位置都求：
+1）当前位置的 左侧比当前位置的数字大，且距离最近的位置 在哪
+2）当前位置的 右侧比当前位置的数字大，且距离最近的位置 在哪
 
 保证stk中元素单调递增或单调递减
 
@@ -171,6 +259,13 @@ let a = [1,3,-1,-3,5, 3, 6, 7];
 console.log(fn15(a)); // [-1，-3，-3，-3，3，3]
 ```
 
+Q: 解释hh <= tt && i - k + 1 > q[hh]的含义
+- hh <= tt: 用来判断队列是否为空。hh为头指针，tt是尾指针。当hh > tt时，队列为空。
+- i - k + 1 > q[hh]: 判断对头元素是否滑出了当前的滑动窗口。
+    - i: 当前遍历到的元素的下标
+    - k: 滑动窗口的大小
+    - i - k + 1: 当前滑动窗口的左边界。如果窗口的大小为k，那么在下标为i的元素被处理时，窗口的左边界应该是 i - k + 1.
+- q[hh]是队列头部元素的下标，即当前窗口中最左边的元素的下标。
 
 ## 3. KMP
 
